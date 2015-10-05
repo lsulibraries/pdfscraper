@@ -18,7 +18,7 @@ xmldata = scraperwiki.pdftoxml(pdfdata)
 xmldata = bytes(bytearray(xmldata, encoding='utf-8'))
 root = etree.fromstring(xmldata)
 
-print root
+#print root
  
 # 4. Have a peek at the XML (click the "more" link in the Console to preview it).
 #print etree.tostring(root, pretty_print=True)
@@ -210,6 +210,7 @@ pdfscopecontent = getalltext("SCOPE AND CONTENT NOTE", "LIST OF SERIES AND SUBSE
 almostListSeries = getalltext("LIST OF SERIES AND SUBSERIES", "SERIES DESCRIPTIONS", "INDEX TERMS")
 d = "Series"
 s =  [d + e for e in almostListSeries.split(d) if e != ""]
+#print s
 dd = "Subseries"
 serieses = []
 for a in s:
@@ -228,7 +229,12 @@ finalseries = "".join(finalseries)
 
 #series descriptions
 seriesdesc = getalltext ("SERIES DESCRIPTIONS", "INDEX TERMS", "CONTAINER LIST")
+d = "Series"
+print seriesdesc
+s = [d + e for e in seriesdesc.split(d) if e != ""]
+print type(s)
 
+'''
 #using efactory
 ead =(
     E.ead(
@@ -310,5 +316,5 @@ ead =(
     )
 #)
 print etree.tostring(ead, pretty_print=True)
-print seriesdesc
-                    
+print finalseries + "\n"
+print seriesdesc        '''            
