@@ -208,33 +208,49 @@ pdfscopecontent = getalltext("SCOPE AND CONTENT NOTE", "LIST OF SERIES AND SUBSE
 #arrangement
 #series and subseries
 almostListSeries = getalltext("LIST OF SERIES AND SUBSERIES", "SERIES DESCRIPTIONS", "INDEX TERMS")
-d = "Series"
-s =  [d + e for e in almostListSeries.split(d) if e != ""]
-#print s
-dd = "Subseries"
-serieses = []
-for a in s:
-    l = [g for g in a.split(dd) if g != ""]
-    serieses.append(l)
-finalseries = []
-for i, series in enumerate(serieses):
-    finalseries.append("<list><head>" + series[0] + "</head>")
-    for ii, m in enumerate(series):
-        if ii > 0:
-            finalseries.append("<item>Subseries" + series[ii] + "</item>")
-    finalseries.append("</list>")
-finalseries.insert(0, "<arrangement encodinganalog='351'>")
-finalseries.append("</arrangement>")
-finalseries = "".join(finalseries)
+
+def seriesSplit(textinput, outerwrap, insidewrap, subwrap):
+    outerwrapf = "<" + outerwrap + ">"
+    outerwrapb = "</" + outerwrap + ">"
+    insidewrapf = "<" + insidewrap + ">"
+    insidewrapb = "</" + insidewrap + ">"
+    subwrapf = "<" + subwrap + ">"
+    subwrapb = "</" + subwrap + ">"
+
+    d = "Series"
+    s =  [d + e for e in textinput.split(d) if e != ""]
+    #print s
+    dd = "Subseries"
+    serieses = []
+    for a in s:
+        l = [g for g in a.split(dd) if g != ""]
+        serieses.append(l)
+    finalseries = []
+    for i, series in enumerate(serieses):
+        finalseries.append(outerwrapf + insidewrapf + series[0] + insidewrapb)
+        for ii, m in enumerate(series):
+            if ii > 0:
+                finalseries.append(subwrapf + "Subseries" + series[ii] + subwrapb)
+        finalseries.append(outerwrapb)
+    #finalseries.insert(0, "<arrangement encodinganalog='351'>")
+    #finalseries.append("</arrangement>")
+    finalseries = "".join(finalseries)
+    return finalseries
+
+seriesdesc = getalltext ("SERIES DESCRIPTIONS", "INDEX TERMS", "CONTAINER LIST")
+
+finalseries = seriesSplit(almostListSeries,"co1","unitid","unitid")
 
 #series descriptions
-seriesdesc = getalltext ("SERIES DESCRIPTIONS", "INDEX TERMS", "CONTAINER LIST")
-d = "Series"
-print seriesdesc
-s = [d + e for e in seriesdesc.split(d) if e != ""]
-print type(s)
+#d = "Series"
+#print seriesdesc
+#s = [d + e for e in seriesdesc.split(d) if e != ""]
+#print type(s)
 
-'''
+#xmlcode = etree.XML(seriesSplit(seriesdesc,"co1","unitid","unitid"))
+#print etree.tostring(xmlcode, pretty_print=True)
+
+
 #using efactory
 ead =(
     E.ead(
@@ -309,12 +325,12 @@ ead =(
                 E.p(pdfscopecontent),
                 encodinganalog='520'
             ),
-            etree.XML(finalseries)    
+            #etree.XML(finalseries)    
             ),
             level='collection', type='inventory', relatedencoding='MARC21'
         )
     )
 #)
-print etree.tostring(ead, pretty_print=True)
+#print etree.tostring(ead, pretty_print=True)
 print finalseries + "\n"
-print seriesdesc        '''            
+#print seriesdesc      
