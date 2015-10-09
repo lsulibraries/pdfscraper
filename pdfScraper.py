@@ -209,7 +209,7 @@ pdfscopecontent = getalltext("SCOPE AND CONTENT NOTE", "LIST OF SERIES AND SUBSE
 #series and subseries
 almostListSeries = getalltext("LIST OF SERIES AND SUBSERIES", "SERIES DESCRIPTIONS", "INDEX TERMS")
 
-def seriesSplit(textinput, outerwrap, insidewrap, subwrap):
+def seriesSplit(textinput, outerwrap, insidewrap, subwrap, check):
     outerwrapf = "<" + outerwrap + ">"
     outerwrapb = "</" + outerwrap + ">"
     insidewrapf = "<" + insidewrap + ">"
@@ -232,14 +232,19 @@ def seriesSplit(textinput, outerwrap, insidewrap, subwrap):
             if ii > 0:
                 finalseries.append(subwrapf + "Subseries" + series[ii] + subwrapb)
         finalseries.append(outerwrapb)
-    #finalseries.insert(0, "<arrangement encodinganalog='351'>")
-    #finalseries.append("</arrangement>")
+    finalseries.insert(0, "<arrangement encodinganalog='351'>")
+    finalseries.append("</arrangement>")
     finalseries = "".join(finalseries)
     return finalseries
 
+
 seriesdesc = getalltext ("SERIES DESCRIPTIONS", "INDEX TERMS", "CONTAINER LIST")
 
-finalseries = seriesSplit(almostListSeries,"co1","unitid","unitid")
+finalseries = seriesSplit(almostListSeries,"list","head","item", False)
+seriesdesc = seriesSplit(seriesdesc,"co1","unitid","p", True)
+
+
+#print type(finalseries)
 
 #series descriptions
 #d = "Series"
@@ -325,12 +330,13 @@ ead =(
                 E.p(pdfscopecontent),
                 encodinganalog='520'
             ),
-            #etree.XML(finalseries)    
+            etree.XML(finalseries),
+            etree.XML(seriesdesc)   
             ),
             level='collection', type='inventory', relatedencoding='MARC21'
         )
     )
 #)
-#print etree.tostring(ead, pretty_print=True)
-print finalseries + "\n"
+print etree.tostring(ead, pretty_print=True)
+#print finalseries + "\n"
 #print seriesdesc      
