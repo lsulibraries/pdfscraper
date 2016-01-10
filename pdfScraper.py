@@ -6,11 +6,11 @@ from lxml import etree
 from lxml.builder import E
 from collections import OrderedDict #for deduping lists while maintaining order
  
-# 2. The URL/web address where we can find the PDF we want to scrape
+# 2. The URL/web address where we can find the sample PDFs we want to scrape
 pdfurl = 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf' #Bankston
 #pdfurl = 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf' #Acy papers
-#pdfurl = 'http://lib.lsu.edu/special/findaid/0826.pdf' #Guion Diary
-#pdfurl = 'http://lib.lsu.edu/special/findaid/4452.pdf' #Turnbull - multiple page biographical note
+#pdfurl = 'http://lib.lsu.edu/sites/default/files/sc/findaid/0826.pdf' #Guion Diary
+#pdfurl = 'http://lib.lsu.edu/sites/default/files/sc/findaid/4452.pdf' #Turnbull - multiple page biographical note
  
 # 3. Grab the file and convert it to an XML document we can work with
 pdfdata = urllib2.urlopen(pdfurl).read()
@@ -20,7 +20,7 @@ root = etree.fromstring(xmldata)
 
 print root
  
-# 4. Have a peek at the XML (click the "more" link in the Console to preview it).
+# 4. To have a peek at the intermediate XML that scraperwiki.pdftoxml is doing - uncomment this line  
 #print etree.tostring(root, pretty_print=True)
 
 #create variables for the elements, using xpath and other logic
@@ -38,7 +38,7 @@ numlinenumberA = str(int(titlelineend) + 12)
 numlinenumberB = str(int(titlelineend) + 25)
 pdfnum = root.xpath('//page[@number="1"]/text[@top>=' + numlinenumberA + ' and @top<=' + numlinenumberB + ']')[0].text.strip()
 
-#subtitle - will subtitle always be the same? - if so then hard-coding the value
+#subtitle - will subtitle always be the same? - if so then setting the value without reading the document
 pdfsubtitle = 'A Collection in the Louisiana and Lower Mississippi Valley Collections'
 
 #author - take next text node after the one that says "Compiled by" - with exception handling
