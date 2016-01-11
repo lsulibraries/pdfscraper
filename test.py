@@ -29,7 +29,6 @@ class EadTest(unittest.TestCase):
 										terms[4]: 5,
 										terms[5]: 6,}
 									}
-		counter_outer, counter_inner = 0, 0
 		for url, value in list_of_proven_answers.iteritems():
 			for term, page_num in value.iteritems():
 				self.assertEquals(self.findaid.getpagenum(term)[0], page_num, '\n\nFor url :{}\nTerm: {}\nExpected Page #: {}\nActual Page #: {}\n'.format(url, term, page_num, self.findaid.getpagenum(term)[0]))
