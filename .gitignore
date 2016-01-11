@@ -1,0 +1,4 @@
+env/*
+*.pyc
+*.pdf
+dbg.xml
