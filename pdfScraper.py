@@ -4,11 +4,12 @@
 import scraperwiki, urllib2
 from lxml import etree
 from lxml.builder import E
+import re
 from collections import OrderedDict #for deduping lists while maintaining order
  
 # 2. The URL/web address where we can find the PDF we want to scrape
-pdfurl = 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf' #Bankston
-#pdfurl = 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf' #Acy papers
+#pdfurl = 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf' #Bankston
+pdfurl = 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf' #Acy papers
 #pdfurl = 'http://lib.lsu.edu/special/findaid/0826.pdf' #Guion Diary
 #pdfurl = 'http://lib.lsu.edu/special/findaid/4452.pdf' #Turnbull - multiple page biographical note
  
@@ -235,6 +236,10 @@ def seriesSplit(textinput, outerwrap, insidewrap, subwrap, check):
     finalseries.insert(0, "<arrangement encodinganalog='351'>")
     finalseries.append("</arrangement>")
     finalseries = "".join(finalseries)
+    s1 = ('>Series.*?\.|>Subseries.*?\(\.\)')
+    #print re.sub(s1, '\1</unitid>', finalseries)
+
+    #print s1.findall(finalseries)
     return finalseries
 
 
