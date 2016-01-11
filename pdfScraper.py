@@ -9,38 +9,54 @@ from collections import OrderedDict #for deduping lists while maintaining order
  
 # 2. The URL/web address where we can find the PDF we want to scrape
 #pdfurl = 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf' #Bankston
-pdfurl = 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf' #Acy papers
+#pdfurl = 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf' #Acy papers
 #pdfurl = 'http://lib.lsu.edu/special/findaid/0826.pdf' #Guion Diary
-#pdfurl = 'http://lib.lsu.edu/special/findaid/4452.pdf' #Turnbull - multiple page biographical note
+#pdfurl = 'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf' # mutltiline title
+pdfurl = 'http://lib.lsu.edu/special/findaid/4452.pdf' #Turnbull - multiple page biographical note
+
+# 2a Global vars
+
+#subtitle - will subtitle always be the same? - if so then hard-coding the value
+pdfsubtitle = 'A Collection in the Louisiana and Lower Mississippi Valley Collections'
+
+#addressline
+pdfaddressline = 'Hill Memorial Library\nBaton Rouge, LA 70803\nhttp://www.lib.lsu.edu/special'
  
+#publisher - assuming publisher can be hard-coded
+pdfpublisher = 'Louisiana State University Special Collections'
+
+#head - always summary?
+pdfhead = 'SUMMARY'
+
+#repository - hardcoding the text, should be same for all
+pdfcorpname = "Louisiana State University Special Collections"
+pdfsubarea = "Louisiana and Lower Mississippi Valley Collection"
+
+
 # 3. Grab the file and convert it to an XML document we can work with
 pdfdata = urllib2.urlopen(pdfurl).read()
 xmldata = scraperwiki.pdftoxml(pdfdata)
 xmldata = bytes(bytearray(xmldata, encoding='utf-8'))
 root = etree.fromstring(xmldata)
 
-#print root
- 
 # 4. Have a peek at the XML (click the "more" link in the Console to preview it).
-#print etree.tostring(root, pretty_print=True)
+print etree.tostring(root, pretty_print=True)
 
 #create variables for the elements, using xpath and other logic
 
 #titleproper - needs to account for multiple lines in some docs
 wholetitle =[]
 titlelines = root.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
+
 for el in titlelines:
     wholetitle.append(el.text.strip())
 pdftitleproper = 'A GUIDE TO THE ' + ' '.join(wholetitle)
 titlelineend = titlelines[-1].getparent().get('top') #figuring out what the top value of the last line of the title is
-
+print titlelineend
 #num - assume it is between 12 and 25 units below the last line of title (a better way might have been to take next text node)
-numlinenumberA = str(int(titlelineend) + 12)
-numlinenumberB = str(int(titlelineend) + 25)
+numlinenumberA = str(int(titlelineend) + 12) # 347
+numlinenumberB = str(int(titlelineend) + 25) # 360
 pdfnum = root.xpath('//page[@number="1"]/text[@top>=' + numlinenumberA + ' and @top<=' + numlinenumberB + ']')[0].text.strip()
-
-#subtitle - will subtitle always be the same? - if so then hard-coding the value
-pdfsubtitle = 'A Collection in the Louisiana and Lower Mississippi Valley Collections'
 
 #author - take next text node after the one that says "Compiled by" - with exception handling
 try:
@@ -48,19 +64,10 @@ try:
 except:
     pdfauthor = 'Special Collections Staff'
     
-#publisher - assuming publisher can be hard-coded
-pdfpublisher = 'Louisiana State University Special Collections'
-
-#addressline
-pdfaddressline1 = 'Hill Memorial Library'
-pdfaddressline2 = 'Baton Rouge, LA 70803'
-pdfaddressline3 = 'http://www.lib.lsu.edu/special'
 
 #date - last node over "20" width on first page - "reformatted" or "revised" dates okay?
 pdfdate = root.xpath('//page[@number="1"]/text[@width>"20"]')[-1].text.strip()
 
-#head - always summary?
-pdfhead = 'SUMMARY'
 
 #physdesc - 
 
@@ -121,6 +128,46 @@ def getrcoldata (lcolname):
         pass
     return pdfdata.strip()
 
+#extent
+pdfextent = getrcoldata("Size.")
+
+#unitdate
+#inclusive dates
+pdfidates = getrcoldata("Inclusive dates.")
+
+#bulk dates
+pdfbdates = getrcoldata("Bulk dates.")
+
+#language
+pdflanguage = getrcoldata("Language.")
+if pdflanguage == "":
+    pdflanguage = getrcoldata("Languages.")
+
+#abstract
+pdfabstract = getrcoldata("Summary.")
+
+#accessrestrict
+pdfaccessrestrict = getrcoldata("Restrictions on access.")
+if pdfaccessrestrict == "":
+    pdfaccessrestrict = getrcoldata("Access restrictions.")
+    
+#related material
+pdfrelatedmaterial = getrcoldata("Related collections.")
+if pdfrelatedmaterial == "":
+    pdfrelatedmaterial = getrcoldata("Related collection.")
+
+#copyright
+pdfuserestrict = getrcoldata("Copyright.")
+
+#prefercite
+pdfprefercite = getrcoldata("Citation.")
+
+#physloc
+pdfphysloc = getrcoldata("Stack locations.")
+if pdfphysloc == "":
+    pdfphysloc = getrcoldata("Stack location.")
+
+
 #finds what page number a particular term appears on and what the "top" value is
 def getpagenum (term):
     termtop = ""
@@ -157,48 +204,6 @@ def getalltext(firstheader, secondheader, backupheader):
     return alltext
 
 
-#extent
-pdfextent = getrcoldata("Size.")
-
-#unitdate
-#inclusive dates
-pdfidates = getrcoldata("Inclusive dates.")
-
-#bulk dates
-pdfbdates = getrcoldata("Bulk dates.")
-
-#language
-pdflanguage = getrcoldata("Language.")
-if pdflanguage == "":
-    pdflanguage = getrcoldata("Languages.")
-
-#abstract
-pdfabstract = getrcoldata("Summary.")
-
-#accessrestrict
-pdfaccessrestrict = getrcoldata("Restrictions on access.")
-if pdfaccessrestrict == "":
-    pdfaccessrestrict = getrcoldata("Access restrictions.")
-    
-#related material
-pdfrelatedmaterial = getrcoldata("Related collections.")
-if pdfrelatedmaterial == "":
-    pdfrelatedmaterial = getrcoldata("Related collection.")
-
-#copyright
-pdfuserestrict = getrcoldata("Copyright.")
-
-#prefercite
-pdfprefercite = getrcoldata("Citation.")
-
-#repository - hardcoding the text, should be same for all
-pdfcorpname = "Louisiana State University Special Collections"
-pdfsubarea = "Louisiana and Lower Mississippi Valley Collection"
-
-#physloc
-pdfphysloc = getrcoldata("Stack locations.")
-if pdfphysloc == "":
-    pdfphysloc = getrcoldata("Stack location.")
 
 #bioghist assuming scope and content always next
 pdfbioghist = getalltext("BIOGRAPHICAL/HISTORICAL NOTE","SCOPE AND CONTENT NOTE", "LIST OF SERIES AND SUBSERIES")
@@ -211,6 +216,7 @@ pdfscopecontent = getalltext("SCOPE AND CONTENT NOTE", "LIST OF SERIES AND SUBSE
 almostListSeries = getalltext("LIST OF SERIES AND SUBSERIES", "SERIES DESCRIPTIONS", "INDEX TERMS")
 
 def seriesSplit(textinput, outerwrap, insidewrap, subwrap, check):
+    print "-----------\n" + textinput, outerwrap, insidewrap, subwrap, check
     outerwrapf = "<" + outerwrap + ">"
     outerwrapb = "</" + outerwrap + ">"
     insidewrapf = "<" + insidewrap + ">"
@@ -239,7 +245,7 @@ def seriesSplit(textinput, outerwrap, insidewrap, subwrap, check):
     s1 = ('>Series.*?\.|>Subseries.*?\(\.\)')
     #print re.sub(s1, '\1</unitid>', finalseries)
 
-    #print s1.findall(finalseries)
+    print finalseries
     return finalseries
 
 
@@ -277,9 +283,7 @@ ead =(
                 E.publicationstmt(
                     E.publisher(pdfpublisher),
                     E.address(
-                        E.addressline(pdfaddressline1),
-                        E.addressline(pdfaddressline2),
-                        E.addressline(pdfaddressline3),
+                        E.addressline(pdfaddressline),
                     ),
                     E.date(pdfdate)
                 )
@@ -341,7 +345,9 @@ ead =(
             level='collection', type='inventory', relatedencoding='MARC21'
         )
     )
+
+
 #)
-print etree.tostring(ead, pretty_print=True)
+#print etree.tostring(ead, pretty_print=True)
 #print finalseries + "\n"
 #print seriesdesc      
