@@ -6,348 +6,333 @@ from lxml import etree
 from lxml.builder import E
 import re
 from collections import OrderedDict #for deduping lists while maintaining order
- 
+
+
+class FindingAidPDFtoEAD():
+    def __init__(self, url):
+        self.url = url
+        self.pdfdata = urllib2.urlopen(url).read()
+        self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
+        self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
+        self.root = etree.fromstring(self.xmldata)
+
+    pdfsubtitle = 'A Collection in the Louisiana and Lower Mississippi Valley Collections'
+    pdfaddressline = 'Hill Memorial Library\nBaton Rouge, LA 70803\nhttp://www.lib.lsu.edu/special'
+    pdfpublisher = 'Louisiana State University Special Collections'
+    pdfhead = 'SUMMARY'
+    pdfcorpname = "Louisiana State University Special Collections"
+    pdfsubarea = "Louisiana and Lower Mississippi Valley Collection"
+
+    def getrcoldata (self, lcolname):
+        lcoldata = []
+        #try it first as is, if not then try it again without the last character (usually a period)
+        try:
+            rcoltop = str(int(self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolname + '"]]')[0].getparent().get('top')))
+            rcoltopbuffer = str(int(rcoltop)-10)
+            afterrcoltop = str(int(self.root.xpath('//page[@number="3"]/text[@left='+leftcolumnleft+' and @top=' + rcoltop + ']/following::text[b]')[0].get('top'))-10)
+            if afterrcoltop < rcoltop: #check to see if it's last on page (it loops to top for some reason). if so hopefully one line is needed
+                afterrcoltop = str(int(rcoltop)+20)
+            datalines = self.root.xpath('//page[@number="3"]/text[@top>' + rcoltopbuffer + 'and @top<' + afterrcoltop + ' and @left>"200"]')
+            for el in datalines:
+                lcoldata.append(el.text.strip())
+            pdfdata = ' '.join(lcoldata)
+        except:
+            try:
+                lcolnameshort = lcolname[:-1]
+                rcoltop = str(int(self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolnameshort + '"]]')[0].getparent().get('top')))
+                rcoltopbuffer = str(int(rcoltop)-10)
+                try: #if it's the last in the column then hopefully its a single line
+                    afterrcoltop = str(int(self.root.xpath('//page[@number="3"]/text[@left='+leftcolumnleft+' and @top=' + rcoltop + ']/following::text[b]')[0].get('top'))-10)
+                except:
+                    aftercoltop = str(int(rcoltop)+15)
+                datalines = self.root.xpath('//page[@number="3"]/text[@top>' + rcoltopbuffer + 'and @top<' + afterrcoltop + ' and @left>"200"]')
+                for el in datalines:
+                   lcoldata.append(el.text.strip())
+                pdfdata = ' '.join(lcoldata)
+            except:
+                try: #split query - test each against different lines and expand the selection
+                    lcolnamefirstpart = lcolname.rsplit(' ',1)[0]
+                    lcolnamelastword = lcolname.rsplit(' ',1)[1]
+                    rcoltop = str(int(self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolnamefirstpart + '"]]')[0].getparent().get('top')))
+                    rcoltopbuffer = str(int(rcoltop)-10)
+                    nextcoltop = str(int(self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolnamelastword + '"]]')[0].getparent().get('top')))
+                    afterrcoltop = str(int(self.root.xpath('//page[@number="3"]/text[@left='+leftcolumnleft+' and @top=' + nextcoltop + ']/following::text[b]')[0].get('top'))-10)
+                    datalines = self.root.xpath('//page[@number="3"]/text[@top>' + rcoltopbuffer + 'and @top<' + afterrcoltop + ' and @left>"200"]')
+                    for el in datalines:
+                        lcoldata.append(el.text.strip())
+                    pdfdata = ' '.join(lcoldata)
+                except:
+                    pdfdata = ' '
+        #strip first character of data if it's a period or space
+        try:
+            if pdfdata[0] == "." or pdfdata[0] == " ":
+                pdfdata = pdfdata[1:]
+        except: 
+            pass
+        try:
+            nextboldtext = self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolname + '"]]')[0].getparent().getnext().getchildren()[0].text
+            #print nextboldtext
+        except:
+            pass
+        return pdfdata.strip()
+
+    def getpagenum (self, term):
+        termtop = ""
+        # @TODO return '', '' if term is not found
+        for pagenumber in range (4, 19):
+            try:
+                termtop = str(int(self.root.xpath('//page[@number='+str(pagenumber)+']/text/b[text()[normalize-space(.)="'+term+'"]]')[0].getparent().get('top')))
+                break
+            except:
+                continue
+        if pagenumber == 18:
+            pagenumber, termtop = None,None
+        return pagenumber, termtop
+
+    def getalltext(self, firstheader, secondheader, backupheader):
+        firstpagenumber, firstheadertop = self.getpagenum(firstheader)
+        secondpagenumber, secondheadertop = self.getpagenum(secondheader)
+        backuppagenumber, backupheadertop = self.getpagenum(backupheader)
+        if backuppagenumber < secondpagenumber or secondpagenumber == 19:
+            secondpagenumber = backuppagenumber
+            secondheadertop = backupheadertop
+        rawtext = []
+        for p in range (firstpagenumber, secondpagenumber+1):
+            if p == secondpagenumber:
+                bottom = secondheadertop
+            else:
+                bottom = "1000"
+            #print firstheader, firstpagenumber, firstheadertop, secondpagenumber, bottom
+            #print(dir(self))
+            data = self.root.xpath('//page[@number='+str(p)+']/text[@top>=' + str(int(firstheadertop)+3) + 'and @top<' + str(int(bottom)-3) +']|//page[@number='+str(p)+']/text[@top>=' + str(int(firstheadertop)+3) + 'and @top<' + str(int(bottom)-3) +']/b')
+            for el in data:
+                if el.text == None :  #removes blank nodes
+                    continue
+                rawtext.append(el.text.strip())
+        textalmost = ' '.join(rawtext)
+        alltext = ' '.join(textalmost.split()) #strips extra spaces
+        return alltext
+
+    def seriesSplit(self, textinput, outerwrap, insidewrap, subwrap, check):
+        #print "-----------\n" + textinput, outerwrap, insidewrap, subwrap, check
+        outerwrapf = "<" + outerwrap + ">"
+        outerwrapb = "</" + outerwrap + ">"
+        insidewrapf = "<" + insidewrap + ">"
+        insidewrapb = "</" + insidewrap + ">"
+        subwrapf = "<" + subwrap + ">"
+        subwrapb = "</" + subwrap + ">"
+
+        d = "Series"
+        s =  [d + e for e in textinput.split(d) if e != ""]
+        #print s
+        dd = "Subseries"
+        serieses = []
+        for a in s:
+            l = [g for g in a.split(dd) if g != ""]
+            serieses.append(l)
+        finalseries = []
+        for i, series in enumerate(serieses):
+            finalseries.append(outerwrapf + insidewrapf + series[0] + insidewrapb)
+            for ii, m in enumerate(series):
+                if ii > 0:
+                    finalseries.append(subwrapf + "Subseries" + series[ii] + subwrapb)
+            finalseries.append(outerwrapb)
+        finalseries.insert(0, "<arrangement encodinganalog='351'>")
+        finalseries.append("</arrangement>")
+        finalseries = "".join(finalseries)
+        s1 = ('>Series.*?\.|>Subseries.*?\(\.\)')
+        #print re.sub(s1, '\1</unitid>', finalseries)
+
+        #print finalseries
+        return finalseries
+
+    def run_conversion(self):
+
+
+        # 4. Have a peek at the XML (click the "more" link in the Console to preview it).
+        print etree.tostring(self.root, pretty_print=True)
+
+        #create variables for the elements, using xpath and other logic
+
+        #titleproper - needs to account for multiple lines in some docs
+        wholetitle =[]
+        titlelines = self.root.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
+
+        for el in titlelines:
+            wholetitle.append(el.text.strip())
+        self.pdftitleproper = 'A GUIDE TO THE ' + ' '.join(wholetitle)
+        titlelineend = titlelines[-1].getparent().get('top') #figuring out what the top value of the last line of the title is
+        #print titlelineend
+        #num - assume it is between 12 and 25 units below the last line of title (a better way might have been to take next text node)
+        numlinenumberA = str(int(titlelineend) + 12) # 347
+        numlinenumberB = str(int(titlelineend) + 25) # 360
+        self.pdfnum = self.root.xpath('//page[@number="1"]/text[@top>=' + numlinenumberA + ' and @top<=' + numlinenumberB + ']')[0].text.strip()
+
+        #author - take next text node after the one that says "Compiled by" - with exception handling
+        try:
+            self.pdfauthor = self.root.xpath('//page[@number="1"]/text[text()[normalize-space(.)="Compiled by"]]')[0].getnext().text.strip()
+        except:
+            self.pdfauthor = 'Special Collections Staff'
+            
+         
+        #date - last node over "20" width on first page - "reformatted" or "revised" dates okay?
+        self.pdfdate = self.root.xpath('//page[@number="1"]/text[@width>"20"]')[-1].text.strip()
+
+
+        #physdesc - 
+
+        #page 3 has a table - find the left of the two columns - can assume Size is the first and always there?
+        leftcolumnleft = str(int(self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="Size."]]')[0].getparent().get('left')))
+
+        #function finds right hand column data based on text of left hand column - just for page 3
+
+
+        self.pdfextent = self.getrcoldata("Size.")
+        self.pdfidates = self.getrcoldata("Inclusive dates.")
+        self.pdfbdates = self.getrcoldata("Bulk dates.")
+
+        self.pdflanguage = self.getrcoldata("Language.")
+        if self.pdflanguage == "":
+            self.pdflanguage = self.getrcoldata("Languages.")
+
+        self.pdfabstract = self.getrcoldata("Summary.")
+
+        self.pdfaccessrestrict = self.getrcoldata("Restrictions on access.")
+        if self.pdfaccessrestrict == "":
+            self.pdfaccessrestrict = self.getrcoldata("Access restrictions.")
+            
+        self.pdfrelatedmaterial = self.getrcoldata("Related collections.")
+        if self.pdfrelatedmaterial == "":
+            self.pdfrelatedmaterial = self.getrcoldata("Related collection.")
+
+        self.pdfuserestrict = self.getrcoldata("Copyright.")
+        self.pdfprefercite = self.getrcoldata("Citation.")
+
+        self.pdfphysloc = self.getrcoldata("Stack locations.")
+        if self.pdfphysloc == "":
+            self.pdfphysloc = self.getrcoldata("Stack location.")
+
+        #bioghist assuming scope and content always next
+        self.pdfbioghist = self.getalltext("BIOGRAPHICAL/HISTORICAL NOTE","SCOPE AND CONTENT NOTE", "LIST OF SERIES AND SUBSERIES")
+
+        #scopecontent - assuming that index terms is always next
+        self.pdfscopecontent = self.getalltext("SCOPE AND CONTENT NOTE", "LIST OF SERIES AND SUBSERIES", "INDEX TERMS")
+
+        #arrangement
+        #series and subseries
+        almostListSeries = self.getalltext("LIST OF SERIES AND SUBSERIES", "SERIES DESCRIPTIONS", "INDEX TERMS")
+
+
+
+
+        seriesdesc = self.getalltext ("SERIES DESCRIPTIONS", "INDEX TERMS", "CONTAINER LIST")
+
+        finalseries = self.seriesSplit(almostListSeries,"list","head","item", False)
+        seriesdesc = self.seriesSplit(seriesdesc,"co1","unitid","p", True)
+
+
+        #print type(finalseries)
+
+        #series descriptions
+        #d = "Series"
+        #print seriesdesc
+        #s = [d + e for e in seriesdesc.split(d) if e != ""]
+        #print type(s)
+
+        #xmlcode = etree.XML(seriesSplit(seriesdesc,"co1","unitid","unitid"))
+        #print etree.tostring(xmlcode, pretty_print=True)
+
+
+        #using efactory
+        ead =(
+            E.ead(
+                E.eadheader(
+                    E.eadid('', countrycode='us', url=self.url),
+                    E.filedesc(
+                        E.titlestmt(
+                            E.titleproper(self.pdftitleproper + '\n\t\t\t', 
+                                          E.num(self.pdfnum, type='Manuscript'),
+                                          ),
+                            E.subtitle(self.pdfsubtitle),
+                            E.author(self.pdfauthor)
+                        ),
+                        E.publicationstmt(
+                            E.publisher(self.pdfpublisher),
+                            E.address(
+                                E.addressline(self.pdfaddressline),
+                            ),
+                            E.date(self.pdfdate)
+                        )
+                    )
+                            
+                ),
+                E.archdesc(
+                    E.did(
+                        E.head(self.pdfhead),
+                        E.physdesc('' + '\n\t\t', 
+                            E.extent(self.pdfextent),
+                            label='Size', encodinganalog='300$a'
+                        ),
+                        E.unitdate(self.pdfidates, type='inclusive', label='Dates:', encodinganalog='245$f'),
+                        E.unitdate(self.pdfbdates, type='bulk', label='Dates:'),
+                        E.langmaterial(
+                            E.language(self.pdflanguage, langcode='eng')
+                        ),
+                        E.abstract(self.pdfabstract, label='Summary'),
+                        E.repository(
+                            E.corpname(self.pdfcorpname),
+                            E.subarea(self.pdfsubarea),
+                            label='Repository:', encodinganalog='825$a'
+                        ),
+                        E.physloc(self.pdfphysloc),
+                    ),
+                    E.accessrestrict(
+                        E.head("Restrictions on access"),
+                        E.p(self.pdfaccessrestrict),
+                    ),
+                    E.relatedmaterial(
+                        E.head("Related Collections"),
+                        E.p(self.pdfrelatedmaterial),
+                        encodinganalog='544 1'
+                    ),
+                    E.userestrict(
+                        E.head("Copyright"),
+                        E.p(self.pdfuserestrict),
+                        encodinganalog='540'
+                    ),
+                    E.prefercite(
+                        E.head("Preferred Citation"),
+                        E.p(self.pdfprefercite),
+                        encodinganalog='524'
+                    ),
+                    E.bioghist(
+                        E.head("BIOGRAPHICAL/HISTORICAL NOTE"),
+                        E.p(self.pdfbioghist),
+                        encodinganalog='545'
+                    ),
+                    E.scopecontent(
+                        E.head("SCOPE AND CONTENT NOTE"),
+                        E.p(self.pdfscopecontent),
+                        encodinganalog='520'
+                    ),
+                    etree.XML(finalseries),
+                    etree.XML(seriesdesc)   
+                    ),
+                    level='collection', type='inventory', relatedencoding='MARC21'
+                )
+            )
+
+
+
+
 # 2. The URL/web address where we can find the PDF we want to scrape
 #pdfurl = 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf' #Bankston
 #pdfurl = 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf' #Acy papers
 #pdfurl = 'http://lib.lsu.edu/special/findaid/0826.pdf' #Guion Diary
 #pdfurl = 'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf' # mutltiline title
-pdfurl = 'http://lib.lsu.edu/special/findaid/4452.pdf' #Turnbull - multiple page biographical note
-
-# 2a Global vars
-
-#subtitle - will subtitle always be the same? - if so then hard-coding the value
-pdfsubtitle = 'A Collection in the Louisiana and Lower Mississippi Valley Collections'
-
-#addressline
-pdfaddressline = 'Hill Memorial Library\nBaton Rouge, LA 70803\nhttp://www.lib.lsu.edu/special'
- 
-#publisher - assuming publisher can be hard-coded
-pdfpublisher = 'Louisiana State University Special Collections'
-
-#head - always summary?
-pdfhead = 'SUMMARY'
-
-#repository - hardcoding the text, should be same for all
-pdfcorpname = "Louisiana State University Special Collections"
-pdfsubarea = "Louisiana and Lower Mississippi Valley Collection"
+#pdfurl = 'http://lib.lsu.edu/special/findaid/4452.pdf' #Turnbull - multiple page biographical note
 
 
-# 3. Grab the file and convert it to an XML document we can work with
-pdfdata = urllib2.urlopen(pdfurl).read()
-xmldata = scraperwiki.pdftoxml(pdfdata)
-xmldata = bytes(bytearray(xmldata, encoding='utf-8'))
-root = etree.fromstring(xmldata)
-
-# 4. Have a peek at the XML (click the "more" link in the Console to preview it).
-print etree.tostring(root, pretty_print=True)
-
-#create variables for the elements, using xpath and other logic
-
-#titleproper - needs to account for multiple lines in some docs
-wholetitle =[]
-titlelines = root.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
-
-for el in titlelines:
-    wholetitle.append(el.text.strip())
-pdftitleproper = 'A GUIDE TO THE ' + ' '.join(wholetitle)
-titlelineend = titlelines[-1].getparent().get('top') #figuring out what the top value of the last line of the title is
-print titlelineend
-#num - assume it is between 12 and 25 units below the last line of title (a better way might have been to take next text node)
-numlinenumberA = str(int(titlelineend) + 12) # 347
-numlinenumberB = str(int(titlelineend) + 25) # 360
-pdfnum = root.xpath('//page[@number="1"]/text[@top>=' + numlinenumberA + ' and @top<=' + numlinenumberB + ']')[0].text.strip()
-
-#author - take next text node after the one that says "Compiled by" - with exception handling
-try:
-    pdfauthor = root.xpath('//page[@number="1"]/text[text()[normalize-space(.)="Compiled by"]]')[0].getnext().text.strip()
-except:
-    pdfauthor = 'Special Collections Staff'
-    
-
-#date - last node over "20" width on first page - "reformatted" or "revised" dates okay?
-pdfdate = root.xpath('//page[@number="1"]/text[@width>"20"]')[-1].text.strip()
-
-
-#physdesc - 
-
-#page 3 has a table - find the left of the two columns - can assume Size is the first and always there?
-leftcolumnleft = str(int(root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="Size."]]')[0].getparent().get('left')))
-
-#function finds right hand column data based on text of left hand column - just for page 3
-def getrcoldata (lcolname):
-    lcoldata = []
-    #try it first as is, if not then try it again without the last character (usually a period)
-    try:
-        rcoltop = str(int(root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolname + '"]]')[0].getparent().get('top')))
-        rcoltopbuffer = str(int(rcoltop)-10)
-        afterrcoltop = str(int(root.xpath('//page[@number="3"]/text[@left='+leftcolumnleft+' and @top=' + rcoltop + ']/following::text[b]')[0].get('top'))-10)
-        if afterrcoltop < rcoltop: #check to see if it's last on page (it loops to top for some reason). if so hopefully one line is needed
-            afterrcoltop = str(int(rcoltop)+20)
-        datalines = root.xpath('//page[@number="3"]/text[@top>' + rcoltopbuffer + 'and @top<' + afterrcoltop + ' and @left>"200"]')
-        for el in datalines:
-            lcoldata.append(el.text.strip())
-        pdfdata = ' '.join(lcoldata)
-    except:
-        try:
-            lcolnameshort = lcolname[:-1]
-            rcoltop = str(int(root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolnameshort + '"]]')[0].getparent().get('top')))
-            rcoltopbuffer = str(int(rcoltop)-10)
-            try: #if it's the last in the column then hopefully its a single line
-                afterrcoltop = str(int(root.xpath('//page[@number="3"]/text[@left='+leftcolumnleft+' and @top=' + rcoltop + ']/following::text[b]')[0].get('top'))-10)
-            except:
-                aftercoltop = str(int(rcoltop)+15)
-            datalines = root.xpath('//page[@number="3"]/text[@top>' + rcoltopbuffer + 'and @top<' + afterrcoltop + ' and @left>"200"]')
-            for el in datalines:
-               lcoldata.append(el.text.strip())
-            pdfdata = ' '.join(lcoldata)
-        except:
-            try: #split query - test each against different lines and expand the selection
-                lcolnamefirstpart = lcolname.rsplit(' ',1)[0]
-                lcolnamelastword = lcolname.rsplit(' ',1)[1]
-                rcoltop = str(int(root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolnamefirstpart + '"]]')[0].getparent().get('top')))
-                rcoltopbuffer = str(int(rcoltop)-10)
-                nextcoltop = str(int(root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolnamelastword + '"]]')[0].getparent().get('top')))
-                afterrcoltop = str(int(root.xpath('//page[@number="3"]/text[@left='+leftcolumnleft+' and @top=' + nextcoltop + ']/following::text[b]')[0].get('top'))-10)
-                datalines = root.xpath('//page[@number="3"]/text[@top>' + rcoltopbuffer + 'and @top<' + afterrcoltop + ' and @left>"200"]')
-                for el in datalines:
-                    lcoldata.append(el.text.strip())
-                pdfdata = ' '.join(lcoldata)
-            except:
-                pdfdata = ' '
-    #strip first character of data if it's a period or space
-    try:
-        if pdfdata[0] == "." or pdfdata[0] == " ":
-            pdfdata = pdfdata[1:]
-    except: 
-        pass
-    try:
-        nextboldtext = root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolname + '"]]')[0].getparent().getnext().getchildren()[0].text
-        #print nextboldtext
-    except:
-        pass
-    return pdfdata.strip()
-
-#extent
-pdfextent = getrcoldata("Size.")
-
-#unitdate
-#inclusive dates
-pdfidates = getrcoldata("Inclusive dates.")
-
-#bulk dates
-pdfbdates = getrcoldata("Bulk dates.")
-
-#language
-pdflanguage = getrcoldata("Language.")
-if pdflanguage == "":
-    pdflanguage = getrcoldata("Languages.")
-
-#abstract
-pdfabstract = getrcoldata("Summary.")
-
-#accessrestrict
-pdfaccessrestrict = getrcoldata("Restrictions on access.")
-if pdfaccessrestrict == "":
-    pdfaccessrestrict = getrcoldata("Access restrictions.")
-    
-#related material
-pdfrelatedmaterial = getrcoldata("Related collections.")
-if pdfrelatedmaterial == "":
-    pdfrelatedmaterial = getrcoldata("Related collection.")
-
-#copyright
-pdfuserestrict = getrcoldata("Copyright.")
-
-#prefercite
-pdfprefercite = getrcoldata("Citation.")
-
-#physloc
-pdfphysloc = getrcoldata("Stack locations.")
-if pdfphysloc == "":
-    pdfphysloc = getrcoldata("Stack location.")
-
-
-#finds what page number a particular term appears on and what the "top" value is
-def getpagenum (term):
-    termtop = ""
-    for pagenumber in range (4, 19):
-        try:
-            termtop = str(int(root.xpath('//page[@number='+str(pagenumber)+']/text/b[text()[normalize-space(.)="'+term+'"]]')[0].getparent().get('top')))
-            break
-        except:
-            continue
-    return pagenumber, termtop
-   
-#gets text nodes in between two headers
-def getalltext(firstheader, secondheader, backupheader):
-    firstpagenumber, firstheadertop = getpagenum(firstheader)
-    secondpagenumber, secondheadertop = getpagenum(secondheader)
-    backuppagenumber, backupheadertop = getpagenum(backupheader)
-    if backuppagenumber < secondpagenumber or secondpagenumber == 19:
-        secondpagenumber = backuppagenumber
-        secondheadertop = backupheadertop
-    rawtext = []
-    for p in range (firstpagenumber, secondpagenumber+1):
-        if p == secondpagenumber:
-            bottom = secondheadertop
-        else:
-            bottom = "1000"
-        #print firstheader, firstpagenumber, firstheadertop, secondpagenumber, bottom
-        data = root.xpath('//page[@number='+str(p)+']/text[@top>=' + str(int(firstheadertop)+3) + 'and @top<' + str(int(bottom)-3) +']|//page[@number='+str(p)+']/text[@top>=' + str(int(firstheadertop)+3) + 'and @top<' + str(int(bottom)-3) +']/b')
-        for el in data:
-            if el.text == None :  #removes blank nodes
-                continue
-            rawtext.append(el.text.strip())
-    textalmost = ' '.join(rawtext)
-    alltext = ' '.join(textalmost.split()) #strips extra spaces
-    return alltext
-
-
-
-#bioghist assuming scope and content always next
-pdfbioghist = getalltext("BIOGRAPHICAL/HISTORICAL NOTE","SCOPE AND CONTENT NOTE", "LIST OF SERIES AND SUBSERIES")
-
-#scopecontent - assuming that index terms is always next
-pdfscopecontent = getalltext("SCOPE AND CONTENT NOTE", "LIST OF SERIES AND SUBSERIES", "INDEX TERMS")
-
-#arrangement
-#series and subseries
-almostListSeries = getalltext("LIST OF SERIES AND SUBSERIES", "SERIES DESCRIPTIONS", "INDEX TERMS")
-
-def seriesSplit(textinput, outerwrap, insidewrap, subwrap, check):
-    print "-----------\n" + textinput, outerwrap, insidewrap, subwrap, check
-    outerwrapf = "<" + outerwrap + ">"
-    outerwrapb = "</" + outerwrap + ">"
-    insidewrapf = "<" + insidewrap + ">"
-    insidewrapb = "</" + insidewrap + ">"
-    subwrapf = "<" + subwrap + ">"
-    subwrapb = "</" + subwrap + ">"
-
-    d = "Series"
-    s =  [d + e for e in textinput.split(d) if e != ""]
-    #print s
-    dd = "Subseries"
-    serieses = []
-    for a in s:
-        l = [g for g in a.split(dd) if g != ""]
-        serieses.append(l)
-    finalseries = []
-    for i, series in enumerate(serieses):
-        finalseries.append(outerwrapf + insidewrapf + series[0] + insidewrapb)
-        for ii, m in enumerate(series):
-            if ii > 0:
-                finalseries.append(subwrapf + "Subseries" + series[ii] + subwrapb)
-        finalseries.append(outerwrapb)
-    finalseries.insert(0, "<arrangement encodinganalog='351'>")
-    finalseries.append("</arrangement>")
-    finalseries = "".join(finalseries)
-    s1 = ('>Series.*?\.|>Subseries.*?\(\.\)')
-    #print re.sub(s1, '\1</unitid>', finalseries)
-
-    print finalseries
-    return finalseries
-
-
-seriesdesc = getalltext ("SERIES DESCRIPTIONS", "INDEX TERMS", "CONTAINER LIST")
-
-finalseries = seriesSplit(almostListSeries,"list","head","item", False)
-seriesdesc = seriesSplit(seriesdesc,"co1","unitid","p", True)
-
-
-#print type(finalseries)
-
-#series descriptions
-#d = "Series"
-#print seriesdesc
-#s = [d + e for e in seriesdesc.split(d) if e != ""]
-#print type(s)
-
-#xmlcode = etree.XML(seriesSplit(seriesdesc,"co1","unitid","unitid"))
-#print etree.tostring(xmlcode, pretty_print=True)
-
-
-#using efactory
-ead =(
-    E.ead(
-        E.eadheader(
-            E.eadid('', countrycode='us', url=pdfurl),
-            E.filedesc(
-                E.titlestmt(
-                    E.titleproper(pdftitleproper + '\n\t\t\t', 
-                                  E.num(pdfnum, type='Manuscript'),
-                                  ),
-                    E.subtitle(pdfsubtitle),
-                    E.author(pdfauthor)
-                ),
-                E.publicationstmt(
-                    E.publisher(pdfpublisher),
-                    E.address(
-                        E.addressline(pdfaddressline),
-                    ),
-                    E.date(pdfdate)
-                )
-            )
-                    
-        ),
-        E.archdesc(
-            E.did(
-                E.head(pdfhead),
-                E.physdesc('' + '\n\t\t', 
-                    E.extent(pdfextent),
-                    label='Size', encodinganalog='300$a'
-                ),
-                E.unitdate(pdfidates, type='inclusive', label='Dates:', encodinganalog='245$f'),
-                E.unitdate(pdfbdates, type='bulk', label='Dates:'),
-                E.langmaterial(
-                    E.language(pdflanguage, langcode='eng')
-                ),
-                E.abstract(pdfabstract, label='Summary'),
-                E.repository(
-                    E.corpname(pdfcorpname),
-                    E.subarea(pdfsubarea),
-                    label='Repository:', encodinganalog='825$a'
-                ),
-                E.physloc(pdfphysloc),
-            ),
-            E.accessrestrict(
-                E.head("Restrictions on access"),
-                E.p(pdfaccessrestrict),
-            ),
-            E.relatedmaterial(
-                E.head("Related Collections"),
-                E.p(pdfrelatedmaterial),
-                encodinganalog='544 1'
-            ),
-            E.userestrict(
-                E.head("Copyright"),
-                E.p(pdfuserestrict),
-                encodinganalog='540'
-            ),
-            E.prefercite(
-                E.head("Preferred Citation"),
-                E.p(pdfprefercite),
-                encodinganalog='524'
-            ),
-            E.bioghist(
-                E.head("BIOGRAPHICAL/HISTORICAL NOTE"),
-                E.p(pdfbioghist),
-                encodinganalog='545'
-            ),
-            E.scopecontent(
-                E.head("SCOPE AND CONTENT NOTE"),
-                E.p(pdfscopecontent),
-                encodinganalog='520'
-            ),
-            etree.XML(finalseries),
-            etree.XML(seriesdesc)   
-            ),
-            level='collection', type='inventory', relatedencoding='MARC21'
-        )
-    )
-
-
-#)
-#print etree.tostring(ead, pretty_print=True)
-#print finalseries + "\n"
-#print seriesdesc      
+if __name__ == '__main__':
+    A = FindingAidPDFtoEAD('http://lib.lsu.edu/special/findaid/0826.pdf')
+    A.run_conversion()
