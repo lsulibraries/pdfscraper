@@ -4,6 +4,7 @@ import unittest
 from pdfScraper import FindingAidPDFtoEAD
 import lxml
 
+# http://eli.thegreenplace.net/2011/08/02/python-unit-testing-parametrized-test-cases
 class ParametrizedTestCase(unittest.TestCase):
     """ TestCase classes that want to be parametrized should
         inherit from this class.
