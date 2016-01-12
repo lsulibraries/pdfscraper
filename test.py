@@ -1,4 +1,4 @@
-#! python2.7
+#! /usr/bin/python2.7
 
 import unittest
 from pdfScraper import FindingAidPDFtoEAD
@@ -24,6 +24,9 @@ class ParametrizedTestCase(unittest.TestCase):
         for name in testnames:
             suite.addTest(testcase_klass(name, url=url))
         return suite
+
+
+
 
 class EadTest(ParametrizedTestCase):
 
@@ -53,7 +56,7 @@ class EadTest(ParametrizedTestCase):
 										terms[0]: 4,
 										terms[1]: 6,
 										terms[2]: 7,
-										terms[3]: 8, # uses non-standard header 'SERIES AND SUBSERIES DESTRIPTONS'
+										terms[3]: 8, # Fails - uses non-standard header 'SERIES AND SUBSERIES DESCRIPTONS'
 										terms[4]: 15,
 										terms[5]: 18,},
 									'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf': {
@@ -71,14 +74,14 @@ class EadTest(ParametrizedTestCase):
 										terms[4]: 7,
 										terms[5]: 8,},
 									}		
-		# for url, value in self.list_of_proven_answers.iteritems():
-		# 	self.list_of_proven_answers['findaid'] = FindingAidPDFtoEAD(url)
 		allTerms = self.list_of_proven_answers[self.url]
 
 		for term, page_num in allTerms.iteritems():
 			self.assertEquals(self.findaid.getpagenum(term)[0], page_num, '\n\nFor url :{}\nTerm: {}\nExpected Page #: {}\nActual Page #: {}\n'.format(self.url, term, page_num, self.findaid.getpagenum(term)[0]))
-			#print '\n\nFor url :{}\nTerm: {}\nObserved Page #: {}\nCalculated Page #: {}\n'.format(url, term, page_num, self.findaid.getpagenum(term)[0])
 
+	def testgetrcoldata(self):
+		size = self.findaid.getrcoldata('Size.')
+		self.assertEquals('hello', size)
 
 if __name__ == "__main__":
 	suite = unittest.TestSuite()
@@ -87,6 +90,3 @@ if __name__ == "__main__":
 	suite.addTest(ParametrizedTestCase.parametrize(EadTest, url='http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf'))
 	suite.addTest(ParametrizedTestCase.parametrize(EadTest, url='http://www.lib.lsu.edu/sites/default/files/sc/findaid/4452.pdf'))
 	unittest.TextTestRunner(verbosity=2).run(suite)
-
-
-
