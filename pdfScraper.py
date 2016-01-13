@@ -97,6 +97,7 @@ class FindingAidPDFtoEAD():
         return pagenumber, termtop
 
     def getalltext(self, firstheader, secondheader, backupheader):
+        print('line 100: ', firstheader, secondheader, backupheader)
         firstpagenumber, firstheadertop = self.getpagenum(firstheader)
         secondpagenumber, secondheadertop = self.getpagenum(secondheader)
         backuppagenumber, backupheadertop = self.getpagenum(backupheader)
@@ -118,6 +119,7 @@ class FindingAidPDFtoEAD():
                 rawtext.append(el.text.strip())
         textalmost = ' '.join(rawtext)
         alltext = ' '.join(textalmost.split())  # strips extra spaces
+        print('line 122: ', alltext)
         return alltext
 
     def seriesSplit(self, textinput, outerwrap, insidewrap, subwrap, check):
