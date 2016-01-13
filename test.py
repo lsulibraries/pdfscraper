@@ -49,8 +49,8 @@ class EadTest(ParametrizedTestCase):
 		self.list_of_proven_answers = 	{'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0826.pdf': {
 										terms[0]: 4, 
 										terms[1]: 4,
-										terms[2]: None,
-										terms[3]: None,
+										terms[2]: 18,
+										terms[3]: 18,
 										terms[4]: 5,
 										terms[5]: 6,},
 									'http://www.lib.lsu.edu/sites/default/files/sc/findaid/4452.pdf': {
@@ -70,8 +70,8 @@ class EadTest(ParametrizedTestCase):
 									'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf': {
 										terms[0]: 4,
 										terms[1]: 5,
-										terms[2]: None,
-										terms[3]: None,
+										terms[2]: 18,
+										terms[3]: 18,
 										terms[4]: 7,
 										terms[5]: 8,},
 									}		
@@ -82,7 +82,7 @@ class EadTest(ParametrizedTestCase):
 
 	def testgetrcoldata(self):
 		size = self.findaid.getrcoldata('Size.')
-		self.assertEquals('hello', size)
+
 
 if __name__ == "__main__":
 	suite = unittest.TestSuite()
