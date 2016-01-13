@@ -97,7 +97,10 @@ class FindingAidPDFtoEAD():
         return pagenumber, termtop
 
     def getalltext(self, firstheader, secondheader, backupheader):
-        print('line 100: ', firstheader, secondheader, backupheader)
+        output_tuple = (firstheader, secondheader, backupheader)
+
+
+
         firstpagenumber, firstheadertop = self.getpagenum(firstheader)
         secondpagenumber, secondheadertop = self.getpagenum(secondheader)
         backuppagenumber, backupheadertop = self.getpagenum(backupheader)
@@ -119,7 +122,8 @@ class FindingAidPDFtoEAD():
                 rawtext.append(el.text.strip())
         textalmost = ' '.join(rawtext)
         alltext = ' '.join(textalmost.split())  # strips extra spaces
-        print('line 122: ', alltext)
+        output_tuple += (alltext,)
+        print output_tuple, ','
         return alltext
 
     def seriesSplit(self, textinput, outerwrap, insidewrap, subwrap, check):
@@ -343,5 +347,5 @@ list_of_urls = [
 if __name__ == '__main__':
     for our_url in list_of_urls:
         print(our_url)
-        A = FindingAidPDFtoEAD('http://lib.lsu.edu/special/findaid/0826.pdf')
+        A = FindingAidPDFtoEAD(our_url)
         A.run_conversion()
