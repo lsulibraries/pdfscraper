@@ -92,18 +92,21 @@ class FindingAidPDFtoEAD():
             except:
                 continue
         if pagenumber == 18:
-            pagenumber, termtop = None, None
+            pagenumber, termtop = 18, None
+
         return pagenumber, termtop
 
     def getalltext(self, firstheader, secondheader, backupheader):
         firstpagenumber, firstheadertop = self.getpagenum(firstheader)
         secondpagenumber, secondheadertop = self.getpagenum(secondheader)
         backuppagenumber, backupheadertop = self.getpagenum(backupheader)
+
         if backuppagenumber < secondpagenumber or secondpagenumber == 19:
             secondpagenumber = backuppagenumber
             secondheadertop = backupheadertop
         rawtext = []
         for p in range(firstpagenumber, secondpagenumber+1):
+
             if p == secondpagenumber:
                 bottom = secondheadertop
             else:
