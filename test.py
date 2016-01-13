@@ -38,12 +38,13 @@ class EadTest(ParametrizedTestCase):
 		self.assertIsInstance(self.findaid.root, lxml.etree._Element)
 
 	def testGetPageNum(self):
-		terms = ["BIOGRAPHICAL/HISTORICAL NOTE", 
+		terms = ["BIOGRAPHICAL/HISTORICAL NOTE",
 				"SCOPE AND CONTENT NOTE", 
 				"LIST OF SERIES AND SUBSERIES", 
 				"SERIES DESCRIPTIONS", 
 				"INDEX TERMS", 
-				"CONTAINER LIST"
+				"CONTAINER LIST",
+				#"CITE AS"
 				]
 		self.list_of_proven_answers = 	{'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0826.pdf': {
 										terms[0]: 4, 
@@ -90,3 +91,8 @@ if __name__ == "__main__":
 	suite.addTest(ParametrizedTestCase.parametrize(EadTest, url='http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf'))
 	suite.addTest(ParametrizedTestCase.parametrize(EadTest, url='http://www.lib.lsu.edu/sites/default/files/sc/findaid/4452.pdf'))
 	unittest.TextTestRunner(verbosity=2).run(suite)
+
+# styles
+# pre 2010 is really funky
+# 2010 - 2013 standardization happened in 2010, some small change in style happened before 2013
+# after 2013 is good

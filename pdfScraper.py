@@ -15,11 +15,19 @@ class FindingAidPDFtoEAD():
         self.root = etree.fromstring(self.xmldata)
 
     pdfsubtitle = 'A Collection in the Louisiana and Lower Mississippi Valley Collections'
-    pdfaddressline = 'Hill Memorial Library\nBaton Rouge, LA 70803\nhttp://www.lib.lsu.edu/special'
+    pdfaddressline = 'Hill Memorial Library\nBaton Rouge, LA 70803-3300\nhttp://www.lib.lsu.edu/special' # add phone numbers
     pdfpublisher = 'Louisiana State University Special Collections'
     pdfhead = 'SUMMARY'
     pdfcorpname = "Louisiana State University Special Collections"
     pdfsubarea = "Louisiana and Lower Mississippi Valley Collection"
+
+    # <langmaterial><!-- lang material may not be covered in finding aids -->
+    #    <language encodinganalog="041" langcode="eng" scriptcode="latn">English in Latin script.</language>
+    # </langmaterial>
+
+    # todo add element deflist for things like : 'ENCODED BY', 'PROCESSED BY'
+
+    # within the bioghist element, mark names (?): <persname>Mrs. Nellie M. Mingo</persname>
 
     def getrcoldata(self, lcolname):
         lcoldata = []
@@ -301,9 +309,17 @@ class FindingAidPDFtoEAD():
                         E.p(self.pdfscopecontent),
                         encodinganalog='520'
                     ),
+                    # INDEX TERMS will need to be encoded all as 'subject' cuz we can't tell automatically...
+                    # @source should usually be 'lcnaf'
                     etree.XML(finalseries),
                     etree.XML(seriesdesc)
                     ),
+                    # E.acqinfo may need to be gleaned by humans, same for E.accruals
+                    # E.custodinfo, E.altformavail, E.appraisal
+                    # For required elements that must be inferred, insert placeholder text like:
+                    #   "Unknown - could not be automatically inferred"
+                    #
+                    # E.processinfo may need to be included
                 level='collection', type='inventory', relatedencoding='MARC21'
                 )
             )
