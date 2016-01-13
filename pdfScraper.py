@@ -150,7 +150,7 @@ class FindingAidPDFtoEAD():
 
     def run_conversion(self):
         # 4. Have a peek at the XML (click the "more" link in the Console to preview it).
-        print etree.tostring(self.root, pretty_print=True)
+        # print etree.tostring(self.root, pretty_print=True)
         # titleproper - needs to account for multiple lines in some docs
         wholetitle = []
         titlelines = self.root.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
@@ -330,14 +330,16 @@ class FindingAidPDFtoEAD():
 
 
 
-# 2. The URL/web address where we can find the PDF we want to scrape
-#pdfurl = 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf' #Bankston
-#pdfurl = 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf' #Acy papers
-#pdfurl = 'http://lib.lsu.edu/special/findaid/0826.pdf' #Guion Diary
-#pdfurl = 'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf' # mutltiline title
-#pdfurl = 'http://lib.lsu.edu/special/findaid/4452.pdf' #Turnbull - multiple page biographical note
-
+list_of_urls = [
+                'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf', #Bankston
+                'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf', #Acy papers
+                'http://lib.lsu.edu/special/findaid/0826.pdf', #Guion Diary
+                'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf', # mutltiline title
+                'http://lib.lsu.edu/special/findaid/4452.pdf' #Turnbull - multiple page biographical note
+    ]
 
 if __name__ == '__main__':
-    A = FindingAidPDFtoEAD('http://lib.lsu.edu/special/findaid/0826.pdf')
-    A.run_conversion()
+    for our_url in list_of_urls:
+        print(our_url)
+        A = FindingAidPDFtoEAD('http://lib.lsu.edu/special/findaid/0826.pdf')
+        A.run_conversion()
