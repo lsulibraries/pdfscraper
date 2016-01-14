@@ -181,6 +181,10 @@ class FindingAidPDFtoEAD():
         # figuring out what the top value of the last line of the title is
         titlelineend = titlelines[-1].getparent().get('top')
 
+        # This is where we should grab the Contents of the Inventory, put it into a list for using in the 
+        # getalltext function.
+
+
         # num - assume it is between 12 and 25 units below the last line of title
         #    (a better way might have been to take next text node)
         numlinenumberA = str(int(titlelineend) + 12)  # 347
@@ -243,21 +247,16 @@ class FindingAidPDFtoEAD():
         if self.pdfphysloc == "":
             self.pdfphysloc = self.getrcoldata("Stack location.")
 
-        # bioghist assuming scope and content always next
+
+
+#_____________________________________________________________
+        # This section is problematic especiall with pdf 4745:
+        # We need a function that grabs all TERMS from CONTENTS OF IVENTORY SECTION, 
+        # Then the getalltext function won't need a backupheader, and we can get all text by looping through available terms for appropriate sections
         self.pdfbioghist = self.getalltext("BIOGRAPHICAL/HISTORICAL NOTE", "SCOPE AND CONTENT NOTE", "LIST OF SERIES AND SUBSERIES")
-
-        # scopecontent - assuming that index terms is always next
         self.pdfscopecontent = self.getalltext("SCOPE AND CONTENT NOTE", "LIST OF SERIES AND SUBSERIES", "INDEX TERMS")
-
-        # arrangement
-        # series and subseries
         almostListSeries = self.getalltext("LIST OF SERIES AND SUBSERIES", "SERIES DESCRIPTIONS", "INDEX TERMS")
-
-
-
-
         seriesdesc = self.getalltext("SERIES DESCRIPTIONS", "INDEX TERMS", "CONTAINER LIST")
-
         finalseries = self.seriesSplit(almostListSeries, "list", "head", "item", False)
         seriesdesc = self.seriesSplit(seriesdesc, "co1", "unitid", "p", True)
 
@@ -361,7 +360,7 @@ list_of_urls = [
                 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
                 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
                 'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
-                'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title
+                'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title #Problem with the Contents of Inventory
                 'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
                ]
 
