@@ -35,7 +35,7 @@ class FindingAidPDFtoEAD():
         try:
             rcoltop = str(int(self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolname + '"]]')[0].getparent().get('top')))
             rcoltopbuffer = str(int(rcoltop)-10)
-            afterrcoltop = str(int(self.root.xpath('//page[@number="3"]/text[@left='+leftcolumnleft+' and @top=' + rcoltop + ']/following::text[b]')[0].get('top'))-10)
+            afterrcoltop = str(int(self.root.xpath('//page[@number="3"]/text[@left=' + self.xpos_of_left_column + ' and @top=' + rcoltop + ']/following::text[b]')[0].get('top'))-10)
             # check to see if it's last on page (it loops to top for some reason). if so hopefully one line is needed
             if afterrcoltop < rcoltop:
                 afterrcoltop = str(int(rcoltop)+20)
@@ -49,7 +49,7 @@ class FindingAidPDFtoEAD():
                 rcoltop = str(int(self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolnameshort + '"]]')[0].getparent().get('top')))
                 rcoltopbuffer = str(int(rcoltop)-10)
                 try: #if it's the last in the column then hopefully its a single line
-                    afterrcoltop = str(int(self.root.xpath('//page[@number="3"]/text[@left='+leftcolumnleft+' and @top=' + rcoltop + ']/following::text[b]')[0].get('top'))-10)
+                    afterrcoltop = str(int(self.root.xpath('//page[@number="3"]/text[@left=' + self.xpos_of_left_column + ' and @top=' + rcoltop + ']/following::text[b]')[0].get('top'))-10)
                 except:
                     aftercoltop = str(int(rcoltop)+15)
                 datalines = self.root.xpath('//page[@number="3"]/text[@top>' + rcoltopbuffer + 'and @top<' + afterrcoltop + ' and @left>"200"]')
@@ -63,7 +63,7 @@ class FindingAidPDFtoEAD():
                     rcoltop = str(int(self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolnamefirstpart + '"]]')[0].getparent().get('top')))
                     rcoltopbuffer = str(int(rcoltop)-10)
                     nextcoltop = str(int(self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolnamelastword + '"]]')[0].getparent().get('top')))
-                    afterrcoltop = str(int(self.root.xpath('//page[@number="3"]/text[@left='+leftcolumnleft+' and @top=' + nextcoltop + ']/following::text[b]')[0].get('top'))-10)
+                    afterrcoltop = str(int(self.root.xpath('//page[@number="3"]/text[@left=' + self.xpos_of_left_column + ' and @top=' + nextcoltop + ']/following::text[b]')[0].get('top'))-10)
                     datalines = self.root.xpath('//page[@number="3"]/text[@top>' + rcoltopbuffer + 'and @top<' + afterrcoltop + ' and @left>"200"]')
                     for el in datalines:
                         lcoldata.append(el.text.strip())
@@ -99,15 +99,13 @@ class FindingAidPDFtoEAD():
     def getalltext(self, firstheader, secondheader, backupheader):
         output_tuple = (firstheader, secondheader, backupheader)
 
-
-
         firstpagenumber, firstheadertop = self.getpagenum(firstheader)
         secondpagenumber, secondheadertop = self.getpagenum(secondheader)
         backuppagenumber, backupheadertop = self.getpagenum(backupheader)
 
         if backuppagenumber < secondpagenumber or secondpagenumber == 19:
-            secondpagenumber = backuppagenumber
-            secondheadertop = backupheadertop
+            secondpagenumber, secondheadertop = backuppagenumber, backupheadertop
+
         rawtext = []
         for p in range(firstpagenumber, secondpagenumber+1):
 
@@ -115,7 +113,15 @@ class FindingAidPDFtoEAD():
                 bottom = secondheadertop
             else:
                 bottom = "1000"
-            data = self.root.xpath('//page[@number='+str(p)+']/text[@top>=' + str(int(firstheadertop)+3) + 'and @top<' + str(int(bottom)-3) +']|//page[@number='+str(p)+']/text[@top>=' + str(int(firstheadertop)+3) + 'and @top<' + str(int(bottom)-3) +']/b')
+            thingie = '//page[@number={}]/text[@top>={}and @top<{}]|//page[@number={}]/text[@top>={}and @top<{}]/b'.format(
+                    str(p),
+                    str(int(firstheadertop)+3),
+                    str(int(bottom)-3),
+                    str(p),
+                    str(int(firstheadertop)+3),
+                    str(int(bottom)-3)
+                    )
+            data = self.root.xpath(thingie)
             for el in data:
                 if not el.text:  # removes blank nodes
                     continue
@@ -123,7 +129,9 @@ class FindingAidPDFtoEAD():
         textalmost = ' '.join(rawtext)
         alltext = ' '.join(textalmost.split())  # strips extra spaces
         output_tuple += (alltext,)
-        print output_tuple, ','
+        # print output_tuple, ', '
+        # broken in pieces and truncated the length of fields
+        # print output_tuple[0], ', ', output_tuple[1], ', ',  output_tuple[2], ', ', output_tuple[3][:10]
         return alltext
 
     def seriesSplit(self, textinput, outerwrap, insidewrap, subwrap, check):
@@ -151,12 +159,18 @@ class FindingAidPDFtoEAD():
         finalseries.insert(0, "<arrangement encodinganalog='351'>")
         finalseries.append("</arrangement>")
         finalseries = "".join(finalseries)
-        s1 = ('>Series.*?\.|>Subseries.*?\(\.\)')
+        # s1 = ('>Series.*?\.|>Subseries.*?\(\.\)')
         return finalseries
 
     def run_conversion(self):
         # 4. Have a peek at the XML (click the "more" link in the Console to preview it).
         # print etree.tostring(self.root, pretty_print=True)
+
+        '''# writing to pdf to xml file
+        file_name = '{}.xml'.format(self.url[-8:-4])
+        with open(file_name, 'w') as f:
+            f.write(etree.tostring(self.root, pretty_print=True))'''
+
         # titleproper - needs to account for multiple lines in some docs
         wholetitle = []
         titlelines = self.root.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
@@ -171,16 +185,21 @@ class FindingAidPDFtoEAD():
         #    (a better way might have been to take next text node)
         numlinenumberA = str(int(titlelineend) + 12)  # 347
         numlinenumberB = str(int(titlelineend) + 25)  # 360
-        self.pdfnum = self.root.xpath('//page[@number="1"]/text[@top>=' +
-                                       numlinenumberA + ' and @top<=' +
-                                       numlinenumberB + ']')[0].text.strip()
+        xpath_address = '//page[@number="1"]/text[@top>=' + numlinenumberA + ' and @top<=' + numlinenumberB + ']'
+        mss_elem = self.root.xpath(xpath_address)[0]
+        mss_text = mss_elem.text
+        if mss_text:
+            self.pdfnum = mss_text.strip()
+        else:
+            # should we raise & catch exceptions here?
+            print '\nAttention!!   MSS not digitally scanned from document: ', self.url, '\n'
+            self.pdfnum = 'Attention!!   MSS not digitally scanned from document: {}'.format(self.url)
 
         # author - take next text node after the one that says "Compiled by" - with exception handling
         try:
             self.pdfauthor = self.root.xpath('//page[@number="1"]/text[text()[normalize-space(.)="Compiled by"]]')[0].getnext().text.strip()
         except:
             self.pdfauthor = 'Special Collections Staff'
-
 
         # date - last node over "20" width on first page - "reformatted" or "revised" dates okay?
         self.pdfdate = self.root.xpath('//page[@number="1"]/text[@width>"20"]')[-1].text.strip()
@@ -189,10 +208,15 @@ class FindingAidPDFtoEAD():
         # physdesc -
 
         # page 3 has a table - find the left of the two columns - can assume Size is the first and always there?
-        leftcolumnleft = str(int(self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="Size."]]')[0].getparent().get('left')))
+        elem_for_pos_of_left_column = self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="Size."]]')
+        if elem_for_pos_of_left_column:
+            self.xpos_of_left_column = elem_for_pos_of_left_column[0].getparent().get('left')
+        # should we raise & catch Exceptions?
+        else:
+            print '\nAttention!!  elem_for_pos_of_left_column not digitally scanned from document: {}\n'.format(self.url)
+            self.xpos_of_left_column = '/nAttention!!  elem_for_pos_of_left_column not digitally scanned from document: {}'.format(self.url)
 
         # function finds right hand column data based on text of left hand column - just for page 3
-
 
         self.pdfextent = self.getrcoldata("Size.")
         self.pdfidates = self.getrcoldata("Inclusive dates.")
@@ -333,16 +357,13 @@ class FindingAidPDFtoEAD():
                 )
             )
 
-
-
-
 list_of_urls = [
-                'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf', #Bankston
-                'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf', #Acy papers
-                'http://lib.lsu.edu/special/findaid/0826.pdf', #Guion Diary
-                'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf', # mutltiline title
-                'http://lib.lsu.edu/special/findaid/4452.pdf' #Turnbull - multiple page biographical note
-    ]
+                'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
+                'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
+                'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
+                'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title
+                'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
+               ]
 
 if __name__ == '__main__':
     for our_url in list_of_urls:
