@@ -123,6 +123,44 @@ class EadTest(ParametrizedTestCase):
                 self.url, firstheader, secondheader, backupheader, return_value, self.findaid.getalltext(firstheader, secondheader, backupheader)))
 
 
+    # def testSeriesSplit(self):
+    # 	almostListSeries = self.findaid.getalltext("LIST OF SERIES AND SUBSERIES", "SERIES DESCRIPTIONS", "INDEX TERMS")
+    #     seriesdesc       = self.findaid.getalltext("SERIES DESCRIPTIONS", "INDEX TERMS", "CONTAINER LIST")
+
+    #     finalseries      = self.findaid.seriesSplit(almostListSeries, "list", "head", "item", False)
+    #     seriesdesc       = self.findaid.seriesSplit(seriesdesc, "co1", "unitid", "p", True)
+    #     print(finalseries)
+
+    def testGetDeflistItem(self):
+    	labels = [
+    		'Created by',
+    		'Compiled by',
+    		'Revised by',
+    		'Encoded by',
+    		'Processed by',
+    		'Date Completed'
+    	]
+    	expected_answers = {
+            'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf':
+            	[
+            		('Compiled by', 'Luana Henderson')
+            	],
+            'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0826.pdf':
+            	[
+            		('','')
+            	],
+            'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf':
+            	[
+            		('Compiled by', 'Luana Henderson')
+            	]
+            }
+        current_pdf_expected_answers = expected_answers[self.url]
+        for our_tuple in current_pdf_expected_answers:
+        	label, value = our_tuple
+        	observed = self.findaid.getDefListItem(label)
+        	self.assertEquals(observed, value, 'For url: {}\nUnexpected Value for: {}\nGot: {}\nExpected: {}\n\n'.format(self.url, label, observed, value))
+
+
 if __name__ == "__main__":
     suite = unittest.TestSuite()
     suite.addTest(ParametrizedTestCase.parametrize(

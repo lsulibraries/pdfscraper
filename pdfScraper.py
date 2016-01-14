@@ -162,14 +162,17 @@ class FindingAidPDFtoEAD():
         # s1 = ('>Series.*?\.|>Subseries.*?\(\.\)')
         return finalseries
 
+    def getDefListItem(self, label):
+        return None
+
     def run_conversion(self):
         # 4. Have a peek at the XML (click the "more" link in the Console to preview it).
         # print etree.tostring(self.root, pretty_print=True)
 
-        '''# writing to pdf to xml file
+        # writing to pdf to xml file
         file_name = '{}.xml'.format(self.url[-8:-4])
         with open(file_name, 'w') as f:
-            f.write(etree.tostring(self.root, pretty_print=True))'''
+            f.write(etree.tostring(self.root, pretty_print=True))
 
         # titleproper - needs to account for multiple lines in some docs
         wholetitle = []
@@ -356,6 +359,7 @@ class FindingAidPDFtoEAD():
                 level='collection', type='inventory', relatedencoding='MARC21'
                 )
             )
+        print etree.tostring(ead, pretty_print=True)
 
 list_of_urls = [
                 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
