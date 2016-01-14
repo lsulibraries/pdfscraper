@@ -9,10 +9,18 @@ from lxml.builder import E
 class FindingAidPDFtoEAD():
     def __init__(self, url):
         self.url = url
-        self.pdfdata = urllib2.urlopen(url).read()
-        self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
-        self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
-        self.root = etree.fromstring(self.xmldata)
+        '''normal pull-pdf-from-web-and-interpret code'''
+        # self.pdfdata = urllib2.urlopen(url).read()   # Necessary code for pulling pdf from web.
+        # self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
+        # self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
+        # self.root = etree.fromstring(self.xmldata)
+
+        '''temp read-cached-file-from-harddrive monkeypatch'''
+        with open('cached_pdfs/' + self.url[-8:], 'r') as f:
+            self.pdfdata = f.read()
+            self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
+            self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
+            self.root = etree.fromstring(self.xmldata)
 
     pdfsubtitle = 'A Collection in the Louisiana and Lower Mississippi Valley Collections'
     pdfaddressline = 'Hill Memorial Library\nBaton Rouge, LA 70803-3300\nhttp://www.lib.lsu.edu/special'  # add phone numbers
