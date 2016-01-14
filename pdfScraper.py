@@ -14,6 +14,7 @@ class FindingAidPDFtoEAD():
         # self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
         # self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
         # self.root = etree.fromstring(self.xmldata)
+        # self.pdf_length = self.get_pdf_length()
 
         '''temp read-cached-file-from-harddrive monkeypatch'''
         with open('cached_pdfs/' + self.url[-8:], 'r') as f:
@@ -21,6 +22,7 @@ class FindingAidPDFtoEAD():
             self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
             self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
             self.root = etree.fromstring(self.xmldata)
+            self.pdf_length = self.get_pdf_length()
 
     pdfsubtitle = 'A Collection in the Louisiana and Lower Mississippi Valley Collections'
     pdfaddressline = 'Hill Memorial Library\nBaton Rouge, LA 70803-3300\nhttp://www.lib.lsu.edu/special'  # add phone numbers
@@ -37,7 +39,7 @@ class FindingAidPDFtoEAD():
 
     # within the bioghist element, mark names (?): <persname>Mrs. Nellie M. Mingo</persname>
 
-    def getpdflength(self):
+    def get_pdf_length(self):
         list_of_all_page_nums = [int(i) for i in self.root.xpath('//page/@number')]
         return max(list_of_all_page_nums)
 
@@ -173,15 +175,7 @@ class FindingAidPDFtoEAD():
         return finalseries
 
     def run_conversion(self):
-        self.length_of_pdf = self.getpdflength()
-
-        # 4. Have a peek at the XML (click the "more" link in the Console to preview it).
-        # print etree.tostring(self.root, pretty_print=True)
-
-        # writing to pdf to xml file
-        # file_name = '{}.xml'.format(self.url[-8:-4])
-        # with open(file_name, 'w') as f:
-        #     f.write(etree.tostring(self.root, pretty_print=True))
+        # self.print_xml_to_file()    # if you want to
 
         # titleproper - needs to account for multiple lines in some docs
         wholetitle = []
@@ -356,6 +350,11 @@ class FindingAidPDFtoEAD():
                 level='collection', type='inventory', relatedencoding='MARC21'
                 )
             )
+
+    def print_xml_to_file(self):
+        file_name = 'cached_pdfs/{}.xml'.format(self.url[-8:-4])
+        with open(file_name, 'w') as f:
+            f.write(etree.tostring(self.root, pretty_print=True))
 
 list_of_urls = [
                 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
