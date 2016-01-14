@@ -221,8 +221,13 @@ class FindingAidPDFtoEAD():
         # <text top="244" left="135" width="647" height="16" font="0"><a href="tmpdT3vWn.html#4">SCOPE AND CONTENT NOTE ....................................................................................... 4</a></text>
         # <text top="244" left="782" width="4" height="17" font="2"> </text>
         # <text top="265" left="135" width="647" height="16" font="0"><a href="tmpdT3vWn.html#5">COLLECTION DESCRIPTION AND CONTAINER LIST ............................................. 5</a></text>
-        #contents_inventory = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text')[0].text.strip()
-        #print contents_inventory
+        contents = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
+        contents_inventory = []
+        for i in contents:
+            noperiod = i.text.replace(".", "")
+            splat = noperiod.split("  ")
+            contents_inventory.append(splat[0])
+        print contents_inventory
 
 
 
