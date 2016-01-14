@@ -3,3 +3,4 @@ env/*
 *.pdf
 dbg.xml
 .vagrant/*
+*.xml
