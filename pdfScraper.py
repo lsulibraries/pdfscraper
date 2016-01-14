@@ -164,7 +164,7 @@ class FindingAidPDFtoEAD():
 
     def run_conversion(self):
         # 4. Have a peek at the XML (click the "more" link in the Console to preview it).
-        # print etree.tostring(self.root, pretty_print=True)
+        #print etree.tostring(self.root, pretty_print=True)
 
         '''# writing to pdf to xml file
         file_name = '{}.xml'.format(self.url[-8:-4])
@@ -174,16 +174,14 @@ class FindingAidPDFtoEAD():
         # titleproper - needs to account for multiple lines in some docs
         wholetitle = []
         titlelines = self.root.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
+        #print titlelines
 
         for el in titlelines:
             wholetitle.append(el.text.strip())
         self.pdftitleproper = 'A GUIDE TO THE ' + ' '.join(wholetitle)
+
         # figuring out what the top value of the last line of the title is
         titlelineend = titlelines[-1].getparent().get('top')
-
-        # This is where we should grab the Contents of the Inventory, put it into a list for using in the 
-        # getalltext function.
-
 
         # num - assume it is between 12 and 25 units below the last line of title
         #    (a better way might have been to take next text node)
@@ -211,13 +209,31 @@ class FindingAidPDFtoEAD():
 
         # physdesc -
 
+
+        # This is where we should grab the Contents of the Inventory, put it into a list for using in the 
+        # getalltext function.
+        # <text top="162" left="135" width="248" height="16" font="1"><b>CONTENTS OF INVENTORY </b></text>
+        # <text top="182" left="135" width="5" height="16" font="1"><b> </b></text>
+        # <text top="203" left="135" width="647" height="16" font="0"><a href="tmpdT3vWn.html#3">SUMMARY ........................................................................................................................ 3</a></text>
+        # <text top="203" left="782" width="4" height="17" font="2"> </text>
+        # <text top="224" left="135" width="647" height="16" font="0"><a href="tmpdT3vWn.html#4">BIOGRAPHICAL/HISTORICAL NOTE .......................................................................... 4</a></text>
+        # <text top="223" left="782" width="4" height="17" font="2"> </text>
+        # <text top="244" left="135" width="647" height="16" font="0"><a href="tmpdT3vWn.html#4">SCOPE AND CONTENT NOTE ....................................................................................... 4</a></text>
+        # <text top="244" left="782" width="4" height="17" font="2"> </text>
+        # <text top="265" left="135" width="647" height="16" font="0"><a href="tmpdT3vWn.html#5">COLLECTION DESCRIPTION AND CONTAINER LIST ............................................. 5</a></text>
+        #contents_inventory = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text')[0].text.strip()
+        #print contents_inventory
+
+
+
+
         # page 3 has a table - find the left of the two columns - can assume Size is the first and always there?
         elem_for_pos_of_left_column = self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="Size."]]')
         if elem_for_pos_of_left_column:
             self.xpos_of_left_column = elem_for_pos_of_left_column[0].getparent().get('left')
         # should we raise & catch Exceptions?
         else:
-            print '\nAttention!!  elem_for_pos_of_left_column not digitally scanned from document: {}\n'.format(self.url)
+            #print '\nAttention!!  elem_for_pos_of_left_column not digitally scanned from document: {}\n'.format(self.url)
             self.xpos_of_left_column = '/nAttention!!  elem_for_pos_of_left_column not digitally scanned from document: {}'.format(self.url)
 
         # function finds right hand column data based on text of left hand column - just for page 3
@@ -343,7 +359,9 @@ class FindingAidPDFtoEAD():
                     ),
                     # INDEX TERMS will need to be encoded all as 'subject' cuz we can't tell automatically...
                     # @source should usually be 'lcnaf'
-                    etree.XML(finalseries),
+                    
+                    #put this back 
+                    #etree.XML(finalseries),
                     etree.XML(seriesdesc)
                     ),
                     # E.acqinfo may need to be gleaned by humans, same for E.accruals
@@ -357,11 +375,11 @@ class FindingAidPDFtoEAD():
             )
 
 list_of_urls = [
-                'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
-                'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
-                'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
+                #'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
+                #'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
+                #'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
                 'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title #Problem with the Contents of Inventory
-                'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
+                #'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
                ]
 
 if __name__ == '__main__':
