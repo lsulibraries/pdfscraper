@@ -163,7 +163,9 @@ class FindingAidPDFtoEAD():
         return finalseries
 
     def getDefListItem(self, label):
-        return None
+        xpath_address = '//page[@number=1]/text[contains(text(),label)]'
+        itemValue = self.root.xpath(xpath_address)[0].getnext().text.strip()
+        return itemValue
 
     def run_conversion(self):
         # 4. Have a peek at the XML (click the "more" link in the Console to preview it).

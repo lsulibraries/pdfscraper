@@ -156,11 +156,12 @@ class EadTest(ParametrizedTestCase):
             		('Compiled by', 'Luana Henderson')
             	]
             }
-        current_pdf_expected_answers = expected_answers[self.url]
-        for our_tuple in current_pdf_expected_answers:
-        	label, value = our_tuple
-        	observed = self.findaid.getDefListItem(label)
-        	self.assertEquals(observed, value, 'For url: {}\nUnexpected Value for: {}\nGot: {}\nExpected: {}\n\n'.format(self.url, label, observed, value))
+        tuple_list = expected_answers[self.url]
+        for our_tuple in tuple_list:
+        	 
+    		label, value = our_tuple
+    		observed = self.findaid.getDefListItem(label)
+    		self.assertEquals(observed, value, 'For url: {}\nUnexpected Value for: {}\nGot: {}\nExpected: {}\n\n'.format(self.url, label, observed, value))
 
 
 if __name__ == "__main__":
