@@ -78,8 +78,8 @@ class EadTest(ParametrizedTestCase):
             terms[4]: 7,
             terms[5]: 8, },
         }
-        current_pdfs_proven_answers = self.list_of_proven_answers[self.url]
 
+        current_pdfs_proven_answers = self.list_of_proven_answers[self.url]
         for term, page_num in current_pdfs_proven_answers.iteritems():
             self.assertEquals(self.findaid.getpagenum(term)[0], page_num, '\n\nFor url :{}\nTerm: {}\nExpected Page #: {}\nActual Page #: {}\n'.format(
                 self.url, term, page_num, self.findaid.getpagenum(term)[0]))

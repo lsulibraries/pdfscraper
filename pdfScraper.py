@@ -15,7 +15,7 @@ class FindingAidPDFtoEAD():
         self.root = etree.fromstring(self.xmldata)
 
     pdfsubtitle = 'A Collection in the Louisiana and Lower Mississippi Valley Collections'
-    pdfaddressline = 'Hill Memorial Library\nBaton Rouge, LA 70803-3300\nhttp://www.lib.lsu.edu/special' # add phone numbers
+    pdfaddressline = 'Hill Memorial Library\nBaton Rouge, LA 70803-3300\nhttp://www.lib.lsu.edu/special'  # add phone numbers
     pdfpublisher = 'Louisiana State University Special Collections'
     pdfhead = 'SUMMARY'
     pdfcorpname = "Louisiana State University Special Collections"
@@ -48,18 +48,18 @@ class FindingAidPDFtoEAD():
                 lcolnameshort = lcolname[:-1]
                 rcoltop = str(int(self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolnameshort + '"]]')[0].getparent().get('top')))
                 rcoltopbuffer = str(int(rcoltop)-10)
-                try: #if it's the last in the column then hopefully its a single line
+                try:  # if it's the last in the column then hopefully its a single line
                     afterrcoltop = str(int(self.root.xpath('//page[@number="3"]/text[@left=' + self.xpos_of_left_column + ' and @top=' + rcoltop + ']/following::text[b]')[0].get('top'))-10)
                 except:
-                    aftercoltop = str(int(rcoltop)+15)
+                    afterrcoltop = str(int(rcoltop)+15)
                 datalines = self.root.xpath('//page[@number="3"]/text[@top>' + rcoltopbuffer + 'and @top<' + afterrcoltop + ' and @left>"200"]')
                 for el in datalines:
-                   lcoldata.append(el.text.strip())
+                    lcoldata.append(el.text.strip())
                 pdfdata = ' '.join(lcoldata)
             except:
-                try:  #split query - test each against different lines and expand the selection
-                    lcolnamefirstpart = lcolname.rsplit(' ',1)[0]
-                    lcolnamelastword = lcolname.rsplit(' ',1)[1]
+                try:  # split query - test each against different lines and expand the selection
+                    lcolnamefirstpart = lcolname.rsplit(' ', 1)[0]
+                    lcolnamelastword = lcolname.rsplit(' ', 1)[1]
                     rcoltop = str(int(self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolnamefirstpart + '"]]')[0].getparent().get('top')))
                     rcoltopbuffer = str(int(rcoltop)-10)
                     nextcoltop = str(int(self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolnamelastword + '"]]')[0].getparent().get('top')))
@@ -76,10 +76,10 @@ class FindingAidPDFtoEAD():
                 pdfdata = pdfdata[1:]
         except:
             pass
-        try:
-            nextboldtext = self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolname + '"]]')[0].getparent().getnext().getchildren()[0].text
-        except:
-            pass
+        # try:
+        #     nextboldtext = self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolname + '"]]')[0].getparent().getnext().getchildren()[0].text
+        # except:
+        #     pass
         return pdfdata.strip()
 
     def getpagenum(self, term):
@@ -97,7 +97,6 @@ class FindingAidPDFtoEAD():
         return pagenumber, termtop
 
     def getalltext(self, firstheader, secondheader, backupheader):
-        output_tuple = (firstheader, secondheader, backupheader)
 
         firstpagenumber, firstheadertop = self.getpagenum(firstheader)
         secondpagenumber, secondheadertop = self.getpagenum(secondheader)
@@ -107,31 +106,32 @@ class FindingAidPDFtoEAD():
             secondpagenumber, secondheadertop = backuppagenumber, backupheadertop
 
         rawtext = []
-        for p in range(firstpagenumber, secondpagenumber+1):
 
-            if p == secondpagenumber:
-                bottom = secondheadertop
-            else:
-                bottom = "1000"
-            thingie = '//page[@number={}]/text[@top>={}and @top<{}]|//page[@number={}]/text[@top>={}and @top<{}]/b'.format(
-                    str(p),
-                    str(int(firstheadertop)+3),
-                    str(int(bottom)-3),
-                    str(p),
-                    str(int(firstheadertop)+3),
-                    str(int(bottom)-3)
-                    )
-            data = self.root.xpath(thingie)
-            for el in data:
-                if not el.text:  # removes blank nodes
-                    continue
-                rawtext.append(el.text.strip())
+        if secondheadertop:
+            for p in range(firstpagenumber, secondpagenumber+1):
+                if p == secondpagenumber:
+                    bottom = secondheadertop
+                else:
+                    bottom = "1000"
+                thingie = '//page[@number={}]/text[@top>={}and @top<{}]|//page[@number={}]/text[@top>={}and @top<{}]/b'.format(
+                        str(p),
+                        str(int(firstheadertop)+3),
+                        str(int(bottom)-3),
+                        str(p),
+                        str(int(firstheadertop)+3),
+                        str(int(bottom)-3)
+                        )
+                data = self.root.xpath(thingie)
+                for el in data:
+                    if not el.text:  # removes blank nodes
+                        continue
+                    rawtext.append(el.text.strip())
+        else:
+            # should we throw & catch Exception?
+            print '\nAttention!!   SecondHeaderTop == None.   The pdfscraper is broken in this case: ', self.url, '\n'
+
         textalmost = ' '.join(rawtext)
         alltext = ' '.join(textalmost.split())  # strips extra spaces
-        output_tuple += (alltext,)
-        # print output_tuple, ', '
-        # broken in pieces and truncated the length of fields
-        # print output_tuple[0], ', ', output_tuple[1], ', ',  output_tuple[2], ', ', output_tuple[3][:10]
         return alltext
 
     def seriesSplit(self, textinput, outerwrap, insidewrap, subwrap, check):
@@ -208,7 +208,6 @@ class FindingAidPDFtoEAD():
         # date - last node over "20" width on first page - "reformatted" or "revised" dates okay?
         self.pdfdate = self.root.xpath('//page[@number="1"]/text[@width>"20"]')[-1].text.strip()
 
-
         # physdesc -
 
         # page 3 has a table - find the left of the two columns - can assume Size is the first and always there?
@@ -260,20 +259,10 @@ class FindingAidPDFtoEAD():
         finalseries = self.seriesSplit(almostListSeries, "list", "head", "item", False)
         seriesdesc = self.seriesSplit(seriesdesc, "co1", "unitid", "p", True)
 
+        # xmlcode = etree.XML(seriesSplit(seriesdesc,"co1","unitid","unitid"))
+        # print etree.tostring(xmlcode, pretty_print=True)
 
-        #print type(finalseries)
-
-        #series descriptions
-        #d = "Series"
-        #print seriesdesc
-        #s = [d + e for e in seriesdesc.split(d) if e != ""]
-        #print type(s)
-
-        #xmlcode = etree.XML(seriesSplit(seriesdesc,"co1","unitid","unitid"))
-        #print etree.tostring(xmlcode, pretty_print=True)
-
-
-        #using efactory
+        # using efactory
         ead = (
             E.ead(
                 E.eadheader(
