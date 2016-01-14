@@ -25,7 +25,6 @@ class FindingAidPDFtoEAD():
             self.root = etree.fromstring(self.xmldata)
             self.pdf_length = self.get_pdf_length()
 
-
     pdfsubtitle = 'A Collection in the Louisiana and Lower Mississippi Valley Collections'
     pdfaddressline = 'Hill Memorial Library\nBaton Rouge, LA 70803-3300\nhttp://www.lib.lsu.edu/special'  # add phone numbers
     pdfpublisher = 'Louisiana State University Special Collections'
@@ -177,16 +176,11 @@ class FindingAidPDFtoEAD():
         return finalseries
 
     def getDefListItem(self, label):
-        xpath_address = '//page[@number=1]/text[contains(text(),label)]'
-        first_occurence_of_label = self.root.xpath(xpath_address)
-        #print first_occurence_of_label
-        for occurrence in first_occurence_of_label:
-            print occurrence.text
-        #print 'looking for label {}, found it: {}'.format(label, first_occurence_of_label.text)
-        itemValueElement = first_occurence_of_label.getnext()
-        if itemValueElement is not None:
-            print self.url, itemValueElement.text
-            return itemValueElement.text.strip()
+        address  = "/pdf2xml/page[@number=1]/text[contains(text(),'Compiled by')]/following-sibling::text[1]/text()"
+        nodes_list = self.root.xpath(address)
+
+        if len(nodes_list) > 0:
+            return nodes_list[0].strip()
         return ''
 
     def run_conversion(self):

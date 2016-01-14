@@ -154,7 +154,8 @@ class EadTest(ParametrizedTestCase):
             'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf':
             	[
             		('Compiled by', 'Luana Henderson')
-            	]
+            	],
+            'http://www.lib.lsu.edu/sites/default/files/sc/findaid/4452.pdf': []
             }
         tuple_list = expected_answers[self.url]
         for our_tuple in tuple_list:
