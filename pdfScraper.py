@@ -29,6 +29,10 @@ class FindingAidPDFtoEAD():
 
     # within the bioghist element, mark names (?): <persname>Mrs. Nellie M. Mingo</persname>
 
+    def getpdflength(self):
+        list_of_all_page_nums = [int(i) for i in self.root.xpath('//page/@number')]
+        return max(list_of_all_page_nums)
+
     def getrcoldata(self, lcolname):
         lcoldata = []
         # try it first as is, if not then try it again without the last character (usually a period)
@@ -93,11 +97,9 @@ class FindingAidPDFtoEAD():
                 continue
         if pagenumber == 18:
             pagenumber, termtop = 18, None
-
         return pagenumber, termtop
 
     def getalltext(self, firstheader, secondheader, backupheader):
-
         firstpagenumber, firstheadertop = self.getpagenum(firstheader)
         secondpagenumber, secondheadertop = self.getpagenum(secondheader)
         backuppagenumber, backupheadertop = self.getpagenum(backupheader)
@@ -163,13 +165,15 @@ class FindingAidPDFtoEAD():
         return finalseries
 
     def run_conversion(self):
+        self.length_of_pdf = self.getpdflength()
+
         # 4. Have a peek at the XML (click the "more" link in the Console to preview it).
         # print etree.tostring(self.root, pretty_print=True)
 
-        '''# writing to pdf to xml file
-        file_name = '{}.xml'.format(self.url[-8:-4])
-        with open(file_name, 'w') as f:
-            f.write(etree.tostring(self.root, pretty_print=True))'''
+        # writing to pdf to xml file
+        # file_name = '{}.xml'.format(self.url[-8:-4])
+        # with open(file_name, 'w') as f:
+        #     f.write(etree.tostring(self.root, pretty_print=True))
 
         # titleproper - needs to account for multiple lines in some docs
         wholetitle = []
@@ -349,8 +353,8 @@ list_of_urls = [
                 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
                 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
                 'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
-                'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title #Problem with the Contents of Inventory
-                'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
+                # 'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title #Problem with the Contents of Inventory
+                # 'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
                ]
 
 if __name__ == '__main__':
