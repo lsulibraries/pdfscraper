@@ -9,6 +9,7 @@ from lxml.builder import E
 class FindingAidPDFtoEAD():
     def __init__(self, url):
         self.url = url
+
         '''normal pull-pdf-from-web-and-interpret code'''
         # self.pdfdata = urllib2.urlopen(url).read()   # Necessary code for pulling pdf from web.
         # self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
@@ -23,6 +24,7 @@ class FindingAidPDFtoEAD():
             self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
             self.root = etree.fromstring(self.xmldata)
             self.pdf_length = self.get_pdf_length()
+
 
     pdfsubtitle = 'A Collection in the Louisiana and Lower Mississippi Valley Collections'
     pdfaddressline = 'Hill Memorial Library\nBaton Rouge, LA 70803-3300\nhttp://www.lib.lsu.edu/special'  # add phone numbers
@@ -176,8 +178,16 @@ class FindingAidPDFtoEAD():
 
     def getDefListItem(self, label):
         xpath_address = '//page[@number=1]/text[contains(text(),label)]'
-        itemValue = self.root.xpath(xpath_address)[0].getnext().text.strip()
-        return itemValue
+        first_occurence_of_label = self.root.xpath(xpath_address)
+        #print first_occurence_of_label
+        for occurrence in first_occurence_of_label:
+            print occurrence.text
+        #print 'looking for label {}, found it: {}'.format(label, first_occurence_of_label.text)
+        itemValueElement = first_occurence_of_label.getnext()
+        if itemValueElement is not None:
+            print self.url, itemValueElement.text
+            return itemValueElement.text.strip()
+        return ''
 
     def run_conversion(self):
 
