@@ -118,9 +118,11 @@ class EadTest(ParametrizedTestCase):
 
         current_pdf_expected_answers = expected_answers[self.url]
         for our_tuple in current_pdf_expected_answers:
-            firstheader, secondheader, backupheader, return_value = our_tuple
-            self.assertEquals(self.findaid.getalltext(firstheader, secondheader, backupheader), return_value, '\n\nFor url :{}\nHeaders: {}, {}, {}\nExpected return value: {}\nActual return value: {}\n'.format(
-                self.url, firstheader, secondheader, backupheader, return_value, self.findaid.getalltext(firstheader, secondheader, backupheader)))
+            firstheader, secondheader, backupheader, expected_result = our_tuple
+            actual_result = self.findaid.getalltext(firstheader, secondheader, backupheader)
+            actual_result_formatted, expected_result_formatted = actual_result.encode('ascii', 'ignore'), expected_result.encode('ascii', 'ignore')
+            self.assertEquals(actual_result, expected_result, '\n\nFor url :{}\nHeaders: {}, {}, {}\nExpected return value: {}\nActual return value: {}\n'.format(
+                self.url, firstheader, secondheader, backupheader, expected_result_formatted, actual_result_formatted))
 
 
     # def testSeriesSplit(self):
