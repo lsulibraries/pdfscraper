@@ -376,11 +376,17 @@ class FindingAidPDFtoEAD():
         contents = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
         contents_inventory = []
         for i in contents:
-            print i.text
+            # print i.text
             noperiod = i.text.replace(".", "")
             splat = noperiod.split("  ")
             contents_inventory.append(splat[0])
-        # print(contents_inventory)
+        print(contents_inventory)
+        # problems: Compare 4452 to 0717: 0717 xml has whitespace, 4452 looks like whitespace, but it'snot
+        # 4745 gets a list with ['section pg','section pg']
+        # 4452 gets ['section', 'pg', 'section', 'pg']
+        # 5078 gets ['section', 'section'] missing 'pg'
+        # 0826 gets ['section', 'section'] missing 'pg'
+        # 0717 gets ['section', ' ', ' ', ' ', 'pg']
         return contents_inventory
 
     def get_text_after_header(self, header_and_pages):
