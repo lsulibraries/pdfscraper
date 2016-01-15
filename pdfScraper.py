@@ -109,20 +109,6 @@ class FindingAidPDFtoEAD():
             pagenumber, termtop = 18, None
         return pagenumber, termtop
 
-    def get_text_between_headers(self, header_1, header_2):
-        header_1 = 'SCOPE AND CONTENT NOTE'
-        header_2 = 'LIST OF SERIES AND SUBSERIES'
-        elem_of_header_1 = self.root.xpath('//text/*[text()[normalize-space(.)="{}"]]'.format(header_1))
-        elems_following = elem_of_header_1[0].getparent().itersiblings()
-        elem_of_header_2 = self.root.xpath('//text/*[text()[normalize-space(.)="{}"]]'.format(header_2))
-        print elem_of_header_1[0].text
-        print 'following elems'
-        print elems_following
-        for i in elems_following:
-            print i.text
-    
-
-
     def getalltext(self, firstheader, secondheader, backupheader):
         firstpagenumber, firstheadertop = self.getpagenum(firstheader)
         secondpagenumber, secondheadertop = self.getpagenum(secondheader)
@@ -378,6 +364,18 @@ class FindingAidPDFtoEAD():
         print contents_inventory
         return contents_inventory
 
+    def get_text_between_headers(self, header_1, header_2):
+        header_1 = 'SCOPE AND CONTENT NOTE'
+        header_2 = 'LIST OF SERIES AND SUBSERIES'
+        elem_of_header_1 = self.root.xpath('//text/*[text()[normalize-space(.)="{}"]]'.format(header_1))
+        elems_following = elem_of_header_1[0].getparent().itersiblings()
+        elem_of_header_2 = self.root.xpath('//text/*[text()[normalize-space(.)="{}"]]'.format(header_2))
+        print elem_of_header_1[0].text
+        print 'following elems'
+        print elems_following
+        for i in elems_following:
+            print i.text
+
     def print_xml_to_file(self):
         file_name = 'cached_pdfs/{}.xml'.format(self.url[-8:-4])
         with open(file_name, 'w') as f:
@@ -385,17 +383,10 @@ class FindingAidPDFtoEAD():
 
 list_of_urls = [
                 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
-<<<<<<< Updated upstream
                 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
                 'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
                 'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title #Problem with the Contents of Inventory
                 'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
-=======
-                # 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
-                # 'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
-                # 'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title #Problem with the Contents of Inventory
-                # 'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
->>>>>>> Stashed changes
                ]
 
 if __name__ == '__main__':
