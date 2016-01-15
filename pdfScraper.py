@@ -4,6 +4,7 @@ import scraperwiki
 import urllib2
 from lxml import etree
 from lxml.builder import E
+import re
 
 
 class FindingAidPDFtoEAD():
@@ -171,11 +172,12 @@ class FindingAidPDFtoEAD():
         finalseries.insert(0, "<arrangement encodinganalog='351'>")
         finalseries.append("</arrangement>")
         finalseries = "".join(finalseries)
-        # s1 = ('>Series.*?\.|>Subseries.*?\(\.\)')
         return finalseries
 
     def run_conversion(self):
         # self.print_xml_to_file()    # if you want to
+
+        self.grab_contents_of_inventory()
         self.get_text_between_headers('SCOPE AND CONTENT NOTE', 'hello')
 
         # titleproper - needs to account for multiple lines in some docs
@@ -216,8 +218,6 @@ class FindingAidPDFtoEAD():
         self.pdfdate = self.root.xpath('//page[@number="1"]/text[@width>"20"]')[-1].text.strip()
 
         # physdesc -
-
-        self.grab_contents_of_inventory()
 
         # page 3 has a table - find the left of the two columns - can assume Size is the first and always there?
         elem_for_pos_of_left_column = self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="Size."]]')
@@ -361,7 +361,6 @@ class FindingAidPDFtoEAD():
             noperiod = i.text.replace(".", "")
             splat = noperiod.split("  ")
             contents_inventory.append(splat[0])
-        print contents_inventory
         return contents_inventory
 
     def get_text_between_headers(self, header_1, header_2):
@@ -370,11 +369,10 @@ class FindingAidPDFtoEAD():
         elem_of_header_1 = self.root.xpath('//text/*[text()[normalize-space(.)="{}"]]'.format(header_1))
         elems_following = elem_of_header_1[0].getparent().itersiblings()
         elem_of_header_2 = self.root.xpath('//text/*[text()[normalize-space(.)="{}"]]'.format(header_2))
-        print elem_of_header_1[0].text
-        print 'following elems'
-        print elems_following
+        print 'line 373', elem_of_header_1[0].text
+        print 'line 374', elems_following
         for i in elems_following:
-            print i.text
+            print 'line 376', i.text
 
     def print_xml_to_file(self):
         file_name = 'cached_pdfs/{}.xml'.format(self.url[-8:-4])
