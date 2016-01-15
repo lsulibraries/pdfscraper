@@ -216,6 +216,8 @@ class FindingAidPDFtoEAD():
 
         # physdesc -
 
+        self.grab_contents_of_inventory()
+
         # page 3 has a table - find the left of the two columns - can assume Size is the first and always there?
         elem_for_pos_of_left_column = self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="Size."]]')
         if elem_for_pos_of_left_column:
@@ -338,8 +340,8 @@ class FindingAidPDFtoEAD():
                     ),
                     # INDEX TERMS will need to be encoded all as 'subject' cuz we can't tell automatically...
                     # @source should usually be 'lcnaf'
-                    etree.XML(finalseries),
-                    etree.XML(seriesdesc)
+                    # etree.XML(finalseries),
+                    # etree.XML(seriesdesc)
                     ),
                     # E.acqinfo may need to be gleaned by humans, same for E.accruals
                     # E.custodinfo, E.altformavail, E.appraisal
@@ -351,6 +353,16 @@ class FindingAidPDFtoEAD():
                 )
             )
 
+    def grab_contents_of_inventory(self):
+        contents = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
+        contents_inventory = []
+        for i in contents:
+            noperiod = i.text.replace(".", "")
+            splat = noperiod.split("  ")
+            contents_inventory.append(splat[0])
+        print contents_inventory
+        return contents_inventory
+
     def print_xml_to_file(self):
         file_name = 'cached_pdfs/{}.xml'.format(self.url[-8:-4])
         with open(file_name, 'w') as f:
@@ -360,8 +372,8 @@ list_of_urls = [
                 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
                 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
                 'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
-                # 'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title #Problem with the Contents of Inventory
-                # 'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
+                'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title #Problem with the Contents of Inventory
+                'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
                ]
 
 if __name__ == '__main__':
