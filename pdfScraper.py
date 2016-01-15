@@ -82,6 +82,8 @@ class FindingAidPDFtoEAD():
             pass
         return pdfdata.strip()
 
+    # this function may be obsolete, if we can expect "CONTENTS OF INVENTORY" to be correct. 
+    #maybe setup that test later..
     def getpagenum(self, term):
         termtop = ""
         # @TODO return '', '' if term is not found
@@ -95,6 +97,10 @@ class FindingAidPDFtoEAD():
             pagenumber, termtop = 18, None
 
         return pagenumber, termtop
+
+    # I think there is a way to do this without the need for a backup header, that also might not
+    # - have to be called as many times...
+    #def getall_section_text(self, inventory_sections):
 
     def getalltext(self, firstheader, secondheader, backupheader):
         output_tuple = (firstheader, secondheader, backupheader)
@@ -212,24 +218,20 @@ class FindingAidPDFtoEAD():
 
         # This is where we should grab the Contents of the Inventory, put it into a list for using in the 
         # getalltext function.
-        # <text top="162" left="135" width="248" height="16" font="1"><b>CONTENTS OF INVENTORY </b></text>
-        # <text top="182" left="135" width="5" height="16" font="1"><b> </b></text>
-        # <text top="203" left="135" width="647" height="16" font="0"><a href="tmpdT3vWn.html#3">SUMMARY ........................................................................................................................ 3</a></text>
-        # <text top="203" left="782" width="4" height="17" font="2"> </text>
-        # <text top="224" left="135" width="647" height="16" font="0"><a href="tmpdT3vWn.html#4">BIOGRAPHICAL/HISTORICAL NOTE .......................................................................... 4</a></text>
-        # <text top="223" left="782" width="4" height="17" font="2"> </text>
-        # <text top="244" left="135" width="647" height="16" font="0"><a href="tmpdT3vWn.html#4">SCOPE AND CONTENT NOTE ....................................................................................... 4</a></text>
-        # <text top="244" left="782" width="4" height="17" font="2"> </text>
         # <text top="265" left="135" width="647" height="16" font="0"><a href="tmpdT3vWn.html#5">COLLECTION DESCRIPTION AND CONTAINER LIST ............................................. 5</a></text>
+        # look for 5-4 if so we can really check range
+        #
         contents = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
         contents_inventory = []
         for i in contents:
             noperiod = i.text.replace(".", "")
-            splat = noperiod.split("  ")
-            contents_inventory.append(splat[0])
+            splice = noperiod.split("  ")
+            
+            contents_inventory.append(splice[0])
+            contents_inventory.append(splice[1])
         print contents_inventory
-
-
+        #contents_dict = {}
+        #need to convert the list into a dict
 
 
         # page 3 has a table - find the left of the two columns - can assume Size is the first and always there?
@@ -271,8 +273,7 @@ class FindingAidPDFtoEAD():
 
 
 #_____________________________________________________________
-        # This section is problematic especiall with pdf 4745:
-        # We need a function that grabs all TERMS from CONTENTS OF IVENTORY SECTION, 
+
         # Then the getalltext function won't need a backupheader, and we can get all text by looping through available terms for appropriate sections
         self.pdfbioghist = self.getalltext("BIOGRAPHICAL/HISTORICAL NOTE", "SCOPE AND CONTENT NOTE", "LIST OF SERIES AND SUBSERIES")
         self.pdfscopecontent = self.getalltext("SCOPE AND CONTENT NOTE", "LIST OF SERIES AND SUBSERIES", "INDEX TERMS")
