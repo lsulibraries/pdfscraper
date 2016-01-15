@@ -195,7 +195,7 @@ class FindingAidPDFtoEAD():
 
 
         self.grab_contents_of_inventory()
-        self.get_text_between_headers('SCOPE AND CONTENT NOTE', 'hello')
+        # self.get_text_after_(argument)
 
         # titleproper - needs to account for multiple lines in some docs
         wholetitle = []
@@ -370,7 +370,7 @@ class FindingAidPDFtoEAD():
                 level='collection', type='inventory', relatedencoding='MARC21'
                 )
             )
-        print etree.tostring(ead, pretty_print=True)
+        # print etree.tostring(ead, pretty_print=True)
 
     def grab_contents_of_inventory(self):
         contents = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
@@ -379,18 +379,17 @@ class FindingAidPDFtoEAD():
             noperiod = i.text.replace(".", "")
             splat = noperiod.split("  ")
             contents_inventory.append(splat[0])
+        print(contents_inventory)
         return contents_inventory
 
-    def get_text_between_headers(self, header_1, header_2):
-        header_1 = 'SCOPE AND CONTENT NOTE'
-        header_2 = 'LIST OF SERIES AND SUBSERIES'
+    def get_text_after_header(self, header_and_pages):
         elem_of_header_1 = self.root.xpath('//text/*[text()[normalize-space(.)="{}"]]'.format(header_1))
         elems_following = elem_of_header_1[0].getparent().itersiblings()
         elem_of_header_2 = self.root.xpath('//text/*[text()[normalize-space(.)="{}"]]'.format(header_2))
-        print 'line 373', elem_of_header_1[0].text
-        print 'line 374', elems_following
         for i in elems_following:
-            print 'line 376', i.text
+            # print 'line 376', i.text
+            i
+        return None
 
     def print_xml_to_file(self):
         file_name = 'cached_pdfs/{}.xml'.format(self.url[-8:-4])

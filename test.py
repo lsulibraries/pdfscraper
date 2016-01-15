@@ -164,6 +164,23 @@ class EadTest(ParametrizedTestCase):
     		observed = self.findaid.getDefListItem(label)
     		self.assertEquals(observed, value, 'For url: {}\nUnexpected Value for: {}\nGot: {}\nExpected: {}\n\n'.format(self.url, label, observed, value))
 
+    def testGetTextAfterHeader(self):
+        sample_header_and_pages = {'http://lib.lsu.edu/special/findaid/4452.pdf': {
+                                        'Summary': (3, 3), 
+                                        'Biographical/Historical Note': (4, 4),
+                                        'Scope and Content Note': (6, 6),
+                                        'List of Series and Subseries': (7, 7),
+                                        'Series and Subseries Descriptions': (8, 8),
+                                        'Index Terms': (15, 15),
+                                        'Container List': (18, 18),
+                                        'Microfilm Container List': (21, 21),
+                                        'Appendices': (22, 22),
+                                        'B Index to Merchants': (23, 23),
+                                        'C List of Music Publishers': (24, 24),
+                                        },
+                                  }
+
+
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
