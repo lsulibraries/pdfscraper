@@ -389,8 +389,10 @@ class FindingAidPDFtoEAD():
             splat = noperiod.split("  ")
             contents_inventory.append(splat[0])
         # problems: Compare 4452 to 0717: 0717 xml has whitespace, 4452 looks like whitespace, but it'snot
-        # 4745 gets a list with ['section pg','section pg']
+        # 4745 gets a list with ['section','section']
         # 4452 gets ['section', 'pg', 'section', 'pg']
+
+        #these are not confirmed trying to get to same page...
         # 5078 gets ['section', 'section'] missing 'pg'
         # 0826 gets ['section', 'section'] missing 'pg'
         # 0717 gets ['section', ' ', ' ', ' ', 'pg']
