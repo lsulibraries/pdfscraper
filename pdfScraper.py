@@ -202,7 +202,10 @@ class FindingAidPDFtoEAD():
 
         self.grab_contents_of_inventory()
 
+        #self.get_text_after_header('Biographical/Historical Note', (4, 4))
+
         # self.get_text_after_header('Biographical/Historical Note', (4, 4))
+
 
 
         
@@ -385,8 +388,7 @@ class FindingAidPDFtoEAD():
         return (start, end)
 
     def grab_contents_of_inventory(self):
-        contents = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
-        # print len(contents)
+        contents  = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
         collapsed = self.collapse(contents)
         inventory = []        
         
