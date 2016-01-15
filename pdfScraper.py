@@ -398,14 +398,15 @@ class FindingAidPDFtoEAD():
                 # print pegg
                 for i in pegg:                    
                     contents_inventory.append(i)
-        x = 1
-        bigstring = ''
-        while x < len(contents_inventory):
-            bigstring = bigstring + contents_inventory[x] + ' '
-            x = x + 1
-        print bigstring
-        # newlist = bigstring.split(" ")
+        # x = 1
+        # bigstring = ''
+        # while x < len(contents_inventory):
+        #     bigstring = bigstring + contents_inventory[x] + ' '
+        #     x = x + 1
+        # # print bigstring
+        # newlist = bigstring.split("  ")
         # print newlist
+        print contents_inventory
         return contents_inventory
 
     def get_text_after_header(self, header_and_pages):
