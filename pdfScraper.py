@@ -195,7 +195,7 @@ class FindingAidPDFtoEAD():
 
 
         self.grab_contents_of_inventory()
-        # self.get_text_after_(argument)
+        self.get_text_after_header('Biographical/Historical Note', (4, 4))
 
         # titleproper - needs to account for multiple lines in some docs
         wholetitle = []
@@ -383,14 +383,15 @@ class FindingAidPDFtoEAD():
         # print(contents_inventory)
         return contents_inventory
 
-    def get_text_after_header(self, header_and_pages):
-        elem_of_header_1 = self.root.xpath('//text/*[text()[normalize-space(.)="{}"]]'.format(header_1))
-        elems_following = elem_of_header_1[0].getparent().itersiblings()
-        elem_of_header_2 = self.root.xpath('//text/*[text()[normalize-space(.)="{}"]]'.format(header_2))
-        for i in elems_following:
-            # print 'line 376', i.text
-            i
-        return None
+    def get_text_after_header(self, header, pages_tuple):
+        beginning_page, end_page = pages_tuple
+        # ok, but fails to resume reading subtext at pagebreaks.
+        # also fails on formatting changes
+        elem_of_header = self.root.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(beginning_page, header.lower()))
+        elems_following = elem_of_header[0].getparent().itersiblings()
+        for sibling in elems_following:
+            print sibling.text
+
 
     def print_xml_to_file(self):
         file_name = 'cached_pdfs/{}.xml'.format(self.url[-8:-4])
@@ -398,10 +399,10 @@ class FindingAidPDFtoEAD():
             f.write(etree.tostring(self.root, pretty_print=True))
 
 list_of_urls = [
-                'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
-                'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
-                'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
-                'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title #Problem with the Contents of Inventory
+                # 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
+                # 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
+                # 'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
+                # 'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title #Problem with the Contents of Inventory
                 'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
                ]
 
