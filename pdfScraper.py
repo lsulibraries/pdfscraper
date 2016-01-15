@@ -341,8 +341,8 @@ class FindingAidPDFtoEAD():
                     ),
                     # INDEX TERMS will need to be encoded all as 'subject' cuz we can't tell automatically...
                     # @source should usually be 'lcnaf'
-                    # etree.XML(finalseries),
-                    # etree.XML(seriesdesc)
+                    # etree.XML(finalseries),   # commented out to silence errors
+                    # etree.XML(seriesdesc)     # commented out to silence errors
                     ),
                     # E.acqinfo may need to be gleaned by humans, same for E.accruals
                     # E.custodinfo, E.altformavail, E.appraisal
