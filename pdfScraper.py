@@ -202,7 +202,10 @@ class FindingAidPDFtoEAD():
 
         self.grab_contents_of_inventory()
 
-        self.get_text_after_header('Biographical/Historical Note', (4, 4))
+        #self.get_text_after_header('Biographical/Historical Note', (4, 4))
+
+        # self.get_text_after_header('Biographical/Historical Note', (4, 4))
+
 
 
         
@@ -280,10 +283,6 @@ class FindingAidPDFtoEAD():
         self.pdfphysloc = self.getrcoldata("Stack locations.")
         if self.pdfphysloc == "":
             self.pdfphysloc = self.getrcoldata("Stack location.")
-
-
-
-#_____________________________________________________________
 
         # Then the getalltext function won't need a backupheader, and we can get all text by looping through available terms for appropriate sections
         self.pdfbioghist = self.getalltext("BIOGRAPHICAL/HISTORICAL NOTE", "SCOPE AND CONTENT NOTE", "LIST OF SERIES AND SUBSERIES")
@@ -410,13 +409,6 @@ class FindingAidPDFtoEAD():
         elems_following = elem_of_header[0].getparent().itersiblings()
         for sibling in elems_following:
             print sibling.text
-
-        # print 'line 373', elem_of_header_1[0].text
-        # print 'line 374', elems_following
-        # for i in elems_following:
-        #   print 'line 376', i.text
-
-
 
     def print_xml_to_file(self):
         file_name = 'cached_pdfs/{}.xml'.format(self.url[-8:-4])
