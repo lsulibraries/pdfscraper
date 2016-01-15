@@ -376,10 +376,11 @@ class FindingAidPDFtoEAD():
         contents = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
         contents_inventory = []
         for i in contents:
+            print i.text
             noperiod = i.text.replace(".", "")
             splat = noperiod.split("  ")
             contents_inventory.append(splat[0])
-        print(contents_inventory)
+        # print(contents_inventory)
         return contents_inventory
 
     def get_text_after_header(self, header_and_pages):
