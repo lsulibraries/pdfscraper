@@ -261,6 +261,8 @@ class EadTest(ParametrizedTestCase):
         collapsed = self.findaid.collapse(elms)
         print collapsed
 
+    def testCollapseRealPdfs(self):
+        contents = self.findaid.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
