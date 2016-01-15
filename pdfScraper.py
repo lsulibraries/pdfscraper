@@ -98,6 +98,8 @@ class FindingAidPDFtoEAD():
         #     pass
         return pdfdata.strip()
 
+    # this function may be obsolete, if we can expect "CONTENTS OF INVENTORY" to be correct. 
+    #maybe setup that test later..
     def getpagenum(self, term):
         termtop = ""
         # @TODO return '', '' if term is not found
@@ -110,6 +112,10 @@ class FindingAidPDFtoEAD():
         if pagenumber == 18:
             pagenumber, termtop = 18, None
         return pagenumber, termtop
+
+    # I think there is a way to do this without the need for a backup header, that also might not
+    # - have to be called as many times...
+    #def getall_section_text(self, inventory_sections):
 
     def getalltext(self, firstheader, secondheader, backupheader):
         firstpagenumber, firstheadertop = self.getpagenum(firstheader)
@@ -186,7 +192,7 @@ class FindingAidPDFtoEAD():
     def run_conversion(self):
 
         # 4. Have a peek at the XML (click the "more" link in the Console to preview it).
-        # print etree.tostring(self.root, pretty_print=True)
+        #print etree.tostring(self.root, pretty_print=True)
 
         # writing to pdf to xml file
         file_name = '{}.xml'.format(self.url[-8:-4])
@@ -204,16 +210,14 @@ class FindingAidPDFtoEAD():
         # titleproper - needs to account for multiple lines in some docs
         wholetitle = []
         titlelines = self.root.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
+        #print titlelines
 
         for el in titlelines:
             wholetitle.append(el.text.strip())
         self.pdftitleproper = 'A GUIDE TO THE ' + ' '.join(wholetitle)
+
         # figuring out what the top value of the last line of the title is
         titlelineend = titlelines[-1].getparent().get('top')
-
-        # This is where we should grab the Contents of the Inventory, put it into a list for using in the 
-        # getalltext function.
-
 
         # num - assume it is between 12 and 25 units below the last line of title
         #    (a better way might have been to take next text node)
@@ -240,13 +244,32 @@ class FindingAidPDFtoEAD():
 
         # physdesc -
 
+
+        # This is where we should grab the Contents of the Inventory, put it into a list for using in the 
+        # getalltext function.
+        # <text top="265" left="135" width="647" height="16" font="0"><a href="tmpdT3vWn.html#5">COLLECTION DESCRIPTION AND CONTAINER LIST ............................................. 5</a></text>
+        # look for 5-4 if so we can really check range
+        #
+        contents = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
+        contents_inventory = []
+        for i in contents:
+            noperiod = i.text.replace(".", "")
+            splice = noperiod.split("  ")
+            
+            contents_inventory.append(splice[0])
+            contents_inventory.append(splice[1])
+        print contents_inventory
+        #contents_dict = {}
+        #need to convert the list into a dict
+
+
         # page 3 has a table - find the left of the two columns - can assume Size is the first and always there?
         elem_for_pos_of_left_column = self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="Size."]]')
         if elem_for_pos_of_left_column:
             self.xpos_of_left_column = elem_for_pos_of_left_column[0].getparent().get('left')
         # should we raise & catch Exceptions?
         else:
-            print '\nAttention!!  elem_for_pos_of_left_column not digitally scanned from document: {}\n'.format(self.url)
+            #print '\nAttention!!  elem_for_pos_of_left_column not digitally scanned from document: {}\n'.format(self.url)
             self.xpos_of_left_column = '/nAttention!!  elem_for_pos_of_left_column not digitally scanned from document: {}'.format(self.url)
 
         # function finds right hand column data based on text of left hand column - just for page 3
@@ -279,8 +302,7 @@ class FindingAidPDFtoEAD():
 
 
 #_____________________________________________________________
-        # This section is problematic especiall with pdf 4745:
-        # We need a function that grabs all TERMS from CONTENTS OF IVENTORY SECTION, 
+
         # Then the getalltext function won't need a backupheader, and we can get all text by looping through available terms for appropriate sections
         self.pdfbioghist = self.getalltext("BIOGRAPHICAL/HISTORICAL NOTE", "SCOPE AND CONTENT NOTE", "LIST OF SERIES AND SUBSERIES")
         self.pdfscopecontent = self.getalltext("SCOPE AND CONTENT NOTE", "LIST OF SERIES AND SUBSERIES", "INDEX TERMS")
@@ -362,9 +384,11 @@ class FindingAidPDFtoEAD():
                     ),
                     # INDEX TERMS will need to be encoded all as 'subject' cuz we can't tell automatically...
                     # @source should usually be 'lcnaf'
-                    # etree.XML(finalseries),   # commented out to silence errors
-                    # etree.XML(seriesdesc)     # commented out to silence errors
-                    ),
+                    
+                    #put this back 
+                    #etree.XML(finalseries),
+                    etree.XML(seriesdesc)
+
                     # E.acqinfo may need to be gleaned by humans, same for E.accruals
                     # E.custodinfo, E.altformavail, E.appraisal
                     # For required elements that must be inferred, insert placeholder text like:
@@ -439,11 +463,13 @@ class FindingAidPDFtoEAD():
             f.write(etree.tostring(self.root, pretty_print=True))
 
 list_of_urls = [
+
                # 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
                 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
                # 'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
                 'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title #Problem with the Contents of Inventory
                # 'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
+
                ]
 
 if __name__ == '__main__':
