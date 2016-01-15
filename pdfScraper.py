@@ -244,25 +244,6 @@ class FindingAidPDFtoEAD():
 
         # physdesc -
 
-
-        # # This is where we should grab the Contents of the Inventory, put it into a list for using in the 
-        # # getalltext function.
-        # # <text top="265" left="135" width="647" height="16" font="0"><a href="tmpdT3vWn.html#5">COLLECTION DESCRIPTION AND CONTAINER LIST ............................................. 5</a></text>
-        # # look for 5-4 if so we can really check range
-        # #
-        # contents = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
-        # contents_inventory = []
-        # for i in contents:
-        #     noperiod = i.text.replace(".", "")
-        #     splice = noperiod.split("  ")
-            
-        #     contents_inventory.append(splice[0])
-        #     contents_inventory.append(splice[1])
-        # print contents_inventory
-        # #contents_dict = {}
-        # #need to convert the list into a dict
-
-
         # page 3 has a table - find the left of the two columns - can assume Size is the first and always there?
         elem_for_pos_of_left_column = self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="Size."]]')
         if elem_for_pos_of_left_column:
@@ -398,10 +379,10 @@ class FindingAidPDFtoEAD():
            )
        # print etree.tostring(ead, pretty_print=True)
 
-
+       #problem right now with ..... vs whitespace, getting some lists ['section pg'] others ['section', 'pg']
     def grab_contents_of_inventory(self):
         contents = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
-        print contents
+        # print len(contents)
 
         contents_inventory = []        
         
@@ -417,7 +398,14 @@ class FindingAidPDFtoEAD():
                 # print pegg
                 for i in pegg:                    
                     contents_inventory.append(i)
-        print contents_inventory
+        x = 1
+        bigstring = ''
+        while x < len(contents_inventory):
+            bigstring = bigstring + contents_inventory[x] + ' '
+            x = x + 1
+        print bigstring
+        # newlist = bigstring.split(" ")
+        # print newlist
         return contents_inventory
 
     def get_text_after_header(self, header_and_pages):
@@ -444,11 +432,11 @@ class FindingAidPDFtoEAD():
 
 list_of_urls = [
 
-               # 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
-                'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
-               # 'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
+                # 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
+                # 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
+                # 'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
                 'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title #Problem with the Contents of Inventory
-               # 'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
+                'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
 
                ]
 
