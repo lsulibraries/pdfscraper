@@ -245,22 +245,22 @@ class FindingAidPDFtoEAD():
         # physdesc -
 
 
-        # This is where we should grab the Contents of the Inventory, put it into a list for using in the 
-        # getalltext function.
-        # <text top="265" left="135" width="647" height="16" font="0"><a href="tmpdT3vWn.html#5">COLLECTION DESCRIPTION AND CONTAINER LIST ............................................. 5</a></text>
-        # look for 5-4 if so we can really check range
-        #
-        contents = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
-        contents_inventory = []
-        for i in contents:
-            noperiod = i.text.replace(".", "")
-            splice = noperiod.split("  ")
+        # # This is where we should grab the Contents of the Inventory, put it into a list for using in the 
+        # # getalltext function.
+        # # <text top="265" left="135" width="647" height="16" font="0"><a href="tmpdT3vWn.html#5">COLLECTION DESCRIPTION AND CONTAINER LIST ............................................. 5</a></text>
+        # # look for 5-4 if so we can really check range
+        # #
+        # contents = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
+        # contents_inventory = []
+        # for i in contents:
+        #     noperiod = i.text.replace(".", "")
+        #     splice = noperiod.split("  ")
             
-            contents_inventory.append(splice[0])
-            contents_inventory.append(splice[1])
-        print contents_inventory
-        #contents_dict = {}
-        #need to convert the list into a dict
+        #     contents_inventory.append(splice[0])
+        #     contents_inventory.append(splice[1])
+        # print contents_inventory
+        # #contents_dict = {}
+        # #need to convert the list into a dict
 
 
         # page 3 has a table - find the left of the two columns - can assume Size is the first and always there?
@@ -316,89 +316,88 @@ class FindingAidPDFtoEAD():
 
         # using efactory
         ead = (
-            E.ead(
-                E.eadheader(
-                    E.eadid('', countrycode='us', url=self.url),
-                    E.filedesc(
-                        E.titlestmt(
-                            E.titleproper(self.pdftitleproper + '\n\t\t\t',
-                                          E.num(self.pdfnum, type='Manuscript'),
-                                          ),
-                            E.subtitle(self.pdfsubtitle),
-                            E.author(self.pdfauthor)
-                        ),
-                        E.publicationstmt(
-                            E.publisher(self.pdfpublisher),
-                            E.address(
-                                E.addressline(self.pdfaddressline),
-                            ),
-                            E.date(self.pdfdate)
-                        )
-                    )
-                ),
-                E.archdesc(
-                    E.did(
-                        E.head(self.pdfhead),
-                        E.physdesc('' + '\n\t\t', E.extent(self.pdfextent), label='Size', encodinganalog='300$a'),
-                        E.unitdate(self.pdfidates, type='inclusive', label='Dates:', encodinganalog='245$f'),
-                        E.unitdate(self.pdfbdates, type='bulk', label='Dates:'),
-                        E.langmaterial(
-                            E.language(self.pdflanguage, langcode='eng')
-                        ),
-                        E.abstract(self.pdfabstract, label='Summary'),
-                        E.repository(
-                            E.corpname(self.pdfcorpname),
-                            E.subarea(self.pdfsubarea),
-                            label='Repository:', encodinganalog='825$a'
-                        ),
-                        E.physloc(self.pdfphysloc),
-                    ),
-                    E.accessrestrict(
-                        E.head("Restrictions on access"),
-                        E.p(self.pdfaccessrestrict),
-                    ),
-                    E.relatedmaterial(
-                        E.head("Related Collections"),
-                        E.p(self.pdfrelatedmaterial),
-                        encodinganalog='544 1'
-                    ),
-                    E.userestrict(
-                        E.head("Copyright"),
-                        E.p(self.pdfuserestrict),
-                        encodinganalog='540'
-                    ),
-                    E.prefercite(
-                        E.head("Preferred Citation"),
-                        E.p(self.pdfprefercite),
-                        encodinganalog='524'
-                    ),
-                    E.bioghist(
-                        E.head("BIOGRAPHICAL/HISTORICAL NOTE"),
-                        E.p(self.pdfbioghist),
-                        encodinganalog='545'
-                    ),
-                    E.scopecontent(
-                        E.head("SCOPE AND CONTENT NOTE"),
-                        E.p(self.pdfscopecontent),
-                        encodinganalog='520'
-                    ),
-                    # INDEX TERMS will need to be encoded all as 'subject' cuz we can't tell automatically...
-                    # @source should usually be 'lcnaf'
-                    
-                    #put this back 
-                    #etree.XML(finalseries),
-                    etree.XML(seriesdesc)
+           E.ead(
+               E.eadheader(
+                   E.eadid('', countrycode='us', url=self.url),
+                   E.filedesc(
+                       E.titlestmt(
+                           E.titleproper(self.pdftitleproper + '\n\t\t\t',
+                                         E.num(self.pdfnum, type='Manuscript'),
+                                         ),
+                           E.subtitle(self.pdfsubtitle),
+                           E.author(self.pdfauthor)
+                       ),
+                       E.publicationstmt(
+                           E.publisher(self.pdfpublisher),
+                           E.address(
+                               E.addressline(self.pdfaddressline),
+                           ),
+                           E.date(self.pdfdate)
+                       )
+                   )
+               ),
+               E.archdesc(
+                   E.did(
+                       E.head(self.pdfhead),
+                       E.physdesc('' + '\n\t\t', E.extent(self.pdfextent), label='Size', encodinganalog='300$a'),
+                       E.unitdate(self.pdfidates, type='inclusive', label='Dates:', encodinganalog='245$f'),
+                       E.unitdate(self.pdfbdates, type='bulk', label='Dates:'),
+                       E.langmaterial(
+                           E.language(self.pdflanguage, langcode='eng')
+                       ),
+                       E.abstract(self.pdfabstract, label='Summary'),
+                       E.repository(
+                           E.corpname(self.pdfcorpname),
+                           E.subarea(self.pdfsubarea),
+                           label='Repository:', encodinganalog='825$a'
+                       ),
+                       E.physloc(self.pdfphysloc),
+                   ),
+                   E.accessrestrict(
+                       E.head("Restrictions on access"),
+                       E.p(self.pdfaccessrestrict),
+                   ),
+                   E.relatedmaterial(
+                       E.head("Related Collections"),
+                       E.p(self.pdfrelatedmaterial),
+                       encodinganalog='544 1'
+                   ),
+                   E.userestrict(
+                       E.head("Copyright"),
+                       E.p(self.pdfuserestrict),
+                       encodinganalog='540'
+                   ),
+                   E.prefercite(
+                       E.head("Preferred Citation"),
+                       E.p(self.pdfprefercite),
+                       encodinganalog='524'
+                   ),
+                   E.bioghist(
+                       E.head("BIOGRAPHICAL/HISTORICAL NOTE"),
+                       E.p(self.pdfbioghist),
+                       encodinganalog='545'
+                   ),
+                   E.scopecontent(
+                       E.head("SCOPE AND CONTENT NOTE"),
+                       E.p(self.pdfscopecontent),
+                       encodinganalog='520'
+                   ),
+                   # INDEX TERMS will need to be encoded all as 'subject' cuz we can't tell automatically...
+                   # @source should usually be 'lcnaf'
+                   # etree.XML(finalseries),   # commented out to silence errors
+                   # etree.XML(seriesdesc)     # commented out to silence errors
+                   ),
+                   # E.acqinfo may need to be gleaned by humans, same for E.accruals
+                   # E.custodinfo, E.altformavail, E.appraisal
+                   # For required elements that must be inferred, insert placeholder text like:
+                   #   "Unknown - could not be automatically inferred"
+                   #
+                   # E.processinfo may need to be included
+               level='collection', type='inventory', relatedencoding='MARC21'
+               )
+           )
+       # print etree.tostring(ead, pretty_print=True)
 
-                    # E.acqinfo may need to be gleaned by humans, same for E.accruals
-                    # E.custodinfo, E.altformavail, E.appraisal
-                    # For required elements that must be inferred, insert placeholder text like:
-                    #   "Unknown - could not be automatically inferred"
-                    #
-                    # E.processinfo may need to be included
-                level='collection', type='inventory', relatedencoding='MARC21'
-                )
-            )
-        # print etree.tostring(ead, pretty_print=True)
 
     def grab_contents_of_inventory(self):
         contents = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
@@ -406,6 +405,7 @@ class FindingAidPDFtoEAD():
         # aoeu =re.findall('[a-z A-Z/]+)', contents.text)
         for i in contents:
             regged = re.findall('((\w.*))', i.text)
+            print i
         for i in regged:
             splice = i.replace("  ", "")
             splat = splice.replace(".", "")
