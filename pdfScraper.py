@@ -195,7 +195,11 @@ class FindingAidPDFtoEAD():
 
 
         self.grab_contents_of_inventory()
+
         # self.get_text_after_(argument)
+
+        
+        # self.get_text_between_headers('SCOPE AND CONTENT NOTE', 'hello')
 
         # titleproper - needs to account for multiple lines in some docs
         wholetitle = []
@@ -374,23 +378,60 @@ class FindingAidPDFtoEAD():
 
     def grab_contents_of_inventory(self):
         contents = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
-        contents_inventory = []
+        contents_inventory = []        
+        # aoeu =re.findall('[a-z A-Z/]+)', contents.text)
         for i in contents:
-            print i.text
-            noperiod = i.text.replace(".", "")
-            splat = noperiod.split("  ")
-            contents_inventory.append(splat[0])
-        # print(contents_inventory)
-        return contents_inventory
+            regged = re.findall('((\w.*))', i.text)
+        for i in regged:
+            splice = i.replace("  ", "")
+            splat = splice.replace(".", "")
+            splurt = splat.split("  ")
+            print "splurt"
+            print splurt
+            contents_inventory.append(splurt)
+        # print "contents"
+        print contents_inventory
+        # newlist = []
+        # if len(contents_inventory[0]) > 1:
+        #    # newlist.append( contents_inventory[0][0] contents_inventory[0][1]))
+        #     print 'itsnew'
+        #     print newlist
+        # # for i in contents_inventory:
+        #    print i
+
+        # for i in contents:
+        #     print "the I.text" 
+        #     print i.text
+            
+        #     clean_content = re.findall('[a-zA-Z\s]+).*([0-9\s\-]',i.text)
+
+        #     print 'the clean content'
+        #     print clean_content
+
+        #     # noperiod = i.text.replace(".", "")
+        #     # splice = noperiod.split("  ")
+        #     contents_inventory.append(clean_content[0])
+        #     # contents_inventory.append(splice[1])
+        #     print contents_inventory
+
+        # return contents_inventory
 
     def get_text_after_header(self, header_and_pages):
         elem_of_header_1 = self.root.xpath('//text/*[text()[normalize-space(.)="{}"]]'.format(header_1))
         elems_following = elem_of_header_1[0].getparent().itersiblings()
         elem_of_header_2 = self.root.xpath('//text/*[text()[normalize-space(.)="{}"]]'.format(header_2))
+
         for i in elems_following:
             # print 'line 376', i.text
             i
         return None
+
+        # print 'line 373', elem_of_header_1[0].text
+        # print 'line 374', elems_following
+        # for i in elems_following:
+        #   print 'line 376', i.text
+
+
 
     def print_xml_to_file(self):
         file_name = 'cached_pdfs/{}.xml'.format(self.url[-8:-4])
@@ -398,11 +439,11 @@ class FindingAidPDFtoEAD():
             f.write(etree.tostring(self.root, pretty_print=True))
 
 list_of_urls = [
-                'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
+               # 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
                 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
-                'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
+               # 'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
                 'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title #Problem with the Contents of Inventory
-                'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
+               # 'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
                ]
 
 if __name__ == '__main__':
