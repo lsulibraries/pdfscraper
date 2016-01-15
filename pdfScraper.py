@@ -377,34 +377,25 @@ class FindingAidPDFtoEAD():
        # print etree.tostring(ead, pretty_print=True)
 
        #problem right now with ..... vs whitespace, getting some lists ['section pg'] others ['section', 'pg']
+    def split_on_char(self, char, text):
+        if char in text:
+            start, end = text.split(char)
+        else:
+            start, end = text, text
+        return (start, end)
+
     def grab_contents_of_inventory(self):
         contents = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
         # print len(contents)
-
-        contents_inventory = []        
+        collapsed = self.collapse(contents)
+        inventory = []        
         
-        for i in contents:
-                
-                # regged = re.findall('(?:\.)', i.text)
-                regged = re.sub('(?:\.)', '', i.text)
-                pegg = re.findall('(\w.*)', regged)
-                # regged = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', i.text)
-                # print "regged"
-                # print regged
-                # print "pegg"
-                # print pegg
-                for i in pegg:                    
-                    contents_inventory.append(i)
-        # x = 1
-        # bigstring = ''
-        # while x < len(contents_inventory):
-        #     bigstring = bigstring + contents_inventory[x] + ' '
-        #     x = x + 1
-        # # print bigstring
-        # newlist = bigstring.split("  ")
-        # print newlist
-        print contents_inventory
-        return contents_inventory
+        for top, text in collapsed.iteritems():
+            heading, page = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', text)[0]
+            pages_tuple = self.split_on_char('-', page)
+            inventory.append((heading, pages_tuple))
+        print inventory
+        return inventory
 
     def get_text_after_header(self, header, pages_tuple):
         beginning_page, end_page = pages_tuple
@@ -432,11 +423,11 @@ class FindingAidPDFtoEAD():
         return collapsed
 
 list_of_urls = [
-                # 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
-                # 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
-                # 'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
+                'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
+                #'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
+                'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
                 'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title #Problem with the Contents of Inventory
-                'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
+                #'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
 
                ]
 
