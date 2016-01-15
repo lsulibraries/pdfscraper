@@ -401,44 +401,24 @@ class FindingAidPDFtoEAD():
 
     def grab_contents_of_inventory(self):
         contents = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
+        print contents
+
         contents_inventory = []        
-        # aoeu =re.findall('[a-z A-Z/]+)', contents.text)
+        
         for i in contents:
-            regged = re.findall('((\w.*))', i.text)
-            print i
-        for i in regged:
-            splice = i.replace("  ", "")
-            splat = splice.replace(".", "")
-            splurt = splat.split("  ")
-            print "splurt"
-            print splurt
-            contents_inventory.append(splurt)
-        # print "contents"
+                
+                # regged = re.findall('(?:\.)', i.text)
+                regged = re.sub('(?:\.)', '', i.text)
+                pegg = re.findall('(\w.*)', regged)
+                # regged = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', i.text)
+                # print "regged"
+                # print regged
+                # print "pegg"
+                # print pegg
+                for i in pegg:                    
+                    contents_inventory.append(i)
         print contents_inventory
-        # newlist = []
-        # if len(contents_inventory[0]) > 1:
-        #    # newlist.append( contents_inventory[0][0] contents_inventory[0][1]))
-        #     print 'itsnew'
-        #     print newlist
-        # # for i in contents_inventory:
-        #    print i
-
-        # for i in contents:
-        #     print "the I.text" 
-        #     print i.text
-            
-        #     clean_content = re.findall('[a-zA-Z\s]+).*([0-9\s\-]',i.text)
-
-        #     print 'the clean content'
-        #     print clean_content
-
-        #     # noperiod = i.text.replace(".", "")
-        #     # splice = noperiod.split("  ")
-        #     contents_inventory.append(clean_content[0])
-        #     # contents_inventory.append(splice[1])
-        #     print contents_inventory
-
-        # return contents_inventory
+        return contents_inventory
 
     def get_text_after_header(self, header_and_pages):
         elem_of_header_1 = self.root.xpath('//text/*[text()[normalize-space(.)="{}"]]'.format(header_1))
