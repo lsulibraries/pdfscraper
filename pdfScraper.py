@@ -4,6 +4,7 @@ import scraperwiki
 import urllib2
 from lxml import etree
 from lxml.builder import E
+import re
 
 
 class FindingAidPDFtoEAD():
@@ -172,7 +173,6 @@ class FindingAidPDFtoEAD():
         finalseries.insert(0, "<arrangement encodinganalog='351'>")
         finalseries.append("</arrangement>")
         finalseries = "".join(finalseries)
-        # s1 = ('>Series.*?\.|>Subseries.*?\(\.\)')
         return finalseries
 
     def getDefListItem(self, label):
@@ -193,6 +193,9 @@ class FindingAidPDFtoEAD():
         with open(file_name, 'w') as f:
             f.write(etree.tostring(self.root, pretty_print=True))
 
+
+        self.grab_contents_of_inventory()
+        self.get_text_between_headers('SCOPE AND CONTENT NOTE', 'hello')
 
         # titleproper - needs to account for multiple lines in some docs
         wholetitle = []
@@ -355,8 +358,8 @@ class FindingAidPDFtoEAD():
                     ),
                     # INDEX TERMS will need to be encoded all as 'subject' cuz we can't tell automatically...
                     # @source should usually be 'lcnaf'
-                    etree.XML(finalseries),
-                    etree.XML(seriesdesc)
+                    # etree.XML(finalseries),   # commented out to silence errors
+                    # etree.XML(seriesdesc)     # commented out to silence errors
                     ),
                     # E.acqinfo may need to be gleaned by humans, same for E.accruals
                     # E.custodinfo, E.altformavail, E.appraisal
@@ -369,6 +372,26 @@ class FindingAidPDFtoEAD():
             )
         print etree.tostring(ead, pretty_print=True)
 
+    def grab_contents_of_inventory(self):
+        contents = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
+        contents_inventory = []
+        for i in contents:
+            noperiod = i.text.replace(".", "")
+            splat = noperiod.split("  ")
+            contents_inventory.append(splat[0])
+        return contents_inventory
+
+    def get_text_between_headers(self, header_1, header_2):
+        header_1 = 'SCOPE AND CONTENT NOTE'
+        header_2 = 'LIST OF SERIES AND SUBSERIES'
+        elem_of_header_1 = self.root.xpath('//text/*[text()[normalize-space(.)="{}"]]'.format(header_1))
+        elems_following = elem_of_header_1[0].getparent().itersiblings()
+        elem_of_header_2 = self.root.xpath('//text/*[text()[normalize-space(.)="{}"]]'.format(header_2))
+        print 'line 373', elem_of_header_1[0].text
+        print 'line 374', elems_following
+        for i in elems_following:
+            print 'line 376', i.text
+
     def print_xml_to_file(self):
         file_name = 'cached_pdfs/{}.xml'.format(self.url[-8:-4])
         with open(file_name, 'w') as f:
@@ -378,8 +401,8 @@ list_of_urls = [
                 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
                 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
                 'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
-                # 'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title #Problem with the Contents of Inventory
-                # 'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
+                'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title #Problem with the Contents of Inventory
+                'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
                ]
 
 if __name__ == '__main__':
