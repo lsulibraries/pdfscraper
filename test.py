@@ -78,8 +78,8 @@ class EadTest(ParametrizedTestCase):
             terms[4]: 7,
             terms[5]: 8, },
         }
-        current_pdfs_proven_answers = self.list_of_proven_answers[self.url]
 
+        current_pdfs_proven_answers = self.list_of_proven_answers[self.url]
         for term, page_num in current_pdfs_proven_answers.iteritems():
             self.assertEquals(self.findaid.getpagenum(term)[0], page_num, '\n\nFor url :{}\nTerm: {}\nExpected Page #: {}\nActual Page #: {}\n'.format(
                 self.url, term, page_num, self.findaid.getpagenum(term)[0]))
@@ -123,6 +123,46 @@ class EadTest(ParametrizedTestCase):
             actual_result_formatted, expected_result_formatted = actual_result.encode('ascii', 'ignore'), expected_result.encode('ascii', 'ignore')
             self.assertEquals(actual_result, expected_result, '\n\nFor url :{}\nHeaders: {}, {}, {}\nExpected return value: {}\nActual return value: {}\n'.format(
                 self.url, firstheader, secondheader, backupheader, expected_result_formatted, actual_result_formatted))
+
+
+    # def testSeriesSplit(self):
+    # 	almostListSeries = self.findaid.getalltext("LIST OF SERIES AND SUBSERIES", "SERIES DESCRIPTIONS", "INDEX TERMS")
+    #     seriesdesc       = self.findaid.getalltext("SERIES DESCRIPTIONS", "INDEX TERMS", "CONTAINER LIST")
+
+    #     finalseries      = self.findaid.seriesSplit(almostListSeries, "list", "head", "item", False)
+    #     seriesdesc       = self.findaid.seriesSplit(seriesdesc, "co1", "unitid", "p", True)
+    #     print(finalseries)
+
+    def testGetDeflistItem(self):
+    	labels = [
+    		'Created by',
+    		'Compiled by',
+    		'Revised by',
+    		'Encoded by',
+    		'Processed by',
+    		'Date Completed'
+    	]
+    	expected_answers = {
+            'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf':
+            	[
+            		('Compiled by', 'Luana Henderson')
+            	],
+            'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0826.pdf':
+            	[
+            		('','')
+            	],
+            'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf':
+            	[
+            		('Compiled by', 'Luana Henderson')
+            	],
+            'http://www.lib.lsu.edu/sites/default/files/sc/findaid/4452.pdf': []
+            }
+        tuple_list = expected_answers[self.url]
+        for our_tuple in tuple_list:
+        	 
+    		label, value = our_tuple
+    		observed = self.findaid.getDefListItem(label)
+    		self.assertEquals(observed, value, 'For url: {}\nUnexpected Value for: {}\nGot: {}\nExpected: {}\n\n'.format(self.url, label, observed, value))
 
 
 if __name__ == "__main__":

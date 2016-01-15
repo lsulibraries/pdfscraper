@@ -4,18 +4,30 @@ import scraperwiki
 import urllib2
 from lxml import etree
 from lxml.builder import E
+import re
 
 
 class FindingAidPDFtoEAD():
     def __init__(self, url):
         self.url = url
-        self.pdfdata = urllib2.urlopen(url).read()
-        self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
-        self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
-        self.root = etree.fromstring(self.xmldata)
+
+        '''normal pull-pdf-from-web-and-interpret code'''
+        # self.pdfdata = urllib2.urlopen(url).read()   # Necessary code for pulling pdf from web.
+        # self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
+        # self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
+        # self.root = etree.fromstring(self.xmldata)
+        # self.pdf_length = self.get_pdf_length()
+
+        '''temp read-cached-file-from-harddrive monkeypatch'''
+        with open('cached_pdfs/' + self.url[-8:], 'r') as f:
+            self.pdfdata = f.read()
+            self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
+            self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
+            self.root = etree.fromstring(self.xmldata)
+            self.pdf_length = self.get_pdf_length()
 
     pdfsubtitle = 'A Collection in the Louisiana and Lower Mississippi Valley Collections'
-    pdfaddressline = 'Hill Memorial Library\nBaton Rouge, LA 70803-3300\nhttp://www.lib.lsu.edu/special' # add phone numbers
+    pdfaddressline = 'Hill Memorial Library\nBaton Rouge, LA 70803-3300\nhttp://www.lib.lsu.edu/special'  # add phone numbers
     pdfpublisher = 'Louisiana State University Special Collections'
     pdfhead = 'SUMMARY'
     pdfcorpname = "Louisiana State University Special Collections"
@@ -28,6 +40,10 @@ class FindingAidPDFtoEAD():
     # todo add element deflist for things like : 'ENCODED BY', 'PROCESSED BY'
 
     # within the bioghist element, mark names (?): <persname>Mrs. Nellie M. Mingo</persname>
+
+    def get_pdf_length(self):
+        list_of_all_page_nums = [int(i) for i in self.root.xpath('//page/@number')]
+        return max(list_of_all_page_nums)
 
     def getrcoldata(self, lcolname):
         lcoldata = []
@@ -48,18 +64,18 @@ class FindingAidPDFtoEAD():
                 lcolnameshort = lcolname[:-1]
                 rcoltop = str(int(self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolnameshort + '"]]')[0].getparent().get('top')))
                 rcoltopbuffer = str(int(rcoltop)-10)
-                try: #if it's the last in the column then hopefully its a single line
+                try:  # if it's the last in the column then hopefully its a single line
                     afterrcoltop = str(int(self.root.xpath('//page[@number="3"]/text[@left=' + self.xpos_of_left_column + ' and @top=' + rcoltop + ']/following::text[b]')[0].get('top'))-10)
                 except:
-                    aftercoltop = str(int(rcoltop)+15)
+                    afterrcoltop = str(int(rcoltop)+15)
                 datalines = self.root.xpath('//page[@number="3"]/text[@top>' + rcoltopbuffer + 'and @top<' + afterrcoltop + ' and @left>"200"]')
                 for el in datalines:
-                   lcoldata.append(el.text.strip())
+                    lcoldata.append(el.text.strip())
                 pdfdata = ' '.join(lcoldata)
             except:
-                try:  #split query - test each against different lines and expand the selection
-                    lcolnamefirstpart = lcolname.rsplit(' ',1)[0]
-                    lcolnamelastword = lcolname.rsplit(' ',1)[1]
+                try:  # split query - test each against different lines and expand the selection
+                    lcolnamefirstpart = lcolname.rsplit(' ', 1)[0]
+                    lcolnamelastword = lcolname.rsplit(' ', 1)[1]
                     rcoltop = str(int(self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolnamefirstpart + '"]]')[0].getparent().get('top')))
                     rcoltopbuffer = str(int(rcoltop)-10)
                     nextcoltop = str(int(self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolnamelastword + '"]]')[0].getparent().get('top')))
@@ -76,10 +92,10 @@ class FindingAidPDFtoEAD():
                 pdfdata = pdfdata[1:]
         except:
             pass
-        try:
-            nextboldtext = self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolname + '"]]')[0].getparent().getnext().getchildren()[0].text
-        except:
-            pass
+        # try:
+        #     nextboldtext = self.root.xpath('//page[@number="3"]/text/b[text()[normalize-space(.)="' + lcolname + '"]]')[0].getparent().getnext().getchildren()[0].text
+        # except:
+        #     pass
         return pdfdata.strip()
 
     # this function may be obsolete, if we can expect "CONTENTS OF INVENTORY" to be correct. 
@@ -95,7 +111,6 @@ class FindingAidPDFtoEAD():
                 continue
         if pagenumber == 18:
             pagenumber, termtop = 18, None
-
         return pagenumber, termtop
 
     # I think there is a way to do this without the need for a backup header, that also might not
@@ -103,8 +118,6 @@ class FindingAidPDFtoEAD():
     #def getall_section_text(self, inventory_sections):
 
     def getalltext(self, firstheader, secondheader, backupheader):
-        output_tuple = (firstheader, secondheader, backupheader)
-
         firstpagenumber, firstheadertop = self.getpagenum(firstheader)
         secondpagenumber, secondheadertop = self.getpagenum(secondheader)
         backuppagenumber, backupheadertop = self.getpagenum(backupheader)
@@ -113,31 +126,32 @@ class FindingAidPDFtoEAD():
             secondpagenumber, secondheadertop = backuppagenumber, backupheadertop
 
         rawtext = []
-        for p in range(firstpagenumber, secondpagenumber+1):
 
-            if p == secondpagenumber:
-                bottom = secondheadertop
-            else:
-                bottom = "1000"
-            thingie = '//page[@number={}]/text[@top>={}and @top<{}]|//page[@number={}]/text[@top>={}and @top<{}]/b'.format(
-                    str(p),
-                    str(int(firstheadertop)+3),
-                    str(int(bottom)-3),
-                    str(p),
-                    str(int(firstheadertop)+3),
-                    str(int(bottom)-3)
-                    )
-            data = self.root.xpath(thingie)
-            for el in data:
-                if not el.text:  # removes blank nodes
-                    continue
-                rawtext.append(el.text.strip())
+        if secondheadertop:
+            for p in range(firstpagenumber, secondpagenumber+1):
+                if p == secondpagenumber:
+                    bottom = secondheadertop
+                else:
+                    bottom = "1000"
+                thingie = '//page[@number={}]/text[@top>={}and @top<{}]|//page[@number={}]/text[@top>={}and @top<{}]/b'.format(
+                        str(p),
+                        str(int(firstheadertop)+3),
+                        str(int(bottom)-3),
+                        str(p),
+                        str(int(firstheadertop)+3),
+                        str(int(bottom)-3)
+                        )
+                data = self.root.xpath(thingie)
+                for el in data:
+                    if not el.text:  # removes blank nodes
+                        continue
+                    rawtext.append(el.text.strip())
+        else:
+            # should we throw & catch Exception?
+            print '\nAttention!!   SecondHeaderTop == None.   The pdfscraper is broken in this case: ', self.url, '\n'
+
         textalmost = ' '.join(rawtext)
         alltext = ' '.join(textalmost.split())  # strips extra spaces
-        output_tuple += (alltext,)
-        # print output_tuple, ', '
-        # broken in pieces and truncated the length of fields
-        # print output_tuple[0], ', ', output_tuple[1], ', ',  output_tuple[2], ', ', output_tuple[3][:10]
         return alltext
 
     def seriesSplit(self, textinput, outerwrap, insidewrap, subwrap, check):
@@ -165,17 +179,29 @@ class FindingAidPDFtoEAD():
         finalseries.insert(0, "<arrangement encodinganalog='351'>")
         finalseries.append("</arrangement>")
         finalseries = "".join(finalseries)
-        # s1 = ('>Series.*?\.|>Subseries.*?\(\.\)')
         return finalseries
 
+    def getDefListItem(self, label):
+        address  = "/pdf2xml/page[@number=1]/text[contains(text(),'Compiled by')]/following-sibling::text[1]/text()"
+        nodes_list = self.root.xpath(address)
+
+        if len(nodes_list) > 0:
+            return nodes_list[0].strip()
+        return ''
+
     def run_conversion(self):
+
         # 4. Have a peek at the XML (click the "more" link in the Console to preview it).
         #print etree.tostring(self.root, pretty_print=True)
 
-        '''# writing to pdf to xml file
+        # writing to pdf to xml file
         file_name = '{}.xml'.format(self.url[-8:-4])
         with open(file_name, 'w') as f:
-            f.write(etree.tostring(self.root, pretty_print=True))'''
+            f.write(etree.tostring(self.root, pretty_print=True))
+
+
+        self.grab_contents_of_inventory()
+        self.get_text_between_headers('SCOPE AND CONTENT NOTE', 'hello')
 
         # titleproper - needs to account for multiple lines in some docs
         wholetitle = []
@@ -211,7 +237,6 @@ class FindingAidPDFtoEAD():
 
         # date - last node over "20" width on first page - "reformatted" or "revised" dates okay?
         self.pdfdate = self.root.xpath('//page[@number="1"]/text[@width>"20"]')[-1].text.strip()
-
 
         # physdesc -
 
@@ -282,20 +307,10 @@ class FindingAidPDFtoEAD():
         finalseries = self.seriesSplit(almostListSeries, "list", "head", "item", False)
         seriesdesc = self.seriesSplit(seriesdesc, "co1", "unitid", "p", True)
 
+        # xmlcode = etree.XML(seriesSplit(seriesdesc,"co1","unitid","unitid"))
+        # print etree.tostring(xmlcode, pretty_print=True)
 
-        #print type(finalseries)
-
-        #series descriptions
-        #d = "Series"
-        #print seriesdesc
-        #s = [d + e for e in seriesdesc.split(d) if e != ""]
-        #print type(s)
-
-        #xmlcode = etree.XML(seriesSplit(seriesdesc,"co1","unitid","unitid"))
-        #print etree.tostring(xmlcode, pretty_print=True)
-
-
-        #using efactory
+        # using efactory
         ead = (
             E.ead(
                 E.eadheader(
@@ -369,7 +384,7 @@ class FindingAidPDFtoEAD():
                     #put this back 
                     #etree.XML(finalseries),
                     etree.XML(seriesdesc)
-                    ),
+
                     # E.acqinfo may need to be gleaned by humans, same for E.accruals
                     # E.custodinfo, E.altformavail, E.appraisal
                     # For required elements that must be inferred, insert placeholder text like:
@@ -379,6 +394,32 @@ class FindingAidPDFtoEAD():
                 level='collection', type='inventory', relatedencoding='MARC21'
                 )
             )
+        print etree.tostring(ead, pretty_print=True)
+
+    def grab_contents_of_inventory(self):
+        contents = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
+        contents_inventory = []
+        for i in contents:
+            noperiod = i.text.replace(".", "")
+            splat = noperiod.split("  ")
+            contents_inventory.append(splat[0])
+        return contents_inventory
+
+    def get_text_between_headers(self, header_1, header_2):
+        header_1 = 'SCOPE AND CONTENT NOTE'
+        header_2 = 'LIST OF SERIES AND SUBSERIES'
+        elem_of_header_1 = self.root.xpath('//text/*[text()[normalize-space(.)="{}"]]'.format(header_1))
+        elems_following = elem_of_header_1[0].getparent().itersiblings()
+        elem_of_header_2 = self.root.xpath('//text/*[text()[normalize-space(.)="{}"]]'.format(header_2))
+        print 'line 373', elem_of_header_1[0].text
+        print 'line 374', elems_following
+        for i in elems_following:
+            print 'line 376', i.text
+
+    def print_xml_to_file(self):
+        file_name = 'cached_pdfs/{}.xml'.format(self.url[-8:-4])
+        with open(file_name, 'w') as f:
+            f.write(etree.tostring(self.root, pretty_print=True))
 
 list_of_urls = [
                 #'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
