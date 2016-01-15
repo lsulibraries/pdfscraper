@@ -98,6 +98,8 @@ class FindingAidPDFtoEAD():
         #     pass
         return pdfdata.strip()
 
+    # this function may be obsolete, if we can expect "CONTENTS OF INVENTORY" to be correct. 
+    #maybe setup that test later..
     def getpagenum(self, term):
         termtop = ""
         # @TODO return '', '' if term is not found
@@ -110,6 +112,10 @@ class FindingAidPDFtoEAD():
         if pagenumber == 18:
             pagenumber, termtop = 18, None
         return pagenumber, termtop
+
+    # I think there is a way to do this without the need for a backup header, that also might not
+    # - have to be called as many times...
+    #def getall_section_text(self, inventory_sections):
 
     def getalltext(self, firstheader, secondheader, backupheader):
         firstpagenumber, firstheadertop = self.getpagenum(firstheader)
@@ -186,7 +192,7 @@ class FindingAidPDFtoEAD():
     def run_conversion(self):
 
         # 4. Have a peek at the XML (click the "more" link in the Console to preview it).
-        # print etree.tostring(self.root, pretty_print=True)
+        #print etree.tostring(self.root, pretty_print=True)
 
         # writing to pdf to xml file
         file_name = '{}.xml'.format(self.url[-8:-4])
@@ -195,21 +201,24 @@ class FindingAidPDFtoEAD():
 
 
         self.grab_contents_of_inventory()
-        # self.get_text_after_(argument)
+
+        self.get_text_after_header('Biographical/Historical Note', (4, 4))
+
+
+        
+        # self.get_text_between_headers('SCOPE AND CONTENT NOTE', 'hello')
 
         # titleproper - needs to account for multiple lines in some docs
         wholetitle = []
         titlelines = self.root.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
+        #print titlelines
 
         for el in titlelines:
             wholetitle.append(el.text.strip())
         self.pdftitleproper = 'A GUIDE TO THE ' + ' '.join(wholetitle)
+
         # figuring out what the top value of the last line of the title is
         titlelineend = titlelines[-1].getparent().get('top')
-
-        # This is where we should grab the Contents of the Inventory, put it into a list for using in the 
-        # getalltext function.
-
 
         # num - assume it is between 12 and 25 units below the last line of title
         #    (a better way might have been to take next text node)
@@ -242,7 +251,7 @@ class FindingAidPDFtoEAD():
             self.xpos_of_left_column = elem_for_pos_of_left_column[0].getparent().get('left')
         # should we raise & catch Exceptions?
         else:
-            print '\nAttention!!  elem_for_pos_of_left_column not digitally scanned from document: {}\n'.format(self.url)
+            #print '\nAttention!!  elem_for_pos_of_left_column not digitally scanned from document: {}\n'.format(self.url)
             self.xpos_of_left_column = '/nAttention!!  elem_for_pos_of_left_column not digitally scanned from document: {}'.format(self.url)
 
         # function finds right hand column data based on text of left hand column - just for page 3
@@ -275,8 +284,7 @@ class FindingAidPDFtoEAD():
 
 
 #_____________________________________________________________
-        # This section is problematic especiall with pdf 4745:
-        # We need a function that grabs all TERMS from CONTENTS OF IVENTORY SECTION, 
+
         # Then the getalltext function won't need a backupheader, and we can get all text by looping through available terms for appropriate sections
         self.pdfbioghist = self.getalltext("BIOGRAPHICAL/HISTORICAL NOTE", "SCOPE AND CONTENT NOTE", "LIST OF SERIES AND SUBSERIES")
         self.pdfscopecontent = self.getalltext("SCOPE AND CONTENT NOTE", "LIST OF SERIES AND SUBSERIES", "INDEX TERMS")
@@ -290,125 +298,147 @@ class FindingAidPDFtoEAD():
 
         # using efactory
         ead = (
-            E.ead(
-                E.eadheader(
-                    E.eadid('', countrycode='us', url=self.url),
-                    E.filedesc(
-                        E.titlestmt(
-                            E.titleproper(self.pdftitleproper + '\n\t\t\t',
-                                          E.num(self.pdfnum, type='Manuscript'),
-                                          ),
-                            E.subtitle(self.pdfsubtitle),
-                            E.author(self.pdfauthor)
-                        ),
-                        E.publicationstmt(
-                            E.publisher(self.pdfpublisher),
-                            E.address(
-                                E.addressline(self.pdfaddressline),
-                            ),
-                            E.date(self.pdfdate)
-                        )
-                    )
-                ),
-                E.archdesc(
-                    E.did(
-                        E.head(self.pdfhead),
-                        E.physdesc('' + '\n\t\t', E.extent(self.pdfextent), label='Size', encodinganalog='300$a'),
-                        E.unitdate(self.pdfidates, type='inclusive', label='Dates:', encodinganalog='245$f'),
-                        E.unitdate(self.pdfbdates, type='bulk', label='Dates:'),
-                        E.langmaterial(
-                            E.language(self.pdflanguage, langcode='eng')
-                        ),
-                        E.abstract(self.pdfabstract, label='Summary'),
-                        E.repository(
-                            E.corpname(self.pdfcorpname),
-                            E.subarea(self.pdfsubarea),
-                            label='Repository:', encodinganalog='825$a'
-                        ),
-                        E.physloc(self.pdfphysloc),
-                    ),
-                    E.accessrestrict(
-                        E.head("Restrictions on access"),
-                        E.p(self.pdfaccessrestrict),
-                    ),
-                    E.relatedmaterial(
-                        E.head("Related Collections"),
-                        E.p(self.pdfrelatedmaterial),
-                        encodinganalog='544 1'
-                    ),
-                    E.userestrict(
-                        E.head("Copyright"),
-                        E.p(self.pdfuserestrict),
-                        encodinganalog='540'
-                    ),
-                    E.prefercite(
-                        E.head("Preferred Citation"),
-                        E.p(self.pdfprefercite),
-                        encodinganalog='524'
-                    ),
-                    E.bioghist(
-                        E.head("BIOGRAPHICAL/HISTORICAL NOTE"),
-                        E.p(self.pdfbioghist),
-                        encodinganalog='545'
-                    ),
-                    E.scopecontent(
-                        E.head("SCOPE AND CONTENT NOTE"),
-                        E.p(self.pdfscopecontent),
-                        encodinganalog='520'
-                    ),
-                    # INDEX TERMS will need to be encoded all as 'subject' cuz we can't tell automatically...
-                    # @source should usually be 'lcnaf'
-                    # etree.XML(finalseries),   # commented out to silence errors
-                    # etree.XML(seriesdesc)     # commented out to silence errors
-                    ),
-                    # E.acqinfo may need to be gleaned by humans, same for E.accruals
-                    # E.custodinfo, E.altformavail, E.appraisal
-                    # For required elements that must be inferred, insert placeholder text like:
-                    #   "Unknown - could not be automatically inferred"
-                    #
-                    # E.processinfo may need to be included
-                level='collection', type='inventory', relatedencoding='MARC21'
-                )
-            )
-        # print etree.tostring(ead, pretty_print=True)
+           E.ead(
+               E.eadheader(
+                   E.eadid('', countrycode='us', url=self.url),
+                   E.filedesc(
+                       E.titlestmt(
+                           E.titleproper(self.pdftitleproper + '\n\t\t\t',
+                                         E.num(self.pdfnum, type='Manuscript'),
+                                         ),
+                           E.subtitle(self.pdfsubtitle),
+                           E.author(self.pdfauthor)
+                       ),
+                       E.publicationstmt(
+                           E.publisher(self.pdfpublisher),
+                           E.address(
+                               E.addressline(self.pdfaddressline),
+                           ),
+                           E.date(self.pdfdate)
+                       )
+                   )
+               ),
+               E.archdesc(
+                   E.did(
+                       E.head(self.pdfhead),
+                       E.physdesc('' + '\n\t\t', E.extent(self.pdfextent), label='Size', encodinganalog='300$a'),
+                       E.unitdate(self.pdfidates, type='inclusive', label='Dates:', encodinganalog='245$f'),
+                       E.unitdate(self.pdfbdates, type='bulk', label='Dates:'),
+                       E.langmaterial(
+                           E.language(self.pdflanguage, langcode='eng')
+                       ),
+                       E.abstract(self.pdfabstract, label='Summary'),
+                       E.repository(
+                           E.corpname(self.pdfcorpname),
+                           E.subarea(self.pdfsubarea),
+                           label='Repository:', encodinganalog='825$a'
+                       ),
+                       E.physloc(self.pdfphysloc),
+                   ),
+                   E.accessrestrict(
+                       E.head("Restrictions on access"),
+                       E.p(self.pdfaccessrestrict),
+                   ),
+                   E.relatedmaterial(
+                       E.head("Related Collections"),
+                       E.p(self.pdfrelatedmaterial),
+                       encodinganalog='544 1'
+                   ),
+                   E.userestrict(
+                       E.head("Copyright"),
+                       E.p(self.pdfuserestrict),
+                       encodinganalog='540'
+                   ),
+                   E.prefercite(
+                       E.head("Preferred Citation"),
+                       E.p(self.pdfprefercite),
+                       encodinganalog='524'
+                   ),
+                   E.bioghist(
+                       E.head("BIOGRAPHICAL/HISTORICAL NOTE"),
+                       E.p(self.pdfbioghist),
+                       encodinganalog='545'
+                   ),
+                   E.scopecontent(
+                       E.head("SCOPE AND CONTENT NOTE"),
+                       E.p(self.pdfscopecontent),
+                       encodinganalog='520'
+                   ),
+                   # INDEX TERMS will need to be encoded all as 'subject' cuz we can't tell automatically...
+                   # @source should usually be 'lcnaf'
+                   # etree.XML(finalseries),   # commented out to silence errors
+                   # etree.XML(seriesdesc)     # commented out to silence errors
+                   ),
+                   # E.acqinfo may need to be gleaned by humans, same for E.accruals
+                   # E.custodinfo, E.altformavail, E.appraisal
+                   # For required elements that must be inferred, insert placeholder text like:
+                   #   "Unknown - could not be automatically inferred"
+                   #
+                   # E.processinfo may need to be included
+               level='collection', type='inventory', relatedencoding='MARC21'
+               )
+           )
+       # print etree.tostring(ead, pretty_print=True)
 
+       #problem right now with ..... vs whitespace, getting some lists ['section pg'] others ['section', 'pg']
     def grab_contents_of_inventory(self):
         contents = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
-        contents_inventory = []
+        contents_inventory = []                
         for i in contents:
-            # print i.text
             noperiod = i.text.replace(".", "")
             splat = noperiod.split("  ")
             contents_inventory.append(splat[0])
-        print(contents_inventory)
         # problems: Compare 4452 to 0717: 0717 xml has whitespace, 4452 looks like whitespace, but it'snot
         # 4745 gets a list with ['section pg','section pg']
         # 4452 gets ['section', 'pg', 'section', 'pg']
         # 5078 gets ['section', 'section'] missing 'pg'
         # 0826 gets ['section', 'section'] missing 'pg'
         # 0717 gets ['section', ' ', ' ', ' ', 'pg']
+
+        # regged = re.sub('(?:\.)', '', i.text)
+        # pegg = re.findall('(\w.*)', regged)                  
+        print contents_inventory
         return contents_inventory
 
-    def get_text_after_header(self, header_and_pages):
-        elem_of_header_1 = self.root.xpath('//text/*[text()[normalize-space(.)="{}"]]'.format(header_1))
-        elems_following = elem_of_header_1[0].getparent().itersiblings()
-        elem_of_header_2 = self.root.xpath('//text/*[text()[normalize-space(.)="{}"]]'.format(header_2))
-        for i in elems_following:
-            # print 'line 376', i.text
-            i
-        return None
+    def get_text_after_header(self, header, pages_tuple):
+        beginning_page, end_page = pages_tuple
+        # ok, but fails to resume reading subtext at pagebreaks.
+        # also fails on formatting changes
+        elem_of_header = self.root.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(beginning_page, header.lower()))
+        elems_following = elem_of_header[0].getparent().itersiblings()
+        for sibling in elems_following:
+            print sibling.text
+
+        # print 'line 373', elem_of_header_1[0].text
+        # print 'line 374', elems_following
+        # for i in elems_following:
+        #   print 'line 376', i.text
+
+
 
     def print_xml_to_file(self):
         file_name = 'cached_pdfs/{}.xml'.format(self.url[-8:-4])
         with open(file_name, 'w') as f:
             f.write(etree.tostring(self.root, pretty_print=True))
 
+    def collapse(self,tree):
+        collapsed = {}
+
+        for elm in tree:
+            top = elm.getparent().get('top')
+            if top in collapsed:
+                existing_text = collapsed[top] + ' ' + etree.tostring(elm, method='text').strip().lower()
+            else:
+                collapsed[top] = '' + etree.tostring(elm, method='text').strip().lower()
+        return collapsed
+
 list_of_urls = [
-                'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
-                'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
-                'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
+                # 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
+                # 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
+                # 'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
                 'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title #Problem with the Contents of Inventory
                 'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
+
                ]
 
 if __name__ == '__main__':
