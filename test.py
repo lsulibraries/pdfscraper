@@ -2,6 +2,7 @@
 
 import unittest
 from pdfScraper import FindingAidPDFtoEAD
+from lxml import etree
 import lxml
 
 # http://eli.thegreenplace.net/2011/08/02/python-unit-testing-parametrized-test-cases
@@ -179,6 +180,65 @@ class EadTest(ParametrizedTestCase):
                                         'C List of Music Publishers': (24, 24),
                                         },
                                   }
+
+    def testCollapser(self):
+        unit = '''<unit>
+                <text top="112" left="108" width="251" height="16" font="0"><b>ACY (WILLIAM) JR. PAPERS </b></text>
+                <text top="106" left="360" width="5" height="24" font="1"> </text>
+                <text top="106" left="459" width="5" height="24" font="1"> </text>
+                <text top="112" left="707" width="108" height="16" font="0"><b>Mss. 717, 772 </b></text>
+                <text top="127" left="108" width="82" height="24" font="1">1844-1909 </text>
+                <text top="127" left="459" width="5" height="24" font="1"> </text>
+                <text top="127" left="563" width="252" height="24" font="1">LSU Libraries Special Collections </text>
+                <text top="1037" left="418" width="86" height="24" font="1">Page <b>2</b> of <b>9</b> </text>
+                <text top="1058" left="108" width="5" height="24" font="1"> </text>
+                <text top="190" left="108" width="248" height="16" font="0"><b>CONTENTS OF INVENTORY </b></text>
+                <text top="205" left="108" width="5" height="24" font="1"> </text>
+                <text top="225" left="108" width="5" height="24" font="1"> </text>
+                <text top="246" left="162" width="75" height="24" font="1"><a href="tmpZROglH.html#3">Summary </a></text>
+                <text top="246" left="270" width="5" height="24" font="1"><a href="tmpZROglH.html#3"> </a></text>
+                <text top="246" left="324" width="5" height="24" font="1"><a href="tmpZROglH.html#3"> </a></text>
+                <text top="246" left="378" width="5" height="24" font="1"><a href="tmpZROglH.html#3"> </a></text>
+                <text top="246" left="432" width="5" height="24" font="1"><a href="tmpZROglH.html#3"> </a></text>
+                <text top="246" left="486" width="5" height="24" font="1"><a href="tmpZROglH.html#3"> </a></text>
+                <text top="246" left="540" width="5" height="24" font="1"><a href="tmpZROglH.html#3"> </a></text>
+                <text top="246" left="594" width="5" height="24" font="1"><a href="tmpZROglH.html#3"> </a></text>
+                <text top="246" left="648" width="14" height="24" font="1"><a href="tmpZROglH.html#3">3</a> </text>
+                <text top="267" left="162" width="221" height="24" font="1"><a href="tmpZROglH.html#4">Biographical/Historical Note   </a></text>
+                <text top="267" left="432" width="5" height="24" font="1"><a href="tmpZROglH.html#4"> </a></text>
+                <text top="267" left="486" width="5" height="24" font="1"><a href="tmpZROglH.html#4"> </a></text>
+                <text top="267" left="540" width="5" height="24" font="1"><a href="tmpZROglH.html#4"> </a></text>
+                <text top="267" left="594" width="5" height="24" font="1"><a href="tmpZROglH.html#4"> </a></text>
+                <text top="267" left="648" width="28" height="24" font="1"><a href="tmpZROglH.html#4">4-5 </a></text>
+                <text top="288" left="162" width="180" height="24" font="1"><a href="tmpZROglH.html#5">Scope and Content Note </a></text>
+                <text top="288" left="378" width="5" height="24" font="1"><a href="tmpZROglH.html#5"> </a></text>
+                <text top="288" left="432" width="5" height="24" font="1"><a href="tmpZROglH.html#5"> </a></text>
+                <text top="288" left="486" width="5" height="24" font="1"><a href="tmpZROglH.html#5"> </a></text>
+                <text top="288" left="540" width="5" height="24" font="1"><a href="tmpZROglH.html#5"> </a></text>
+                <text top="288" left="594" width="5" height="24" font="1"><a href="tmpZROglH.html#5"> </a></text>
+                <text top="288" left="648" width="28" height="24" font="1"><a href="tmpZROglH.html#5">5-6 </a></text>
+                <text top="288" left="702" width="5" height="24" font="1"> </text>
+                <text top="308" left="162" width="113" height="24" font="1"><a href="tmpZROglH.html#7">Index Terms   </a></text>
+                <text top="308" left="324" width="59" height="24" font="1"><a href="tmpZROglH.html#7">          </a></text>
+                <text top="308" left="432" width="5" height="24" font="1"><a href="tmpZROglH.html#7"> </a></text>
+                <text top="308" left="486" width="5" height="24" font="1"><a href="tmpZROglH.html#7"> </a></text>
+                <text top="308" left="540" width="5" height="24" font="1"><a href="tmpZROglH.html#7"> </a></text>
+                <text top="308" left="594" width="5" height="24" font="1"><a href="tmpZROglH.html#7"> </a></text>
+                <text top="308" left="648" width="14" height="24" font="1"><a href="tmpZROglH.html#7">7 </a></text>
+                <text top="329" left="162" width="113" height="24" font="1"><a href="tmpZROglH.html#8">Container List  </a></text>
+                <text top="329" left="324" width="5" height="24" font="1"><a href="tmpZROglH.html#8"> </a></text>
+                <text top="329" left="378" width="5" height="24" font="1"><a href="tmpZROglH.html#8"> </a></text>
+                <text top="329" left="432" width="5" height="24" font="1"><a href="tmpZROglH.html#8"> </a></text>
+                <text top="329" left="486" width="5" height="24" font="1"><a href="tmpZROglH.html#8"> </a></text>
+                <text top="329" left="540" width="5" height="24" font="1"><a href="tmpZROglH.html#8"> </a></text>
+                <text top="329" left="594" width="5" height="24" font="1"><a href="tmpZROglH.html#8"> </a></text>
+                <text top="329" left="648" width="28" height="24" font="1"><a href="tmpZROglH.html#8">8-9 </a></text>
+            </unit>'''
+        tree = etree.fromstring(unit)
+        path = '//text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a'
+        elms = tree.xpath(path)
+        collapsed = self.findaid.collapse(elms)
+        print collapsed
 
 
 

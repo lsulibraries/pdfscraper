@@ -430,6 +430,17 @@ class FindingAidPDFtoEAD():
         with open(file_name, 'w') as f:
             f.write(etree.tostring(self.root, pretty_print=True))
 
+    def collapse(self,tree):
+        collapsed = {}
+
+        for elm in tree:
+            top = elm.getparent().get('top')
+            if top in collapsed:
+                existing_text = collapsed[top] + ' ' + etree.tostring(elm, method='text').strip().lower()
+            else:
+                collapsed[top] = '' + etree.tostring(elm, method='text').strip().lower()
+        return collapsed
+
 list_of_urls = [
 
                 # 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
