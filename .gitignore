@@ -1,4 +1,5 @@
 env/*
 *.pyc
-*.pdf
 dbg.xml
+.vagrant/*
+*.xml
