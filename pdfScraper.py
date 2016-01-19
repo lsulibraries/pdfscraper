@@ -11,14 +11,14 @@ class FindingAidPDFtoEAD():
     def __init__(self, url):
         self.url = url
 
-        '''normal pull-pdf-from-web-and-interpret code'''
+        '''normal 'pull-pdf-from-web-and-interpret' code'''
         # self.pdfdata = urllib2.urlopen(url).read()   # Necessary code for pulling pdf from web.
         # self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
         # self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
         # self.root = etree.fromstring(self.xmldata)
         # self.pdf_length = self.get_pdf_length()
 
-        '''temp read-cached-file-from-harddrive monkeypatch'''
+        '''temporary 'read-cached-file-from-harddrive' monkeypatch'''
         with open('cached_pdfs/' + self.url[-8:], 'r') as f:
             self.pdfdata = f.read()
             self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
@@ -99,7 +99,7 @@ class FindingAidPDFtoEAD():
         return pdfdata.strip()
 
     # this function may be obsolete, if we can expect "CONTENTS OF INVENTORY" to be correct. 
-    #maybe setup that test later..
+    # maybe setup that test later..
     def getpagenum(self, term):
         termtop = ""
         # @TODO return '', '' if term is not found
@@ -115,7 +115,7 @@ class FindingAidPDFtoEAD():
 
     # I think there is a way to do this without the need for a backup header, that also might not
     # - have to be called as many times...
-    #def getall_section_text(self, inventory_sections):
+    # def getall_section_text(self, inventory_sections):
 
     def getalltext(self, firstheader, secondheader, backupheader):
         firstpagenumber, firstheadertop = self.getpagenum(firstheader)
@@ -191,30 +191,20 @@ class FindingAidPDFtoEAD():
 
     def run_conversion(self):
 
-        # 4. Have a peek at the XML (click the "more" link in the Console to preview it).
-        #print etree.tostring(self.root, pretty_print=True)
-
-        # writing to pdf to xml file
-        file_name = '{}.xml'.format(self.url[-8:-4])
-        with open(file_name, 'w') as f:
-            f.write(etree.tostring(self.root, pretty_print=True))
+        # print etree.tostring(self.root, pretty_print=True)
+        # self.print_xml_to_file()
 
 
         self.grab_contents_of_inventory()
 
-        #self.get_text_after_header('Biographical/Historical Note', (4, 4))
-
         # self.get_text_after_header('Biographical/Historical Note', (4, 4))
-
-
-
-        
+        # self.get_text_after_header('Biographical/Historical Note', (4, 4))
         # self.get_text_between_headers('SCOPE AND CONTENT NOTE', 'hello')
 
         # titleproper - needs to account for multiple lines in some docs
         wholetitle = []
         titlelines = self.root.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
-        #print titlelines
+        # print titlelines
 
         for el in titlelines:
             wholetitle.append(el.text.strip())
@@ -254,7 +244,7 @@ class FindingAidPDFtoEAD():
             self.xpos_of_left_column = elem_for_pos_of_left_column[0].getparent().get('left')
         # should we raise & catch Exceptions?
         else:
-            #print '\nAttention!!  elem_for_pos_of_left_column not digitally scanned from document: {}\n'.format(self.url)
+            # print '\nAttention!!  elem_for_pos_of_left_column not digitally scanned from document: {}\n'.format(self.url)
             self.xpos_of_left_column = '/nAttention!!  elem_for_pos_of_left_column not digitally scanned from document: {}'.format(self.url)
 
         # function finds right hand column data based on text of left hand column - just for page 3
@@ -378,8 +368,19 @@ class FindingAidPDFtoEAD():
                )
            )
        # print etree.tostring(ead, pretty_print=True)
+        # problem right now with ..... vs whitespace, getting some lists ['section pg'] others ['section', 'pg']
 
-       #problem right now with ..... vs whitespace, getting some lists ['section pg'] others ['section', 'pg']
+    def grab_contents_of_inventory(self):
+        contents  = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
+        collapsed = self.collapse(contents)
+        inventory = []
+        for top, text in collapsed.iteritems():
+            heading, page = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', text)[0]
+            pages_tuple = self.split_on_char('-', page)
+            inventory.append((heading, pages_tuple))
+        # print inventory
+        return inventory
+
     def split_on_char(self, char, text):
         if char in text:
             start, end = text.split(char)
@@ -387,26 +388,14 @@ class FindingAidPDFtoEAD():
             start, end = text, text
         return (start, end)
 
-    def grab_contents_of_inventory(self):
-        contents  = self.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
-        collapsed = self.collapse(contents)
-        inventory = []        
-        
-        for top, text in collapsed.iteritems():
-            heading, page = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', text)[0]
-            pages_tuple = self.split_on_char('-', page)
-            inventory.append((heading, pages_tuple))
-        print inventory
-        return inventory
-
     def get_text_after_header(self, header, pages_tuple):
         beginning_page, end_page = pages_tuple
         # ok, but fails to resume reading subtext at pagebreaks.
         # also fails on formatting changes
         elem_of_header = self.root.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(beginning_page, header.lower()))
         elems_following = elem_of_header[0].getparent().itersiblings()
-        for sibling in elems_following:
-            print sibling.text
+        # for sibling in elems_following:
+        #     print sibling.text
 
     def print_xml_to_file(self):
         file_name = 'cached_pdfs/{}.xml'.format(self.url[-8:-4])
@@ -415,7 +404,6 @@ class FindingAidPDFtoEAD():
 
     def collapse(self,tree):
         collapsed = {}
-
         for elm in tree:
             top = elm.getparent().get('top')
             if top in collapsed:
@@ -426,12 +414,12 @@ class FindingAidPDFtoEAD():
 
 list_of_urls = [
                 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
-                #'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
+                # 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
                 'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
                 'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title #Problem with the Contents of Inventory
-                #'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
-
+                # 'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
                ]
+
 
 if __name__ == '__main__':
     for our_url in list_of_urls:
