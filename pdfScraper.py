@@ -6,7 +6,7 @@ from lxml import etree
 from lxml.builder import E
 import re
 
-
+        #ummm getdeflist?? 
 class FindingAidPDFtoEAD():
     def __init__(self, url):
         self.url = url
@@ -31,33 +31,42 @@ class FindingAidPDFtoEAD():
     ''' new code flow '''
     def run_conversion(self):
         # print etree.tostring(self.element_tree, pretty_print=True)  # dev only
-        # self.print_xml_to_file()                                    # dev only
+        self.print_xml_to_file()                                    # dev only
         self.grab_contents_of_inventory()
+        self.assemble_subject_terms_dictionary()
         # headers_and_contents = dict()                               # get_text_after_header() not yet functional
         # for heading_and_pages in self.grab_contents_of_inventory():
         #     header, pages = heading_and_pages
         #     text_block = self.get_text_after_header(header, pages)
         #     headers_and_contents[header] = text_block
 
+
+        #problem in 0717.pdf: the collapsed doesn't have the page numbers inside the dict...
     def grab_contents_of_inventory(self):
         contents = self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
         collapsed = self.collapse(contents)
+        print collapsed
         inventory = []
         for top, text in collapsed.iteritems():
             heading, page = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', text)[0]
             pages_tuple = self.split_on_char('-', page)
             inventory.append((heading, pages_tuple))
-        # print inventory
+        print inventory
         return inventory
 
+
+        # if there are two elements following the top, we need them in the same tuple...
     def collapse(self, tree):
         collapsed = {}
         for elm in tree:
             top = elm.getparent().get('top')
+            
             if top in collapsed:
                 existing_text = collapsed[top] + ' ' + etree.tostring(elm, method='text').strip().lower()
+                # print existing_text
             else:
                 collapsed[top] = '' + etree.tostring(elm, method='text').strip().lower()
+        # print collapsed
         return collapsed
 
     def split_on_char(self, char, text):
@@ -67,9 +76,11 @@ class FindingAidPDFtoEAD():
             start, end = text, text
         return (start, end)
 
+
     def get_text_after_header(self, header, pages_tuple):
+        # does this really work? contents don't always list correct endpage...
         # beginning_page, end_page = pages_tuple
-        # ok, but fails to resume reading subtext at pagebreaks.
+        # ok, but fails to resume reading subtext at pagebreaks. #add a check for subtext one page in advance?
         # also fails on formatting changes
         # elem_of_header = self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(beginning_page, header.lower()))
         # elems_following = elem_of_header[0].getparent().itersiblings()
@@ -77,6 +88,38 @@ class FindingAidPDFtoEAD():
         #     print sibling.text
         # unfinished.  It shall return all the text beneath a specified header.
         pass
+
+    # def assemble_subject_terms_dictionary(self):
+    #     # subject_terms {'geoname': '' ,'persname': '','subject': '','title_subject': '','occupation':'','genreform': ''}                      
+    #     # or
+    #     # subject_terms {'item': 'geoname' etc???}
+    #     with open('geoname.txt') as f:
+    #         geoname_list = list(str(line.strip('\r\n')) for line in f)
+    #     print geoname_list
+    #     # persname = open('persname.txt', r)
+    #     with open('persname.txt') as f:
+    #         persname_list = list(str(line.strip('\r\n')) for line in f)
+    #     print persname_list
+    #     # subject = open('subject.txt', r)
+    #     with open('subject.txt') as f:
+    #         subject_list = list(str(line.strip('\r\n')) for line in f)
+    #     # print subject_list
+    #     # title_subject = open('title-subject.txt', r)
+    #     with open('title_subject.txt') as f:
+    #         title_subject_list = list(str(line.strip('\r\n')) for line in f)
+    #     # print title_subject_list
+    #     # occupation = open('occupation.txt', r)
+    #     with open('occupation.txt') as f:
+    #         occupation_list = list(str(line.strip('\r\n')) for line in f)
+    #     # print occupation_list
+    #     # genreform = open('genreform.txt', r)
+    #     with open('genreform.txt') as f: 
+    #         genreform_list = list(str(line.strip('\r\n')) for line in f)
+    #     # print genreform_list
+
+
+
+
 
     '''                    '''
     ''' original code flow '''
@@ -143,7 +186,9 @@ class FindingAidPDFtoEAD():
 
         # function finds right hand column data based on text of left hand column - just for page 3
 
-        pdfextent = self.getrcoldata("Size.")
+        # all these items are found in the SUMMARY section. (not to be confused with 'Summary.')
+        # sometimes there is a period sometimes not...
+        pdfextent = self.getrcoldata("Size.") 
         pdfidates = self.getrcoldata("Inclusive dates.")
         pdfbdates = self.getrcoldata("Bulk dates.")
         pdfuserestrict = self.getrcoldata("Copyright.")
@@ -171,6 +216,7 @@ class FindingAidPDFtoEAD():
         pdfscopecontent = self.getalltext("SCOPE AND CONTENT NOTE", "LIST OF SERIES AND SUBSERIES", "INDEX TERMS")
         almostListSeries = self.getalltext("LIST OF SERIES AND SUBSERIES", "SERIES DESCRIPTIONS", "INDEX TERMS")
         seriesdesc = self.getalltext("SERIES DESCRIPTIONS", "INDEX TERMS", "CONTAINER LIST")
+        # this is where series & subseries data is added to the xml
         seriesdesc = self.seriesSplit(seriesdesc, "co1", "unitid", "p", True)
         # finalseries = self.seriesSplit(almostListSeries, "list", "head", "item", False)
 
@@ -257,10 +303,11 @@ class FindingAidPDFtoEAD():
         )
         print etree.tostring(ead, pretty_print=True)
         # problem right now with ..... vs whitespace, getting some lists ['section pg'] others ['section', 'pg']
+        # I think we solved this, yes?
 
+
+        # If I understand this correctly, this pulls the Left Column data and Right Column data from SUMMMARY 
     def getrcoldata(self, lcolname):
-        # this function may be obsolete, if we can expect "CONTENTS OF INVENTORY" to be correct.
-        # maybe setup that test later..
         lcoldata = []
         # try it first as is, if not then try it again without the last character (usually a period)
         try:
@@ -390,13 +437,14 @@ class FindingAidPDFtoEAD():
         finalseries = "".join(finalseries)
         return finalseries
 
-
     ''' Extra useful tidbits (for development) '''
 
-    # def print_xml_to_file(self):
-    #     file_name = 'cached_pdfs/{}.xml'.format(self.url[-8:-4])
-    #     with open(file_name, 'w') as f:
-    #         f.write(etree.tostring(self.element_tree, pretty_print=True))
+    def print_xml_to_file(self):
+        file_name = 'cached_pdfs/{}.xml'.format(self.url[-8:-4])
+        with open(file_name, 'w') as f:
+            f.write(etree.tostring(self.element_tree, pretty_print=True))
+    
+    
     #
     # def getDefListItem(self, label):
     #     address  = "/pdf2xml/page[@number=1]/text[contains(text(),'Compiled by')]/following-sibling::text[1]/text()"
@@ -414,7 +462,7 @@ list_of_urls = [
                 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
                 # 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
                 'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
-                'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title #Problem with the Contents of Inventory
+                # 'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title #Problem with the Contents of Inventory
                 # 'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
                ]
 
@@ -422,5 +470,6 @@ if __name__ == '__main__':
     for our_url in list_of_urls:
         print(our_url)
         A = FindingAidPDFtoEAD(our_url)
-        A.assemble_ead()        # old code flow - transitioning away
-        # A.run_conversion()    # new code flow - in development
+        # A.assemble_ead()        # old code flow - transitioning away
+        # A.print_xml_to_file()
+        A.run_conversion()    # new code flow - in development
