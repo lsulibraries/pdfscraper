@@ -36,8 +36,8 @@ class EadTest(ParametrizedTestCase):
         self.findaid = FindingAidPDFtoEAD(self.url)
 
     def test__init__(self):
-        assert len(self.findaid.root) > 0
-        self.assertIsInstance(self.findaid.root, lxml.etree._Element)
+        assert len(self.findaid.element_tree) > 0
+        self.assertIsInstance(self.findaid.element_tree, lxml.etree._Element)
 
     def testGetPageNum(self):
         terms = ["BIOGRAPHICAL/HISTORICAL NOTE",
@@ -261,9 +261,11 @@ class EadTest(ParametrizedTestCase):
         # print collapsed
 
     def testCollapseRealPdfs(self):
-        contents = self.findaid.root.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
+        contents = self.findaid.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
+
 
 if __name__ == "__main__":
+    #  dev -- don't worry about tests calling out on the internet -- pdfScraper.read_url_return_etree() is switched to read from cached file.
     suite = unittest.TestSuite()
     # suite.addTest(ParametrizedTestCase.parametrize(
     #     EadTest, url='http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf'))
