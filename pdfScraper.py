@@ -27,6 +27,8 @@ class FindingAidPDFtoEAD():
             self.element_tree = etree.fromstring(self.xmldata)
         return self.element_tree
 
+    '''               '''
+    ''' new code flow '''
     def run_conversion(self):
         # print etree.tostring(self.element_tree, pretty_print=True)  # dev only
         # self.print_xml_to_file()                                    # dev only
@@ -37,8 +39,6 @@ class FindingAidPDFtoEAD():
         #     text_block = self.get_text_after_header(header, pages)
         #     headers_and_contents[header] = text_block
 
-    '''               '''
-    ''' new code flow '''
     def grab_contents_of_inventory(self):
         contents = self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
         collapsed = self.collapse(contents)
@@ -100,7 +100,6 @@ class FindingAidPDFtoEAD():
         # titleproper - needs to account for multiple lines in some docs
         wholetitle = []
         titlelines = self.element_tree.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
-
         for el in titlelines:
             wholetitle.append(el.text.strip())
         pdftitleproper = 'A GUIDE TO THE ' + ' '.join(wholetitle)
@@ -147,12 +146,13 @@ class FindingAidPDFtoEAD():
         pdfextent = self.getrcoldata("Size.")
         pdfidates = self.getrcoldata("Inclusive dates.")
         pdfbdates = self.getrcoldata("Bulk dates.")
+        pdfuserestrict = self.getrcoldata("Copyright.")
+        pdfprefercite = self.getrcoldata("Citation.")
+        pdfabstract = self.getrcoldata("Summary.")
 
         pdflanguage = self.getrcoldata("Language.")
         if pdflanguage == "":
             pdflanguage = self.getrcoldata("Languages.")
-
-        pdfabstract = self.getrcoldata("Summary.")
 
         pdfaccessrestrict = self.getrcoldata("Restrictions on access.")
         if pdfaccessrestrict == "":
@@ -161,9 +161,6 @@ class FindingAidPDFtoEAD():
         pdfrelatedmaterial = self.getrcoldata("Related collections.")
         if pdfrelatedmaterial == "":
             pdfrelatedmaterial = self.getrcoldata("Related collection.")
-
-        pdfuserestrict = self.getrcoldata("Copyright.")
-        pdfprefercite = self.getrcoldata("Citation.")
 
         pdfphysloc = self.getrcoldata("Stack locations.")
         if pdfphysloc == "":
@@ -174,13 +171,8 @@ class FindingAidPDFtoEAD():
         pdfscopecontent = self.getalltext("SCOPE AND CONTENT NOTE", "LIST OF SERIES AND SUBSERIES", "INDEX TERMS")
         almostListSeries = self.getalltext("LIST OF SERIES AND SUBSERIES", "SERIES DESCRIPTIONS", "INDEX TERMS")
         seriesdesc = self.getalltext("SERIES DESCRIPTIONS", "INDEX TERMS", "CONTAINER LIST")
-        finalseries = self.seriesSplit(almostListSeries, "list", "head", "item", False)
         seriesdesc = self.seriesSplit(seriesdesc, "co1", "unitid", "p", True)
-
-        # xmlcode = etree.XML(seriesSplit(seriesdesc,"co1","unitid","unitid"))
-        # print etree.tostring(xmlcode, pretty_print=True)
-
-        # using efactory
+        # finalseries = self.seriesSplit(almostListSeries, "list", "head", "item", False)
 
         ead = (
             E.ead(
