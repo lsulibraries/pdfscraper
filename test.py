@@ -294,6 +294,11 @@ class EadTest(ParametrizedTestCase):
     def testCollapseRealPdfs(self):
         contents = self.findaid.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
 
+    # Unless our list of subject  terms is going to change we don't need this.
+    #     #should take known Index Terms and add headers to terms.
+    # def testAssembleSubjectTermsDictionary(self):
+
+
 
 if __name__ == "__main__":
     #  dev -- don't worry about tests calling out on the internet -- pdfScraper.read_url_return_etree() is switched to read from cached file.

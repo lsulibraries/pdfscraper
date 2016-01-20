@@ -33,7 +33,8 @@ class FindingAidPDFtoEAD():
         # print etree.tostring(self.element_tree, pretty_print=True)  # dev only
         self.print_xml_to_file()                                    # dev only
         self.grab_contents_of_inventory()
-        self.assemble_subject_terms_dictionary()
+        Index_Dict = self.assemble_subject_terms_dictionary()
+        self.tag_index_terms(Index_Dict)
         # headers_and_contents = dict()                               # get_text_after_header() not yet functional
         # for heading_and_pages in self.grab_contents_of_inventory():
         #     header, pages = heading_and_pages
@@ -100,9 +101,12 @@ class FindingAidPDFtoEAD():
                     subject_dict[line] = term
         print subject_dict
         return subject_dict
-        
+        # eventually this needs to tag the items in the Index terms
 
 
+    # def tag_index_terms(self, etree-terms, dictionary):
+    #     #need an etree of inventory?
+    # Index Terms are sometimes formated with a table, :rcoldata lcoldata will help
 
 
 
