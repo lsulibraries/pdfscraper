@@ -89,33 +89,18 @@ class FindingAidPDFtoEAD():
         # unfinished.  It shall return all the text beneath a specified header.
         pass
 
-    # def assemble_subject_terms_dictionary(self):
-    #     # subject_terms {'geoname': '' ,'persname': '','subject': '','title_subject': '','occupation':'','genreform': ''}                      
-    #     # or
-    #     # subject_terms {'item': 'geoname' etc???}
-    #     with open('geoname.txt') as f:
-    #         geoname_list = list(str(line.strip('\r\n')) for line in f)
-    #     print geoname_list
-    #     # persname = open('persname.txt', r)
-    #     with open('persname.txt') as f:
-    #         persname_list = list(str(line.strip('\r\n')) for line in f)
-    #     print persname_list
-    #     # subject = open('subject.txt', r)
-    #     with open('subject.txt') as f:
-    #         subject_list = list(str(line.strip('\r\n')) for line in f)
-    #     # print subject_list
-    #     # title_subject = open('title-subject.txt', r)
-    #     with open('title_subject.txt') as f:
-    #         title_subject_list = list(str(line.strip('\r\n')) for line in f)
-    #     # print title_subject_list
-    #     # occupation = open('occupation.txt', r)
-    #     with open('occupation.txt') as f:
-    #         occupation_list = list(str(line.strip('\r\n')) for line in f)
-    #     # print occupation_list
-    #     # genreform = open('genreform.txt', r)
-    #     with open('genreform.txt') as f: 
-    #         genreform_list = list(str(line.strip('\r\n')) for line in f)
-    #     # print genreform_list
+        #this dictionary ends up huge, but it is quick.
+    def assemble_subject_terms_dictionary(self):
+        subject_terms = ['geoname', 'persname', 'subject', 'title-subject', 'occupation', 'genreform']
+        subject_dict = {}
+        for term in subject_terms:
+            with open(term + '.txt') as f:
+                list_from_file = list(str(line.strip('\r\n')) for line in f)
+                for line in list_from_file:
+                    subject_dict[line] = term
+        print subject_dict
+        return subject_dict
+        
 
 
 
