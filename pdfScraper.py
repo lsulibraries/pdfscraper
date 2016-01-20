@@ -31,43 +31,62 @@ class FindingAidPDFtoEAD():
     ''' new code flow '''
     def run_conversion(self):
         # print etree.tostring(self.element_tree, pretty_print=True)  # dev only
-        self.print_xml_to_file()                                    # dev only
+        # self.print_xml_to_file()                                    # dev only
         self.grab_contents_of_inventory()
-        self.assemble_subject_terms_dictionary()
+        # self.assemble_subject_terms_dictionary()
         # headers_and_contents = dict()                               # get_text_after_header() not yet functional
         # for heading_and_pages in self.grab_contents_of_inventory():
         #     header, pages = heading_and_pages
         #     text_block = self.get_text_after_header(header, pages)
         #     headers_and_contents[header] = text_block
 
-
-        #problem in 0717.pdf: the collapsed doesn't have the page numbers inside the dict...
     def grab_contents_of_inventory(self):
         contents = self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
-        collapsed = self.collapse(contents)
-        print collapsed
-        inventory = []
-        for top, text in collapsed.iteritems():
-            heading, page = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', text)[0]
-            pages_tuple = self.split_on_char('-', page)
-            inventory.append((heading, pages_tuple))
-        print inventory
-        return inventory
+        pruned_elem_list = self.remove_non_text_elements(contents)
+        if re.findall('[a-zA-Z]', etree.tostring(pruned_elem_list[0], method='text')) and re.findall('[0-9]', etree.tostring(pruned_elem_list[0], method='text')): 
+            top_header_page_dict = self.collapse(contents)
+            inventory = []
+            for top, header_page in top_header_page_dict.iteritems():
+                heading, page = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', header_page)[0]
+                pages_tuple = self.split_on_char('-', page)
+                inventory.append((heading, pages_tuple))
+            return inventory
+        else:
+            pruned_elem_list = self.join_disjointed_heading_page(pruned_elem_list)
+            inventory = []
+            for elem in pruned_elem_list:
+                if re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', elem):
+                    heading, page = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', elem)[0]
+                    # Here need to be a way of parsing 4452.pdf Appendices
+                    pages_tuple = self.split_on_char('-', page)
+                    inventory.append((heading, pages_tuple))
+            return inventory
 
-
-        # if there are two elements following the top, we need them in the same tuple...
-    def collapse(self, tree):
+    def collapse(self, elem_list):
         collapsed = {}
-        for elm in tree:
+        for elm in elem_list:
             top = elm.getparent().get('top')
-            
             if top in collapsed:
                 existing_text = collapsed[top] + ' ' + etree.tostring(elm, method='text').strip().lower()
-                # print existing_text
             else:
                 collapsed[top] = '' + etree.tostring(elm, method='text').strip().lower()
-        # print collapsed
         return collapsed
+
+    def remove_non_text_elements(self, elem_list):
+        elements_with_text = []
+        for pos, item in enumerate(elem_list):
+            if re.findall('([A-Za-z0-9]+)', etree.tostring(item, method='text')):
+                elements_with_text.append(item)
+        return elements_with_text
+
+    def join_disjointed_heading_page(self, elem_list):
+        num_of_elems = len(elem_list)
+        joined_elem_list = []
+        for i in xrange(num_of_elems/2):
+            header, page = elem_list[2*i], elem_list[(2*i)+1]
+            head_page_str = "{} {}".format(etree.tostring(header, method='text'), etree.tostring(page, method='text'))
+            joined_elem_list.append(head_page_str)
+        return joined_elem_list
 
     def split_on_char(self, char, text):
         if char in text:
@@ -76,18 +95,18 @@ class FindingAidPDFtoEAD():
             start, end = text, text
         return (start, end)
 
-
-    def get_text_after_header(self, header, pages_tuple):
+    def get_text_after_header(self, header, pages_tuple, following_header):
+        # print(header)
         # does this really work? contents don't always list correct endpage...
-        # beginning_page, end_page = pages_tuple
+        beginning_page, end_page = pages_tuple
         # ok, but fails to resume reading subtext at pagebreaks. #add a check for subtext one page in advance?
         # also fails on formatting changes
-        # elem_of_header = self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(beginning_page, header.lower()))
-        # elems_following = elem_of_header[0].getparent().itersiblings()
-        # for sibling in elems_following:
-        #     print sibling.text
+        elem_of_header = self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(beginning_page, header.lower()))
+        elems_following = elem_of_header[0].getparent().itersiblings()
+        for sibling in elems_following:
+            pass
+            # print sibling.text
         # unfinished.  It shall return all the text beneath a specified header.
-        pass
 
     # def assemble_subject_terms_dictionary(self):
     #     # subject_terms {'geoname': '' ,'persname': '','subject': '','title_subject': '','occupation':'','genreform': ''}                      
@@ -116,9 +135,6 @@ class FindingAidPDFtoEAD():
     #     with open('genreform.txt') as f: 
     #         genreform_list = list(str(line.strip('\r\n')) for line in f)
     #     # print genreform_list
-
-
-
 
 
     '''                    '''
@@ -301,12 +317,13 @@ class FindingAidPDFtoEAD():
                 level='collection', type='inventory', relatedencoding='MARC21'
             )
         )
-        print etree.tostring(ead, pretty_print=True)
+        # print etree.tostring(ead, pretty_print=True)
         # problem right now with ..... vs whitespace, getting some lists ['section pg'] others ['section', 'pg']
         # I think we solved this, yes?
 
 
         # If I understand this correctly, this pulls the Left Column data and Right Column data from SUMMMARY 
+
     def getrcoldata(self, lcolname):
         lcoldata = []
         # try it first as is, if not then try it again without the last character (usually a period)
@@ -376,6 +393,8 @@ class FindingAidPDFtoEAD():
                     bottom = secondheadertop
                 else:
                     bottom = "1000"
+                # print('p: ', p)
+                # print('bottom: ', bottom)
                 thingie = '//page[@number={}]/text[@top>={}and @top<{}]|//page[@number={}]/text[@top>={}and @top<{}]/b'.format(
                         str(p),
                         str(int(firstheadertop)+3),
@@ -384,6 +403,7 @@ class FindingAidPDFtoEAD():
                         str(int(firstheadertop)+3),
                         str(int(bottom)-3)
                         )
+                # print('thingie', thingie)
                 data = self.element_tree.xpath(thingie)
                 for el in data:
                     if not el.text:  # removes blank nodes
@@ -411,6 +431,10 @@ class FindingAidPDFtoEAD():
         return pagenumber, termtop
 
     def seriesSplit(self, textinput, outerwrap, insidewrap, subwrap, check):
+        # print('textinput: ', textinput)
+        # print('outerwrap: ', outerwrap)
+        # print('subwrap: ', subwrap)
+        # print('check: ', check)
         outerwrapf = "<" + outerwrap + ">"
         outerwrapb = "</" + outerwrap + ">"
         insidewrapf = "<" + insidewrap + ">"
@@ -435,6 +459,7 @@ class FindingAidPDFtoEAD():
         finalseries.insert(0, "<arrangement encodinganalog='351'>")
         finalseries.append("</arrangement>")
         finalseries = "".join(finalseries)
+        # print etree.tostring(finalseries, pretty_print=True)
         return finalseries
 
     ''' Extra useful tidbits (for development) '''
@@ -460,10 +485,10 @@ class FindingAidPDFtoEAD():
 
 list_of_urls = [
                 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
-                # 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
+                'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
                 'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
-                # 'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title #Problem with the Contents of Inventory
-                # 'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
+                'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title #Problem with the Contents of Inventory
+                'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
                ]
 
 if __name__ == '__main__':
