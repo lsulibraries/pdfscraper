@@ -219,7 +219,7 @@ class EadTest(ParametrizedTestCase):
 
 
     def testCollapser(self):
-            otherunit = '''<unit><text top="174" left="135" width="647" height="16" font="0"><a href="tmpqOHeUC.html#3">SUMMARY ........................................................................................................................ 3</a></text>
+            unit_0717 = '''<unit><text top="174" left="135" width="647" height="16" font="0"><a href="tmpqOHeUC.html#3">SUMMARY ........................................................................................................................ 3</a></text>
                 <text top="170" left="782" width="4" height="21" font="2"> </text>
                 <text top="195" left="135" width="647" height="16" font="0"><a href="tmpqOHeUC.html#4">BIOGRAPHICAL/HISTORICAL NOTE .......................................................................... 4</a></text>
                 <text top="191" left="782" width="4" height="21" font="2"> </text>
@@ -293,6 +293,11 @@ class EadTest(ParametrizedTestCase):
 
     def testCollapseRealPdfs(self):
         contents = self.findaid.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
+
+    # Unless our list of subject  terms is going to change we don't need this.
+    #     #should take known Index Terms and add headers to terms.
+    # def testAssembleSubjectTermsDictionary(self):
+
 
 
 if __name__ == "__main__":

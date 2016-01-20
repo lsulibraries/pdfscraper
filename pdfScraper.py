@@ -6,7 +6,7 @@ from lxml import etree
 from lxml.builder import E
 import re
 
-        #ummm getdeflist?? 
+
 class FindingAidPDFtoEAD():
     def __init__(self, url):
         self.url = url
@@ -34,6 +34,8 @@ class FindingAidPDFtoEAD():
         # self.print_xml_to_file()                                    # dev only
         self.grab_contents_of_inventory()
         # self.assemble_subject_terms_dictionary()
+        # Index_Dict = self.assemble_subject_terms_dictionary()
+        # self.tag_index_terms(Index_Dict)
         # headers_and_contents = dict()                               # get_text_after_header() not yet functional
         # for heading_and_pages in self.grab_contents_of_inventory():
         #     header, pages = heading_and_pages
@@ -96,8 +98,6 @@ class FindingAidPDFtoEAD():
         return (start, end)
 
     def get_text_after_header(self, header, pages_tuple, following_header):
-        # print(header)
-        # does this really work? contents don't always list correct endpage...
         beginning_page, end_page = pages_tuple
         # ok, but fails to resume reading subtext at pagebreaks. #add a check for subtext one page in advance?
         # also fails on formatting changes
@@ -108,33 +108,22 @@ class FindingAidPDFtoEAD():
             # print sibling.text
         # unfinished.  It shall return all the text beneath a specified header.
 
-    # def assemble_subject_terms_dictionary(self):
-    #     # subject_terms {'geoname': '' ,'persname': '','subject': '','title_subject': '','occupation':'','genreform': ''}                      
-    #     # or
-    #     # subject_terms {'item': 'geoname' etc???}
-    #     with open('geoname.txt') as f:
-    #         geoname_list = list(str(line.strip('\r\n')) for line in f)
-    #     print geoname_list
-    #     # persname = open('persname.txt', r)
-    #     with open('persname.txt') as f:
-    #         persname_list = list(str(line.strip('\r\n')) for line in f)
-    #     print persname_list
-    #     # subject = open('subject.txt', r)
-    #     with open('subject.txt') as f:
-    #         subject_list = list(str(line.strip('\r\n')) for line in f)
-    #     # print subject_list
-    #     # title_subject = open('title-subject.txt', r)
-    #     with open('title_subject.txt') as f:
-    #         title_subject_list = list(str(line.strip('\r\n')) for line in f)
-    #     # print title_subject_list
-    #     # occupation = open('occupation.txt', r)
-    #     with open('occupation.txt') as f:
-    #         occupation_list = list(str(line.strip('\r\n')) for line in f)
-    #     # print occupation_list
-    #     # genreform = open('genreform.txt', r)
-    #     with open('genreform.txt') as f: 
-    #         genreform_list = list(str(line.strip('\r\n')) for line in f)
-    #     # print genreform_list
+    def assemble_subject_terms_dictionary(self):
+        subject_terms = ['geoname', 'persname', 'subject', 'title-subject', 'occupation', 'genreform']
+        subject_dict = {}
+        for term in subject_terms:
+            with open(term + '.txt') as f:
+                list_from_file = list(str(line.strip('\r\n')) for line in f)
+                for line in list_from_file:
+                    subject_dict[line] = term
+        print subject_dict
+        return subject_dict
+        # eventually this needs to tag the items in the Index terms
+
+
+    # def tag_index_terms(self, etree-terms, dictionary):
+    #     #need an etree of inventory?
+    # Index Terms are sometimes formated with a table, :rcoldata lcoldata will help
 
 
     '''                    '''
@@ -431,10 +420,6 @@ class FindingAidPDFtoEAD():
         return pagenumber, termtop
 
     def seriesSplit(self, textinput, outerwrap, insidewrap, subwrap, check):
-        # print('textinput: ', textinput)
-        # print('outerwrap: ', outerwrap)
-        # print('subwrap: ', subwrap)
-        # print('check: ', check)
         outerwrapf = "<" + outerwrap + ">"
         outerwrapb = "</" + outerwrap + ">"
         insidewrapf = "<" + insidewrap + ">"
@@ -459,7 +444,6 @@ class FindingAidPDFtoEAD():
         finalseries.insert(0, "<arrangement encodinganalog='351'>")
         finalseries.append("</arrangement>")
         finalseries = "".join(finalseries)
-        # print etree.tostring(finalseries, pretty_print=True)
         return finalseries
 
     ''' Extra useful tidbits (for development) '''
@@ -468,8 +452,7 @@ class FindingAidPDFtoEAD():
         file_name = 'cached_pdfs/{}.xml'.format(self.url[-8:-4])
         with open(file_name, 'w') as f:
             f.write(etree.tostring(self.element_tree, pretty_print=True))
-    
-    
+
     #
     # def getDefListItem(self, label):
     #     address  = "/pdf2xml/page[@number=1]/text[contains(text(),'Compiled by')]/following-sibling::text[1]/text()"
