@@ -32,15 +32,20 @@ class FindingAidPDFtoEAD():
     def run_conversion(self):
         # print etree.tostring(self.element_tree, pretty_print=True)  # dev only
         # self.print_xml_to_file()                                    # dev only
-        self.grab_contents_of_inventory()
-        # self.assemble_subject_terms_dictionary()
+        contents_of_inventory = self.grab_contents_of_inventory()
+        print 'contents_of_i: ', contents_of_inventory
+        c_o_i_ordered = sorted(contents_of_inventory, key=lambda item: int(item[1][0]))
+        for i in c_o_i_ordered:
+            self.get_text_after_header(i)
         # Index_Dict = self.assemble_subject_terms_dictionary()
         # self.tag_index_terms(Index_Dict)
-        # headers_and_contents = dict()                               # get_text_after_header() not yet functional
-        # for heading_and_pages in self.grab_contents_of_inventory():
-        #     header, pages = heading_and_pages
-        #     text_block = self.get_text_after_header(header, pages)
-        #     headers_and_contents[header] = text_block
+        
+
+        headers_and_contents = dict()                               # get_text_after_header() not yet functional
+        for header_and_pages in self.grab_contents_of_inventory():
+            header, pages = header_and_pages
+            text_block = self.get_text_after_header(header, pages)
+            headers_and_contents[header] = text_block
 
     def grab_contents_of_inventory(self):
         contents = self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
@@ -49,20 +54,20 @@ class FindingAidPDFtoEAD():
             top_header_page_dict = self.collapse(contents)
             inventory = []
             for top, header_page in top_header_page_dict.iteritems():
-                heading, page = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', header_page)[0]
+                header, page = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', header_page)[0]
                 pages_tuple = self.split_on_char('-', page)
-                inventory.append((heading, pages_tuple))
-            return inventory
+                inventory.append((header, pages_tuple))
         else:
-            pruned_elem_list = self.join_disjointed_heading_page(pruned_elem_list)
+            pruned_elem_list = self.join_disjointed_header_page(pruned_elem_list)
             inventory = []
             for elem in pruned_elem_list:
                 if re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', elem):
-                    heading, page = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', elem)[0]
+                    header, page = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', elem)[0]
                     # Here need to be a way of parsing 4452.pdf Appendices
                     pages_tuple = self.split_on_char('-', page)
-                    inventory.append((heading, pages_tuple))
-            return inventory
+                    inventory.append((header, pages_tuple))
+        # print 'inventory', inventory
+        return inventory
 
     def collapse(self, elem_list):
         collapsed = {}
@@ -81,7 +86,7 @@ class FindingAidPDFtoEAD():
                 elements_with_text.append(item)
         return elements_with_text
 
-    def join_disjointed_heading_page(self, elem_list):
+    def join_disjointed_header_page(self, elem_list):
         num_of_elems = len(elem_list)
         joined_elem_list = []
         for i in xrange(num_of_elems/2):
@@ -97,15 +102,22 @@ class FindingAidPDFtoEAD():
             start, end = text, text
         return (start, end)
 
-    def get_text_after_header(self, header, pages_tuple, following_header):
-        beginning_page, end_page = pages_tuple
+    def get_text_after_header(self, inventory_item, following_inventory_item=None):
+        header, (beginning_page, end_page) = inventory_item
+        if following_inventory_item:
+            following_header, (following_beginning_page, following_end_page) = following_inventory_item
+        print("header, page, page: ", header, beginning_page, end_page)
         # ok, but fails to resume reading subtext at pagebreaks. #add a check for subtext one page in advance?
         # also fails on formatting changes
-        elem_of_header = self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(beginning_page, header.lower()))
+        # print self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]')
+        elem_of_header = self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(beginning_page, header.lower().strip()))
+        #print 'headaer_elem', elem_of_header
         elems_following = elem_of_header[0].getparent().itersiblings()
         for sibling in elems_following:
-            pass
-            # print sibling.text
+            for i in sibling.iterchildren():
+                print 'BOLD: ', i.text
+            print "Normal: ", sibling.text
+
         # unfinished.  It shall return all the text beneath a specified header.
 
     def assemble_subject_terms_dictionary(self):
@@ -116,7 +128,7 @@ class FindingAidPDFtoEAD():
                 list_from_file = list(str(line.strip('\r\n')) for line in f)
                 for line in list_from_file:
                     subject_dict[line] = term
-        print subject_dict
+        # print subject_dict
         return subject_dict
         # eventually this needs to tag the items in the Index terms
 
@@ -476,8 +488,9 @@ list_of_urls = [
 
 if __name__ == '__main__':
     for our_url in list_of_urls:
-        print(our_url)
+        print our_url
         A = FindingAidPDFtoEAD(our_url)
         # A.assemble_ead()        # old code flow - transitioning away
         # A.print_xml_to_file()
+        # self.assemble_subject_terms_dictionary()
         A.run_conversion()    # new code flow - in development
