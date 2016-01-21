@@ -34,19 +34,13 @@ class FindingAidPDFtoEAD():
         # self.print_xml_to_file()                                    # dev only
         contents_of_inventory = self.grab_contents_of_inventory()
         c_o_i_ordered = sorted(contents_of_inventory, key=lambda item: int(item[1][0]))
-        print 'contents_of_i_ordered: ', c_o_i_ordered
         for pos, i in enumerate(c_o_i_ordered):
-            self.get_text_after_header(i, c_o_i_ordered[pos+1])
-        # Index_Dict = self.assemble_subject_terms_dictionary()
+            if pos == len(c_o_i_ordered)-1:
+                self.get_text_after_header(i)
+            else:
+                self.get_text_after_header(i, c_o_i_ordered[pos+1])
         # self.tag_index_terms(Index_Dict)
-        
-
-        headers_and_contents = dict()                               # get_text_after_header() not yet functional
-        for header_and_pages in self.grab_contents_of_inventory():
-            header, pages = header_and_pages
-            text_block = self.get_text_after_header(header, pages)
-            headers_and_contents[header] = text_block
-
+ 
     def grab_contents_of_inventory(self):
         contents = self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
         pruned_elem_list = self.remove_non_text_elements(contents)
@@ -109,19 +103,27 @@ class FindingAidPDFtoEAD():
         return (start, end)
 
     def get_text_after_header(self, inventory_item, following_inventory_item=None):
+        print 'inventory item x:',  inventory_item
         header, (beginning_page, end_page) = inventory_item
-        print header, ((beginning_page), (end_page))
-        print following_inventory_item
-        if following_inventory_item:
-            following_header, (following_beginning_page, following_end_page) = following_inventory_item
         elem_of_header = self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(beginning_page, header.lower().strip()))
         self.get_first_page_siblings_and_children(elem_of_header)
-        if following_beginning_page - beginning_page > 1:
-            print '##################', xrange(beginning_page+1, following_beginning_page)
-            for page in xrange(beginning_page+1, following_beginning_page):
-                self.get_middle_page_siblings_and_childrent(page)
-        self.get_last_page_siblings_and_children(following_header, following_beginning_page)
+        # print header, ((beginning_page), (end_page))
+        # print following_inventory_item
+        if following_inventory_item:
+            following_header, (following_beginning_page, following_end_page) = following_inventory_item
+            if following_beginning_page - beginning_page > 1:
+                for page in xrange(beginning_page+1, following_beginning_page):
+                    self.get_middle_page_siblings_and_childrent(page)
+            self.get_last_page_siblings_and_children(following_header, following_beginning_page)
+        else:
+            count = 0
+            while (self.get_pdf_length() - beginning_page) - count > 0:
+                self.get_middle_page_siblings_and_childrent(beginning_page+1 + count)
+                count += 1
 
+    def get_pdf_length(self):
+        list_of_all_page_nums = [int(i) for i in self.element_tree.xpath('//page/@number')]
+        return max(list_of_all_page_nums)
 
     def get_first_page_siblings_and_children(self, elem_of_header):
         list_of_sibling_children_text = []
@@ -130,25 +132,22 @@ class FindingAidPDFtoEAD():
             for i in sibling.iterchildren():
                 list_of_sibling_children_text.append(i.text)
             list_of_sibling_children_text.append(sibling.text)
-        print list_of_sibling_children_text
+        # print list_of_sibling_children_text
         return list_of_sibling_children_text
 
     def get_middle_page_siblings_and_childrent(self, page):
-        print '----------- ', page, '------------------'
         list_of_sibling_children_text = []
         elems_following = self.element_tree.xpath('//page[@number="{}"]/text'.format(page))
         for sibling in elems_following:
             for i in sibling.iterchildren():
                 list_of_sibling_children_text.append(i.text)
             list_of_sibling_children_text.append(sibling.text)
-        print list_of_sibling_children_text
+        # print list_of_sibling_children_text
         return list_of_sibling_children_text
 
     def get_last_page_siblings_and_children(self, end_header, end_page):
-        print '--------------', end_page, '------------------'
+        # print '--------------', end_page, '------------------'
         header_xpath = self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(end_page, end_header.lower()))
-        print "HEADER: ", header_xpath[0].text
-        print "OTHER HEADER: ", self.element_tree.tostring(header_xpath, method="text")
         list_of_sibling_children_text = []
         elems_preceding =header_xpath[0].getparent().itersiblings(preceding=True)
         for sibling in elems_preceding:
@@ -156,11 +155,8 @@ class FindingAidPDFtoEAD():
                 list_of_sibling_children_text.append(i.text)
             list_of_sibling_children_text.append(sibling.text)
         list_of_sibling_children_text = list_of_sibling_children_text.reverse()
-        print list_of_sibling_children_text
+        # print list_of_sibling_children_text
         return list_of_sibling_children_text
-
-
-        return list_of_strings
 
     def assemble_subject_terms_dictionary(self):
         subject_terms = ['geoname', 'persname', 'subject', 'title-subject', 'occupation', 'genreform']
@@ -515,9 +511,7 @@ class FindingAidPDFtoEAD():
     #         return nodes_list[0].strip()
     #     return ''
     #
-    # def get_pdf_length(self):
-    #     list_of_all_page_nums = [int(i) for i in self.element_tree.xpath('//page/@number')]
-    #     return max(list_of_all_page_nums)
+
 
 
 list_of_urls = [
