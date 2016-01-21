@@ -33,10 +33,10 @@ class FindingAidPDFtoEAD():
         # print etree.tostring(self.element_tree, pretty_print=True)  # dev only
         # self.print_xml_to_file()                                    # dev only
         contents_of_inventory = self.grab_contents_of_inventory()
-        print 'contents_of_i: ', contents_of_inventory
         c_o_i_ordered = sorted(contents_of_inventory, key=lambda item: int(item[1][0]))
-        for i in c_o_i_ordered:
-            self.get_text_after_header(i)
+        print 'contents_of_i_ordered: ', c_o_i_ordered
+        for pos, i in enumerate(c_o_i_ordered):
+            self.get_text_after_header(i, c_o_i_ordered[pos+1])
         # Index_Dict = self.assemble_subject_terms_dictionary()
         # self.tag_index_terms(Index_Dict)
         
@@ -56,6 +56,9 @@ class FindingAidPDFtoEAD():
             for top, header_page in top_header_page_dict.iteritems():
                 header, page = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', header_page)[0]
                 pages_tuple = self.split_on_char('-', page)
+                temp_page_start, temp_page_end = pages_tuple
+                temp_page_start, temp_page_end = int(temp_page_start), int(temp_page_end)
+                pages_tuple = (temp_page_start, temp_page_end)
                 inventory.append((header, pages_tuple))
         else:
             pruned_elem_list = self.join_disjointed_header_page(pruned_elem_list)
@@ -65,6 +68,9 @@ class FindingAidPDFtoEAD():
                     header, page = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', elem)[0]
                     # Here need to be a way of parsing 4452.pdf Appendices
                     pages_tuple = self.split_on_char('-', page)
+                    temp_page_start, temp_page_end = pages_tuple
+                    temp_page_start, temp_page_end = int(temp_page_start), int(temp_page_end)
+                    pages_tuple = (temp_page_start, temp_page_end)
                     inventory.append((header, pages_tuple))
         # print 'inventory', inventory
         return inventory
@@ -104,21 +110,57 @@ class FindingAidPDFtoEAD():
 
     def get_text_after_header(self, inventory_item, following_inventory_item=None):
         header, (beginning_page, end_page) = inventory_item
+        print header, ((beginning_page), (end_page))
+        print following_inventory_item
         if following_inventory_item:
             following_header, (following_beginning_page, following_end_page) = following_inventory_item
-        print("header, page, page: ", header, beginning_page, end_page)
-        # ok, but fails to resume reading subtext at pagebreaks. #add a check for subtext one page in advance?
-        # also fails on formatting changes
-        # print self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]')
         elem_of_header = self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(beginning_page, header.lower().strip()))
-        #print 'headaer_elem', elem_of_header
+        self.get_first_page_siblings_and_children(elem_of_header)
+        if following_beginning_page - beginning_page > 1:
+            print '##################', xrange(beginning_page+1, following_beginning_page)
+            for page in xrange(beginning_page+1, following_beginning_page):
+                self.get_middle_page_siblings_and_childrent(page)
+        self.get_last_page_siblings_and_children(following_header, following_beginning_page)
+
+
+    def get_first_page_siblings_and_children(self, elem_of_header):
+        list_of_sibling_children_text = []
         elems_following = elem_of_header[0].getparent().itersiblings()
         for sibling in elems_following:
             for i in sibling.iterchildren():
-                print 'BOLD: ', i.text
-            print "Normal: ", sibling.text
+                list_of_sibling_children_text.append(i.text)
+            list_of_sibling_children_text.append(sibling.text)
+        print list_of_sibling_children_text
+        return list_of_sibling_children_text
 
-        # unfinished.  It shall return all the text beneath a specified header.
+    def get_middle_page_siblings_and_childrent(self, page):
+        print '----------- ', page, '------------------'
+        list_of_sibling_children_text = []
+        elems_following = self.element_tree.xpath('//page[@number="{}"]/text'.format(page))
+        for sibling in elems_following:
+            for i in sibling.iterchildren():
+                list_of_sibling_children_text.append(i.text)
+            list_of_sibling_children_text.append(sibling.text)
+        print list_of_sibling_children_text
+        return list_of_sibling_children_text
+
+    def get_last_page_siblings_and_children(self, end_header, end_page):
+        print '--------------', end_page, '------------------'
+        header_xpath = self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(end_page, end_header.lower()))
+        print "HEADER: ", header_xpath[0].text
+        print "OTHER HEADER: ", self.element_tree.tostring(header_xpath, method="text")
+        list_of_sibling_children_text = []
+        elems_preceding =header_xpath[0].getparent().itersiblings(preceding=True)
+        for sibling in elems_preceding:
+            for i in sibling.iterchildren():
+                list_of_sibling_children_text.append(i.text)
+            list_of_sibling_children_text.append(sibling.text)
+        list_of_sibling_children_text = list_of_sibling_children_text.reverse()
+        print list_of_sibling_children_text
+        return list_of_sibling_children_text
+
+
+        return list_of_strings
 
     def assemble_subject_terms_dictionary(self):
         subject_terms = ['geoname', 'persname', 'subject', 'title-subject', 'occupation', 'genreform']
