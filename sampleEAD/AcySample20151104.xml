@@ -1,0 +1,68 @@
+<ead relatedencoding="MARC21" type="inventory" level="collection">
+  <eadheader>
+    <eadid url="http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf" countrycode="us"></eadid>
+    <filedesc>
+      <titlestmt>
+        <titleproper>A GUIDE TO THE WILLIAM ACY, JR. PAPERS
+          <num type="Manuscript">Mss. 717, 722</num></titleproper>
+<!--I'm pretty sure the num tag can only contain numbers so I think the "Mss." should be removed-->
+        <subtitle>A Collection in the Louisiana and Lower Mississippi Valley Collections</subtitle>
+        <author>Luana Henderson</author>
+      </titlestmt>
+      <publicationstmt>
+        <publisher>Louisiana State University Special Collections</publisher>
+        <address>
+          <addressline>Hill Memorial Library</addressline>
+          <addressline>Baton Rouge, LA 70803</addressline>
+          <addressline>http://www.lib.lsu.edu/special</addressline>
+        </address>
+        <date>Revised 2008</date>
+      </publicationstmt>
+    </filedesc>
+  </eadheader>
+  <archdesc>
+    <did>
+      <head>SUMMARY</head>
+      <physdesc encodinganalog="300$a" label="Size">
+        <extent>1 linear ft.; 18 mss. v.; 22 pr. v.</extent></physdesc>
+      <unitdate type="inclusive" encodinganalog="245$f" label="Dates:">1844-1909.</unitdate>
+      <unitdate type="bulk" label="Dates:"></unitdate>
+      <langmaterial>
+        <language langcode="eng">English.</language>
+      </langmaterial>
+      <abstract label="Summary">Legal and financial papers, correspondence, memorandum books, record books, and printed material.</abstract>
+      <repository encodinganalog="825$a" label="Repository:">
+        <corpname>Louisiana State University Special Collections</corpname>
+        <subarea>Louisiana and Lower Mississippi Valley Collection</subarea>
+      </repository>
+      <physloc>E:1, F:1, OS:A.</physloc>
+    </did>
+    <accessrestrict>
+      <head>Restrictions on access</head>
+      <p>No restrictions.</p>
+    </accessrestrict>
+    <relatedmaterial encodinganalog="544 1">
+      <head>Related Collections</head>
+      <p>N/A</p>
+    </relatedmaterial>
+    <userestrict encodinganalog="540">
+      <head>Copyright</head>
+      <p>Physical rights are retained by the LSU Libraries.  Copyright of the original materials is retained by descendants of the creators of the materials in accordance with U.S. copyright law.</p>
+    </userestrict>
+    <prefercite encodinganalog="524">
+      <head>Preferred Citation</head>
+      <p>William Acy, Jr. Papers, Mss. 717, 722, Louisiana and Lower Mississippi Valley Collections, LSU Libraries, Baton Rouge,</p>
+    </prefercite>
+    <bioghist encodinganalog="545">
+      <head>BIOGRAPHICAL/HISTORICAL NOTE</head>
+      <p>William Acy, Jr., born in 1822, was a plantation owner in Tangipahoa Parish, Louisiana. He also served as Justice of the Peace of Ascension Parish, La. from 1885-1891. His father, William Acy, Sr., of the "Acey" family, emigrated from Hull, England, to the United States in the early 19th century. He lived in Baltimore, Maryland, then moved to General Wade Hampton's Millwood Plantation in South Carolina, and finally to Gen. Hampton's Point Houmas Plantation in Louisiana. William Acy, Jr. owned land in Louisiana and Mississippi, which included Standley Plantation in Carroll County, Mississippi. He married Margaret E. Stansbury in 1847, and after her death, he married Mrs. Mary Elizabeth Marchbanks Stevens, a widow, in 1865. He had one son, C. C. Acy. Among William Acy&#8217;s most prominent acquaintances was Francis T. Nicholls, who served as Governor of Louisiana and Chief Justice of the Louisiana State Supreme Court.</p>
+    </bioghist>
+    <scopecontent encodinganalog="520">
+      <head>SCOPE AND CONTENT NOTE</head>
+      <p>Correspondence, legal, and financial papers of William Acy, Jr., comprise this collection. Personal papers consist primarily of correspondence with relatives and friends in Maryland and England. They relate personal news and social activities, and provide some genealogical information. Among them is a letter from a cousin reporting on the poor living conditions in England and apathy of the people (Aug. 15, 1873). Business correspondence provides legal advice from Acy&#8217;s attorneys and friends. Correspondence of Francis T. Nicholls pertains to Acy's properties (1888-1892). Letters from T. H. Somerville concern Standley Plantation, in Greenwood, Mississippi (1898-1901), and those of R. N. Sims concern a law suit before the Louisiana Supreme Court (1872). Letters from his son, C. C. Acy, describe conditions and management problems at Standley Plantation. There is also a letter from a patient confined to Jackson State Hospital complaining of conditions and inquiring about the length of his stay at the facility (April 15, 1907). He also questions whether he may have been committed for political reasons. Additionally, there are numerous letters regarding litigation over the settlement of the estate of William Acy, Sr., who died in 1882. Approximately $40,000 was owed to him at his death along with possible rights to property in Louisiana and Mississippi. There are numerous copies of court records kept by Acy, Jr., documenting the progression of a lawsuit filed against him by his nephew, William B. Lynam, who claimed a share in the estate of William Acy, Sr. Other documents include commissions signed by Louisiana Governors Hebert, Wickliffe and Moore confirming Acy, Jr.'s election as Justice of the Peace of Ascension Parish (1855-1861); a petition to the court submitted by James H. Muse against William Acy, Jr., for slander (Dec. 21, 1882); and a certificate awarded to Acy by the Amite City Lodge, No. 175 of the Louisiana Grand Lodge of Freemasons (March 4, 1871). Other legal papers consist of deeds and documents regarding property Acy acquired in Louisiana and Mississippi; papers pertaining to the estates of William Acy, Sr. and Margaret Stansbury Acy; and a sample ballot for the State and Tangipahoa Parish election of 1900. Canceled checks, tax receipts, bills, and invoices comprise the financial paper. Printed materials consist of maps of Baltimore, Maryland (1901) and London (undated); a legal brief submitted to the Louisiana Supreme Court in the case of (1882); advertising handbills, broadsides, pamphlets, catalogs, and books pertaining to railway travel (1897, 1901, 1907, 1908); hypnosis (1898); treatment of disease; sale of books, baby carriages, and farm equipment, including a cotton gin (1898). Among the medical printed materials is (1901) and prominent Southerners on the success of treatments. Additional printed volumes include the (April 1889, 1894, 1899, 1900). Photographs include cartes des visites, a cabinet card and a tintype, mostly of unidentified individuals. Photographs of family members include Elizabeth Stansbury Acy (1859), Mary Elizabeth Marchbanks Stevens Acy (1887), and William Acy, Sr. (1856). Bank books (1866- 1883, 1897-1902), memorandum books (1877-1903) and record books (1850-1899) comprise the manuscript volumes.</p>
+    </scopecontent>
+    <arrangement encodinganalog="351"/>
+<!--This collection does not have series so it would not have an arrangement note yet, this will have to be added as a paragraph of text later-->
+    <arrangement encodinganalog="351"/>
+  </archdesc>
+</ead>
