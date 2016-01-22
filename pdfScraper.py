@@ -152,6 +152,16 @@ class FindingAidPDFtoEAD():
         return list_of_sibling_children_text
 
 
+    def get_text_recursive_list(self, element_list):
+        out = ''
+        for el in element_list:
+            text = self.get_text_recursive(el)
+            out += text.strip() + '\n'
+        return out
+
+    def get_text_recursive(self, element):
+        return etree.tostring(element, method='text').strip()
+
 
     '''                    '''
     ''' original code flow '''

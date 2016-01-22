@@ -299,6 +299,40 @@ class EadTest(ParametrizedTestCase):
     # def testAssembleSubjectTermsDictionary(self):
 
 
+    def testget_first_page_siblings_and_children(self):
+        fixture = '''<page>
+            <text>Scope and Content Note</text>
+            <text>The text of the note is here</text>
+        </page>'''
+        tree = etree.fromstring(fixture)
+        header = tree.xpath('//text[contains(text(), "Scope")]')
+        result = self.findaid.get_first_page_siblings_and_children(header)
+
+        self.assertEquals(result, "The text of The note is here", "Failed to get expected text; result was {}".format(str(result)))
+
+    def testGet_text_recursive(self):
+        fixture = '''<page>
+            <text>Scope <i>and</i> Content Note</text>
+            <text>2 <i>line</i> eee.</text>
+        </page>'''
+        tree    = etree.fromstring(fixture)
+        element = tree.xpath("//text[contains(text(), 'Scope')]")[0]
+        result  = self.findaid.get_text_recursive(element)
+
+        self.assertEquals(result, "Scope and Content Note")
+
+    def testGet_text_recursive_list(self):
+        fixture = '''<page>
+            <text>Scope <i>and</i> Content Note</text>
+            <text>Second <i>line</i></text>
+        </page>'''
+        tree     = etree.fromstring(fixture)
+        el_list  = tree.xpath("//text")
+        result   = self.findaid.get_text_recursive_list(el_list)
+        expected = "Scope and Content Note\nSecond line\n"
+
+        self.assertEquals(result, expected, "\nExpected:\n{}\nGot:\n{}".format(expected, result))
+    
 
 if __name__ == "__main__":
     #  dev -- don't worry about tests calling out on the internet -- pdfScraper.read_url_return_etree() is switched to read from cached file.
