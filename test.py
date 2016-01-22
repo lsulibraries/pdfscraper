@@ -4,6 +4,7 @@ import unittest
 from pdfScraper import FindingAidPDFtoEAD
 from lxml import etree
 import lxml
+import xml.etree.ElementTree as ET
 
 # http://eli.thegreenplace.net/2011/08/02/python-unit-testing-parametrized-test-cases
 
@@ -332,7 +333,10 @@ class EadTest(ParametrizedTestCase):
         expected = "Scope and Content Note\nSecond line\n"
 
         self.assertEquals(result, expected, "\nExpected:\n{}\nGot:\n{}".format(expected, result))
-    
+
+    def test_get_ead(self):
+        ead = self.findaid.get_ead()    
+        print ET.tostring(ead)
 
 if __name__ == "__main__":
     #  dev -- don't worry about tests calling out on the internet -- pdfScraper.read_url_return_etree() is switched to read from cached file.

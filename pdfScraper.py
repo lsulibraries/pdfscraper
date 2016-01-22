@@ -6,6 +6,8 @@ from lxml import etree
 from lxml.builder import E
 import re
 from terms_dict_set import get_term_set_dict
+import xml.etree.ElementTree as ET
+
 
 class FindingAidPDFtoEAD():
     def __init__(self, url):
@@ -162,6 +164,19 @@ class FindingAidPDFtoEAD():
     def get_text_recursive(self, element):
         return etree.tostring(element, method='text').strip()
 
+
+    def get_ead(self):
+        ead = ET.Element('ead', {'relatedencoding':"MARC21", 'type':"inventory", 'level':"collection"})
+        ead.append(self.get_eadheader())
+        #ead.append(self.get_archdesc())
+        return ead
+
+    def get_eadheader(self):
+        el = ET.Element('eadheader')
+        #el.append(self.)
+
+    def get_eadid(self):
+        return E.eadid('', countrycode='us', url=self.url)
 
     '''                    '''
     ''' original code flow '''
