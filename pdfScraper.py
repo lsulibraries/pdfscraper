@@ -173,10 +173,11 @@ class FindingAidPDFtoEAD():
 
     def get_eadheader(self):
         el = ET.Element('eadheader')
-        #el.append(self.)
+        el.append(self.get_eadid())
+        return el
 
     def get_eadid(self):
-        return E.eadid('', countrycode='us', url=self.url)
+        return ET.Element('eadid', {'countrycode':'us', 'url':self.url})
 
     '''                    '''
     ''' original code flow '''
