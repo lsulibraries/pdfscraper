@@ -175,6 +175,16 @@ class FindingAidPDFtoEAD():
     #     #need an etree of inventory?
     # Index Terms are sometimes formated with a table, :rcoldata lcoldata will help
 
+    def get_text_recursive_list(self, element_list):
+        out = ''
+        for el in element_list:
+            text = self.get_text_recursive(el)
+            out += text.strip() + '\n'
+        return out
+
+    def get_text_recursive(self, element):
+        return etree.tostring(element, method='text').strip()
+
 
     '''                    '''
     ''' original code flow '''
