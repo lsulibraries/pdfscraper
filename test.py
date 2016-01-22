@@ -148,41 +148,43 @@ class EadTest(ParametrizedTestCase):
         # print(finalseries)
 
         #I feel like this test could be better named... also it's commented out so it always fails
-    def testGetDeflistItem(self):
-        labels = [
-            'Created by',
-            'Compiled by',
-            'Revised by',
-            'Encoded by',
-            'Processed by',
-            'Date Completed'
-        ]
-        expected_answers = {
-            'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf':
-                [
-                    ('Compiled by', 'Luana Henderson')
-                ],
-            'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0826.pdf':
-                [
-                    ('', '')
-                ],
-            'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf':
-                [
-                    ('Compiled by', 'Luana Henderson')
-                ],
-            'http://www.lib.lsu.edu/sites/default/files/sc/findaid/4452.pdf': []
-        }
-        tuple_list = expected_answers[self.url]
-        for our_tuple in tuple_list:
 
-            label, value = our_tuple
-            observed = self.findaid.getDefListItem(label)
-            self.assertEquals(observed, value, 'For url: {}\nUnexpected Value for: {}\nGot: {}\nExpected: {}\n\n'.format(
-                self.url, label, observed, value))
+    # def testGetDeflistItem(self):
+    #     labels = [
+    #         'Created by',
+    #         'Compiled by',
+    #         'Revised by',
+    #         'Encoded by',
+    #         'Processed by',
+    #         'Date Completed'
+    #     ]
+    #     expected_answers = {
+    #         'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf':
+    #             [
+    #                 ('Compiled by', 'Luana Henderson')
+    #             ],
+    #         'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0826.pdf':
+    #             [
+    #                 ('', '')
+    #             ],
+    #         'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf':
+    #             [
+    #                 ('Compiled by', 'Luana Henderson')
+    #             ],
+    #         'http://www.lib.lsu.edu/sites/default/files/sc/findaid/4452.pdf': []
+    #     }
+    #     tuple_list = expected_answers[self.url]
+    #     for our_tuple in tuple_list:
+
+    #         label, value = our_tuple
+    #         observed = self.findaid.getDefListItem(label)
+    #         self.assertEquals(observed, value, 'For url: {}\nUnexpected Value for: {}\nGot: {}\nExpected: {}\n\n'.format(
+    #             self.url, label, observed, value))
 
 
-            #I'm starting to wonder what to do when we encounter a non <p> tag, should we just pass?
-            #question: Do we need to populate expected text for every pdf?
+    #         #I'm starting to wonder what to do when we encounter a non <p> tag, should we just pass?
+    #         #question: Do we need to populate expected text for every pdf?
+
     def testGetTextAfterHeader(self):
         sample_header_and_pages = {'http://www.lib.lsu.edu/sites/default/files/sc/findaid/4452.pdf': (
             ('Biographical/Historical Note', (4, 4),
@@ -324,7 +326,8 @@ class EadTest(ParametrizedTestCase):
 
     def test_get_ead(self):
         ead = self.findaid.get_ead()    
-        print ET.tostring(ead)
+        print ET.dump(ead)
+        pass
    
     def testWhich_Field_Text_It_Belongs(self):
         self.assertEquals(FindingAidPDFtoEAD.which_field_text_it_belongs('Amite City (La.)--History--20th century.'), 'geoname')

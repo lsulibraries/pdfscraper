@@ -169,7 +169,7 @@ class FindingAidPDFtoEAD():
     def get_ead(self):
         ead = ET.Element('ead', {'relatedencoding':"MARC21", 'type':"inventory", 'level':"collection"})
         ead.append(self.get_eadheader())
-        #ead.append(self.get_archdesc())
+        ead.append(self.get_archdesc())
         return ead
 
     def get_eadheader(self):
@@ -180,6 +180,44 @@ class FindingAidPDFtoEAD():
     def get_eadid(self):
         return ET.Element('eadid', {'countrycode':'us', 'url':self.url})
 
+    def get_archdesc(self):
+        archdesc = ET.Element('archdesc')
+        a = ET.SubElement(archdesc, 'did')
+        b = ET.SubElement(archdesc, 'accessrestrict')
+        c = ET.SubElement(archdesc, 'relatedmaterial')
+        d = ET.SubElement(archdesc, 'userestrict')
+        e = ET.SubElement(archdesc, 'prefercite')
+        f = ET.SubElement(archdesc, 'bioghist')
+        g = ET.SubElement(archdesc, 'scopecontent')
+        h = ET.SubElement(archdesc, 'relatedmaterial')
+        i = ET.SubElement(archdesc, 'separatedmaterial')
+        j = ET.SubElement(archdesc, 'otherfindaid') # optional
+        k = ET.SubElement(archdesc, 'controlaccess')
+        l = ET.SubElement(archdesc, 'acqinfo')
+        m = ET.SubElement(archdesc, 'appraisal')
+        n = ET.SubElement(archdesc, 'accruals')
+        o = ET.SubElement(archdesc, 'dsc')
+        p = ET.SubElement(archdesc, 'arrangement')
+        a1 = ET.SubElement(a, 'head')
+        a2 = ET.SubElement(a, 'physdesc')
+        a3 = ET.SubElement(a, 'unitdate')
+        a4 = ET.SubElement(a, 'langmaterial')
+        a5 = ET.SubElement(a, 'abstract')
+        a6 = ET.SubElement(a, 'repository')
+        a7 = ET.SubElement(a, 'physloc')
+        b1 = ET.SubElement(b, 'head')
+        b2 = ET.SubElement(b, 'p')
+        c1 = ET.SubElement(c, 'head')
+        c2 = ET.SubElement(c, 'p')
+        d1 = ET.SubElement(d, 'head')
+        d2 = ET.SubElement(d, 'p')
+        e1 = ET.SubElement(e, 'head')
+        e2 = ET.SubElement(e, 'p')
+        f1 = ET.SubElement(f, 'head')
+        f2 = ET.SubElement(f, 'p')
+        # ET.dump(archdesc)
+        # print ET.tostring(archdesc)
+        return archdesc
 
     @staticmethod
     def which_field_text_it_belongs(text):
