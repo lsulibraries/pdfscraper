@@ -119,7 +119,6 @@ class FindingAidPDFtoEAD():
         else:
             for i in self.do_get_last_pages_if_last_header(beginning_page):
                 text_after_header.append(i)
-        print "HEADER", header, "TEXT", text_after_header
         return text_after_header
 
     def get_pdf_length(self):
@@ -166,6 +165,14 @@ class FindingAidPDFtoEAD():
     def get_text_recursive(self, element):
         return etree.tostring(element, method='text', encoding="UTF-8").strip()
 
+    @staticmethod
+    def which_field_text_it_belongs(text):
+        term_dict_set = get_term_set_dict()
+        for term, values_set in term_dict_set.iteritems():
+            if text in values_set:
+                return term
+        else:
+            return None
     '''                    '''
     ''' original code flow '''
     def assemble_ead(self):
