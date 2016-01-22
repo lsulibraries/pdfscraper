@@ -66,7 +66,6 @@ class FindingAidPDFtoEAD():
                     temp_page_start, temp_page_end = int(temp_page_start), int(temp_page_end)
                     pages_tuple = (temp_page_start, temp_page_end)
                     inventory.append((header, pages_tuple))
-        # print 'inventory', inventory
         return inventory
 
     def collapse(self, elem_list):
@@ -103,12 +102,9 @@ class FindingAidPDFtoEAD():
         return (start, end)
 
     def get_text_after_header(self, inventory_item, following_inventory_item=None):
-        print 'inventory item x:',  inventory_item
         header, (beginning_page, end_page) = inventory_item
         elem_of_header = self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(beginning_page, header.lower().strip()))
         self.get_first_page_siblings_and_children(elem_of_header)
-        # print header, ((beginning_page), (end_page))
-        # print following_inventory_item
         if following_inventory_item:
             following_header, (following_beginning_page, following_end_page) = following_inventory_item
             if following_beginning_page - beginning_page > 1:
@@ -132,7 +128,6 @@ class FindingAidPDFtoEAD():
             for i in sibling.iterchildren():
                 list_of_sibling_children_text.append(i.text)
             list_of_sibling_children_text.append(sibling.text)
-        # print list_of_sibling_children_text
         return list_of_sibling_children_text
 
     def get_middle_page_siblings_and_childrent(self, page):
@@ -142,7 +137,6 @@ class FindingAidPDFtoEAD():
             for i in sibling.iterchildren():
                 list_of_sibling_children_text.append(i.text)
             list_of_sibling_children_text.append(sibling.text)
-        # print list_of_sibling_children_text
         return list_of_sibling_children_text
 
     def get_last_page_siblings_and_children(self, end_header, end_page):
@@ -155,7 +149,6 @@ class FindingAidPDFtoEAD():
                 list_of_sibling_children_text.append(i.text)
             list_of_sibling_children_text.append(sibling.text)
         list_of_sibling_children_text = list_of_sibling_children_text.reverse()
-        # print list_of_sibling_children_text
         return list_of_sibling_children_text
 
     def assemble_subject_terms_dictionary(self):
@@ -166,7 +159,6 @@ class FindingAidPDFtoEAD():
                 list_from_file = list(str(line.strip('\r\n')) for line in f)
                 for line in list_from_file:
                     subject_dict[line] = term
-        # print subject_dict
         return subject_dict
         # eventually this needs to tag the items in the Index terms
 
