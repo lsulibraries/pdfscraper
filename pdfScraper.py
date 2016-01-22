@@ -39,7 +39,6 @@ class FindingAidPDFtoEAD():
                 self.get_text_after_header(i)
             else:
                 self.get_text_after_header(i, c_o_i_ordered[pos+1])
-        # self.tag_index_terms(Index_Dict)
  
     def grab_contents_of_inventory(self):
         contents = self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
@@ -429,8 +428,6 @@ class FindingAidPDFtoEAD():
                     bottom = secondheadertop
                 else:
                     bottom = "1000"
-                # print('p: ', p)
-                # print('bottom: ', bottom)
                 thingie = '//page[@number={}]/text[@top>={}and @top<{}]|//page[@number={}]/text[@top>={}and @top<{}]/b'.format(
                         str(p),
                         str(int(firstheadertop)+3),
@@ -439,7 +436,6 @@ class FindingAidPDFtoEAD():
                         str(int(firstheadertop)+3),
                         str(int(bottom)-3)
                         )
-                # print('thingie', thingie)
                 data = self.element_tree.xpath(thingie)
                 for el in data:
                     if not el.text:  # removes blank nodes
