@@ -22,7 +22,6 @@ African American Catholics--Louisiana--Baton Rouge.
 African American children--Education--Louisiana.
 African American educators--Oklahoma--Biography--Sources.
 African American educators--Oklahoma--Photographs.
-African American farmers--Louisiana.
 African American household employees--Louisiana.
 African American poets--Intellectual life--20th century.
 African American politicians--Louisiana.
@@ -59,9 +58,7 @@ Aging--Political aspects--Louisiana.
 Agricultural colleges--Louisiana--Baton Rouge--Faculty.
 Agricultural contracts--Louisiana.
 Agricultural extension work--United States.
-Agricultural laborers, Foreign--United States.
-Agricultural laborers--Louisiana.
-Agricultural laborers--Mississippi.
+
 Agricultural wages--Louisiana.
 Agriculture and politics--Louisiana.
 Agriculture and state--Louisiana.
@@ -154,7 +151,6 @@ Attorneys general--Louisiana.
 Audubon societies--Louisiana--Baton Rouge.
 Authors and publishers--Louisiana.
 Authors' wives--Louisiana.
-Authors, American--Louisiana.
 Automobile racing.
 Bakery employees--Louisiana.
 Balls (Parties)--Louisiana.
@@ -234,7 +230,6 @@ Cajuns--Social life and customs.
 Cajuns--Social life and customs--20th century.
 Calisthenics--Louisiana--Baton Rouge.
 Campaign funds--Louisiana.
-Campaign literature--Louisiana.
 Campaign paraphernalia--Louisiana.
 Camps--Louisiana--Photographs.
 Canals--Louisiana.
@@ -349,7 +344,6 @@ College students--Mississippi.
 College students--Social life and customs.
 College teachers as authors--Louisiana--Baton Rouge.
 College teachers' spouses--Louisiana--Baton Rouge.
-College teachers--Louisiana.
 Colonists--California.
 Colonists--Oregon.
 Color prints, Japanese.
@@ -878,7 +872,6 @@ Danes--Louisiana.
 Deaf children--Louisiana.
 Deaf--Institutional care--Louisiana.
 Deafness in children--Louisiana.
-Death notices--Louisiana.
 Debt, Imprisonment for--Cuba.
 Debt--Louisiana.
 Debtor and creditor--Mississippi--Osyka.
@@ -1133,7 +1126,6 @@ Freemasonry--Louisiana.
 Freemasonry--Louisiana--Lodges.
 Freemasonry--Mississippi.
 Freemasonry--Mississippi--Natchez.
-Freemasons--Louisiana.
 French American literature--Louisiana.
 French American literature--Louisiana--19th century.
 French American newspapers
@@ -1185,7 +1177,6 @@ Glands--Diseases.
 Gold mines and mining--West (U.S.)
 Government aid to education--Louisiana.
 Government vessels--United States--Photographs.
-Governors--Louisiana.
 Governors--Louisiana--Election.
 Gravel--Louisiana--Florida Parishes--Photographs.
 Gravity waves--Measurement.
@@ -1388,7 +1379,6 @@ Leatherwork--Louisiana.
 Legislation--United States.
 Legislative bills.
 Legislators' spouses--Louisiana.
-Legislators--Louisiana.
 Leprosy.
 Leprosy--Hospitals--Louisiana--Carville.
 Leprosy--Louisiana.
@@ -1400,11 +1390,9 @@ Levees--Louisiana--Photographs
 Levees--Louisiana--Saint Charles Parish.
 Levees--Louisiana--Terrebonne Parish.
 Levees--Mississippi River.
-Librarians--Louisiana.
 Libraries--Louisiana.
 Library legislation--Louisiana.
 Library science--Awards--Louisiana.
-Lieutenant governors--Louisiana.
 Lighthouses--Louisiana--Photographs.
 Limber trade--Louisiana.
 Literary agents--United States.
@@ -1430,7 +1418,6 @@ Longleaf pine--Louisiana.
 Lotteries--Louisiana.
 Louisiana Purchase.
 Louisiana Purchase--Centennial celebrations, etc.
-Louisiana--Politics and government--1865-1950.
 Low temperature research--United States.
 Lumber camps--Louisiana.
 Lumber trade--Florida.
@@ -1540,7 +1527,6 @@ Missionary Ridge, Battle of, Tenn., 1863.
 Mobile Bay, Battle of, Ala., 1864.
 Molasses industry--Louisiana.
 Molasses.
-Money--Confederate States of America.
 Mormons--Persecutions--Utah.
 Mosquitoes--Control--Louisiana--Photographs.
 Mother and child--United States.
@@ -1639,8 +1625,6 @@ Petroleum law and legislation.
 Petroleum law and legislation--Louisiana.
 Petroleum refineries--Louisiana--Baton Rouge.
 Philanthropists--Louisiana--Baton Rouge.
-Photographers--Louisiana.
-Photographers--New York (State)
 Photography--Equipment and supplies.
 Physicians as authors--Louisiana.
 Pilots and pilotage--Louisiana.
@@ -1665,9 +1649,6 @@ Plantation life--Southern States.
 Plantation owners' spouses--Family relationships--Louisiana.
 Plantation owners' spouses--Louisiana--East Feliciana Parish.
 Plantation owners' spouses--Louisiana--West Feliciana Parish.
-Plantation owners--Louisiana.
-Plantation owners--Louisiana--West Feliciana Parish.
-Plantation workers--Louisiana.
 Plantations,--Louisiana--West Feliciana Parish.
 Plantations--Antilles, Greater.
 Plantations--Arkansas.
@@ -1783,7 +1764,6 @@ Political participation--Louisiana--West Feliciana Parish.
 Political participation--Louisiana--Winn Parish.
 Political parties--Louisiana.
 Political parties--United States.
-Politicians--Louisiana.
 Politics and culture--Louisiana.
 Poll tax--Louisiana--Saint James Parish.
 Pond aquaculture--United States.
@@ -2016,15 +1996,12 @@ Slaughtering and slaughter-houses--Health aspects--Louisiana.
 Slaughtering and slaughter-houses--Law and legislation--Louisiana.
 Slaughtering and slaughter-houses--Louisiana.
 Slaughtering and slaughter-houses--Taxation--Louisiana.
-Slave bills of sale--Louisiana.
-Slave bills of sale--Louisiana--East Baton Rouge Parish.
 Slave insurrections.
 Slave insurrections--Louisiana.
 Slave insurrections--Louisiana--Pointe Coup+¬e Parish.
 Slave insurrections--Mississippi--Adams County.
 Slave insurrections--Southern States.
 Slave labor--Southern States.
-Slave records--Louisiana.
 Slave trade--Florida.
 Slave trade--Louisiana.
 Slave trade--United States.
@@ -2129,7 +2106,6 @@ Sociology, Rural--Southern States.
 Sociology--Study and teaching--Germany.
 Sociology--Study and teaching--Louisiana.
 Soil conservation--Louisiana.
-Soldiers--Confederate States of America.
 Sonatas.
 Songs, Cajun French.
 Space sciences--Experiments--Congresses.
@@ -2397,7 +2373,6 @@ Winter--Ohio.
 Wiretapping--United States.
 Women and literature--Mississippi.
 Women and literature--Southern States.
-Women authors, American--Louisiana.
 Women college students--Louisiana--Baton Rouge.
 Women college students--Louisiana--Lafayette.
 Women college students--Louisiana--New Orleans.

@@ -7,6 +7,9 @@ African American college administrators--Louisiana.
 African American college teachers--Louisiana.
 African American dentists--Louisiana--Baton Rouge.
 African American farmers--Louisiana.
+Agricultural laborers, Foreign--United States.
+Agricultural laborers--Louisiana.
+Agricultural laborers--Mississippi.
 Agricultural laborers--Florida--Gainesville.
 Agricultural laborers--Louisiana.
 Agricultural laborers--Louisiana--New Llano.
@@ -91,7 +94,6 @@ Geographers--United States.
 Geography teachers--California--San Diego.
 Governors--Dwellings--Louisiana.
 Governors--Louisiana.
-Governors--Louisiana--Election.
 Governors--Mississippi.
 Grocers--Mississippi.
 Harpists.
@@ -181,6 +183,8 @@ Pharmacists--Louisiana.
 Pharmacists--Mississippi.
 Pharmacists--Mississippi--Osyka.
 Photographers--Louisiana.
+Photographers--New York (State)
+Photographers--Louisiana.
 Photographers--Louisiana--Baton Rouge.
 Photographers--Louisiana--New Orleans.
 Photographers--Minnesota--Saint Paul.
@@ -200,6 +204,8 @@ Physicians--Maine.
 Physicians--Mississippi.
 Plantation overseers--Louisiana.
 Plantation owners.
+Plantation owners--Louisiana.
+Plantation owners--Louisiana--West Feliciana Parish.
 Plantation owners--Arkansas.
 Plantation owners--Family relationships--Louisiana.
 Plantation owners--Georgia.
