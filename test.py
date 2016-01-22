@@ -320,19 +320,10 @@ class EadTest(ParametrizedTestCase):
         result  = self.findaid.get_text_recursive(element)
 
         self.assertEquals(result, "Scope and Content Note")
-
-    def testGet_text_recursive_list(self):
-        fixture = '''<page>
-            <text>Scope <i>and</i> Content Note</text>
-            <text>Second <i>line</i></text>
-        </page>'''
-        tree     = etree.fromstring(fixture)
-        el_list  = tree.xpath("//text")
-        result   = self.findaid.get_text_recursive_list(el_list)
-        expected = "Scope and Content Note\nSecond line\n"
-
-        self.assertEquals(result, expected, "\nExpected:\n{}\nGot:\n{}".format(expected, result))
-    
+   
+    def testWhich_Field_Text_It_Belongs(self):
+        self.assertEquals(FindingAidPDFtoEAD.which_field_text_it_belongs('Amite City (La.)--History--20th century.'), 'geoname')
+        self.assertEquals(FindingAidPDFtoEAD.which_field_text_it_belongs('goobergobber'), None)
 
 if __name__ == "__main__":
     #  dev -- don't worry about tests calling out on the internet -- pdfScraper.read_url_return_etree() is switched to read from cached file.
