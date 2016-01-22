@@ -267,7 +267,6 @@ class FindingAidPDFtoEAD():
         el.append(self.get_titleproper())
         el.append(self.get_subtitle())
         el.append(self.get_author())
-        el.append(self.get_publicationstmt())
         return el
 
     def get_titleproper(self):
