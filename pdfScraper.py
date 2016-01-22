@@ -104,18 +104,23 @@ class FindingAidPDFtoEAD():
     def get_text_after_header(self, inventory_item, following_inventory_item=None):
         header, (beginning_page, end_page) = inventory_item
         elem_of_header = self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(beginning_page, header.lower().strip()))
-        self.get_first_page_siblings_and_children(elem_of_header)
+        text_after_header = []
+        for i in self.get_first_page_siblings_and_children(elem_of_header):
+            text_after_header.append(i)
         if following_inventory_item:
             following_header, (following_beginning_page, following_end_page) = following_inventory_item
             if following_beginning_page - beginning_page > 1:
                 for page in xrange(beginning_page+1, following_beginning_page):
                     self.get_middle_page_siblings_and_childrent(page)
-            self.get_last_page_siblings_and_children(following_header, following_beginning_page)
+
+            if self.get_last_page_siblings_and_children(following_header, following_beginning_page):
+                for i in self.get_last_page_siblings_and_children(following_header, following_beginning_page):
+                    text_after_header.append(i)
         else:
-            count = 0
-            while (self.get_pdf_length() - beginning_page) - count > 0:
-                self.get_middle_page_siblings_and_childrent(beginning_page+1 + count)
-                count += 1
+            for i in self.do_get_last_pages_if_last_header(beginning_page):
+                text_after_header.append(i)
+        print "HEADER", header, "TEXT", text_after_header
+        return text_after_header
 
     def get_pdf_length(self):
         list_of_all_page_nums = [int(i) for i in self.element_tree.xpath('//page/@number')]
@@ -125,43 +130,41 @@ class FindingAidPDFtoEAD():
         list_of_sibling_children_text = []
         elems_following = elem_of_header[0].getparent().itersiblings()
         for sibling in elems_following:
-            for i in sibling.iterchildren():
-                list_of_sibling_children_text.append(i.text)
-            list_of_sibling_children_text.append(sibling.text)
+            sibling_str = self.get_text_recursive(sibling)
+            if sibling_str and len(sibling_str) > 0:
+                list_of_sibling_children_text.append(sibling_str)
         return list_of_sibling_children_text
 
     def get_middle_page_siblings_and_childrent(self, page):
         list_of_sibling_children_text = []
         elems_following = self.element_tree.xpath('//page[@number="{}"]/text'.format(page))
         for sibling in elems_following:
-            for i in sibling.iterchildren():
-                list_of_sibling_children_text.append(i.text)
-            list_of_sibling_children_text.append(sibling.text)
+            sibling_str = self.get_text_recursive(sibling)
+            if sibling_str and len(sibling_str) > 0:
+                list_of_sibling_children_text.append(sibling_str)
         return list_of_sibling_children_text
 
     def get_last_page_siblings_and_children(self, end_header, end_page):
-        # print '--------------', end_page, '------------------'
-        header_xpath = self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(end_page, end_header.lower()))
+        header_xpath = self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(end_page, end_header.lower().strip()))
         list_of_sibling_children_text = []
-        elems_preceding =header_xpath[0].getparent().itersiblings(preceding=True)
+        elems_preceding = header_xpath[0].getparent().itersiblings(preceding=True)
         for sibling in elems_preceding:
-            for i in sibling.iterchildren():
-                list_of_sibling_children_text.append(i.text)
-            list_of_sibling_children_text.append(sibling.text)
+            sibling_str = self.get_text_recursive(sibling)
+            if sibling_str and len(sibling_str) > 0:
+                list_of_sibling_children_text.append(sibling_str)
         list_of_sibling_children_text = list_of_sibling_children_text.reverse()
         return list_of_sibling_children_text
 
-
-    def get_text_recursive_list(self, element_list):
-        out = ''
-        for el in element_list:
-            text = self.get_text_recursive(el)
-            out += text.strip() + '\n'
-        return out
+    def do_get_last_pages_if_last_header(self, beginning_page):
+        temp_text_list = []
+        count = 0
+        while (self.get_pdf_length() - beginning_page) - count > 0:
+            temp_text_list.append(self.get_middle_page_siblings_and_childrent(beginning_page + 1 + count))
+            count += 1
+        return temp_text_list
 
     def get_text_recursive(self, element):
-        return etree.tostring(element, method='text').strip()
-
+        return etree.tostring(element, method='text', encoding="UTF-8").strip()
 
     '''                    '''
     ''' original code flow '''
@@ -505,7 +508,7 @@ list_of_urls = [
                 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
                 'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
                 'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
-                'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title #Problem with the Contents of Inventory
+                'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title # Problem with the Contents of Inventory
                 'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
                ]
 
