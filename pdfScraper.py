@@ -5,7 +5,7 @@ import urllib2
 from lxml import etree
 from lxml.builder import E
 import re
-
+from terms_dict_set import get_term_set_dict
 
 class FindingAidPDFtoEAD():
     def __init__(self, url):
