@@ -151,21 +151,6 @@ class FindingAidPDFtoEAD():
         list_of_sibling_children_text = list_of_sibling_children_text.reverse()
         return list_of_sibling_children_text
 
-    def assemble_subject_terms_dictionary(self):
-        subject_terms = ['geoname', 'persname', 'subject', 'title-subject', 'occupation', 'genreform']
-        subject_dict = {}
-        for term in subject_terms:
-            with open(term + '.txt') as f:
-                list_from_file = list(str(line.strip('\r\n')) for line in f)
-                for line in list_from_file:
-                    subject_dict[line] = term
-        return subject_dict
-        # eventually this needs to tag the items in the Index terms
-
-
-    # def tag_index_terms(self, etree-terms, dictionary):
-    #     #need an etree of inventory?
-    # Index Terms are sometimes formated with a table, :rcoldata lcoldata will help
 
 
     '''                    '''
