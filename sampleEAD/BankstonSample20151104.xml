@@ -1,0 +1,114 @@
+<ead relatedencoding="MARC21" type="inventory" level="collection">
+  <eadheader>
+    <eadid url="http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf" countrycode="us"></eadid>
+    <filedesc>
+      <titlestmt>
+        <titleproper>A GUIDE TO THE JESSE BANKSTON PAPERS
+            <num type="Manuscript">Mss. 5078</num>
+<!--Can we remove the num tag from this section? I know that is how we tagged it originally but it messes up on import-->
+        </titleproper>
+        <subtitle>A Collection in the Louisiana and Lower Mississippi Valley Collections</subtitle>
+        <author>Luana Henderson</author>
+      </titlestmt>
+      <publicationstmt>
+        <publisher>Louisiana State University Special Collections</publisher>
+        <address>
+          <addressline>Hill Memorial Library</addressline>
+          <addressline>Baton Rouge, LA 70803</addressline>
+          <addressline>http://www.lib.lsu.edu/special</addressline>
+        </address>
+        <date>2012</date>
+      </publicationstmt>
+    </filedesc>
+  </eadheader>
+  <archdesc>
+    <did>
+      <head>SUMMARY</head>
+<!--Should include <origination>, <unitid>, and <unittitle>...<origination> may have to be added later since we do not include creator names on our summary pages but <unittitle> and <unitid> should come from the title page. <unittitle> is the collection title portion of <titleproper>. <unitid> is the Mss. number. EAD documents differentiate between the collection title and the title of the finding aid. This was difficult to convey in the tag document since our finding only have title for the collection, not the finding aid itself.-->
+      <physdesc encodinganalog="300$a" label="Size">
+        <extent>2.3 linear ft.</extent></physdesc>
+      <unitdate type="inclusive" encodinganalog="245$f" label="Dates:">1924-2010.</unitdate>
+      <unitdate type="bulk" label="Dates:">1956-1992.</unitdate>
+      <langmaterial>
+        <language langcode="eng">English</language>
+      </langmaterial>
+      <abstract label="Summary">Correspondence, political files, newspaper clippings, campaign material, and photographs reflect Jesse H. Bankston&#8217;s involvement in Louisiana state government and the Louisiana Democratic Party.</abstract>
+      <repository encodinganalog="825$a" label="Repository:">
+        <corpname>Louisiana State University Special Collections</corpname>
+        <subarea>Louisiana and Lower Mississippi Valley Collection</subarea>
+      </repository>
+      <physloc>116:24-25, OS:B, Vault:1</physloc>
+    </did>
+    <accessrestrict>
+      <head>Restrictions on access</head>
+      <p>Original letters of Hubert H. Humphrey (Sept. 28, 1964), Jimmy Carter (July 22, 1977), Bill Clinton (May 20, 1987) are restricted. Use photocopies.</p>
+    </accessrestrict>
+    <relatedmaterial encodinganalog="544 1">
+      <head>Related Collections</head>
+      <p>Jesse Bankston and Larry Bankston Oral History Interview, Mss. 4700.1173.  Democratic State Central Committee of Louisiana Papers, Mss. 3760, Louisiana and Lower Mississippi Valley Collections, LSU Libraries, Baton Rouge, La. Louisiana and Lower Mississippi Valley Collections, LSU Libraries, Baton Rouge, La.</p>
+    </relatedmaterial>
+    <userestrict encodinganalog="540">
+      <head>Copyright</head>
+      <p>For those materials not in the public domain, copyright is retained by the descendants of the creators in accordance with U.S. Copyright law.</p>
+    </userestrict>
+    <prefercite encodinganalog="524">
+      <head>Preferred Citation</head>
+      <p>Jesse H. Bankston Papers, Mss. 5078, Louisiana and Lower Mississippi Valley Collections, LSU Libraries, Baton Rouge, La.</p>
+    </prefercite>
+    <bioghist encodinganalog="545">
+      <head>BIOGRAPHICAL/HISTORICAL NOTE</head>
+      <p>Jesse Homer Bankston was born Oct. 7, 1907 to Allie Magee and Leon V. Bankston of Washington Parish, La. He was educated in local schools and received his Ruth Paine (1918&#8211;1997), daughter of Walter R. Paine, Sr. Ruth was a member of the Bankston began his career in government in 1940 under Governor As a management consultant, he was charged with the reorganization of state government. In 1942, he became an organizational specialist in the Louisiana Civil Service Department. Under Governor assistant in the Department of Institutions and later as the director of that same Department. The Department, which was created 1940 and re-organized in 1942, supervised all mental, tuberculosis, and general hospitals, together with the State Penitentiary and two institutions for delinquent youths. When Governor Earl K. Long left office in 1952, Bankston left state government to open a healthcare consulting firm. With Governor Long&#8217;s return to office in 1956, Bankston was appointed the director of the newly established Department of Hospitals. He held this position until the summer of 1959, when he was dismissed after a dispute over the governor&#8217;s mental health. After his dismissal, Bankston returned to his consulting firm, and began to work with Democratic Party candidates and issues. He also joined the boards of the newly established Louisiana Public Broadcasting, and State Board of Elementary and Secondary Education. Elected in 1968, he served on State Board of Elementary and Secondary Education for 28 years. During his tenure, he served as secretary and chairman of the Board. Bankston was also the longest serving member of the Louisiana Democratic State Central Committee, having served for 51 years until his death in 2010. In 2002, he was inducted into the Louisiana Political Hall of Fame. In addition to his political pursuits, he also served as president of the Baton Rouge YMCA, Young Men's Business Club, Mental Health Association, and Tuberculosis Society.</p>
+    </bioghist>
+    <scopecontent encodinganalog="520">
+      <head>SCOPE AND CONTENT NOTE</head>
+      <p>The collection, consisting of correspondence, political files, printed items and photographs, reflects Jesse H. Bankston&#8217;s involvement in Louisiana state government and the Louisiana Democratic Party. Correspondence discusses political elections, candidates, and government health services. Political files pertain to activities of the Democratic Party, Louisiana politicians, and Louisiana Department of Institutions and State Hospital Board. Printed items contain ephemera and published material. Ephemera include programs, invitations, campaign buttons and bumper stickers, and items relating to the Mardi Gras celebration in Washington, D. C. Published material includes books, serials, newspaper clippings, and scrapbooks relating to Louisiana politics, campaigns and the National Democratic Convention of 1976. Photographs contain portraits, group photographs, and snapshots, with group photographs making up a large part of this series. Early photographs show several Bankston family members (ca. 1930s-ca. 1957). The remaining images show politicians and members of the Democratic Party at political events. The collection also includes a few miscellaneous personal papers.</p>
+    </scopecontent>
+    <arrangement encodinganalog="351">
+      <head>List of Series and Subseries</head>
+      <list>
+        <head>Series I. Correspondence, 1937-2006, undated. </head>
+<!--I think this is my fault but I do not think that the Series should be tagged with the header tag, they should just be items alongside the subseries-->
+      </list>
+      <list>
+        <head>Series II. Political Files 1953-2007, undated. </head>
+        <item>Subseries 1. General Files, 1953-2007, undated. </item>
+        <item>Subseries 2. Earl K. Long File, ca. 1953-2003, undated. </item>
+        <item>Subseries 3. Louisiana Hospital Files, 1941-1959. </item>
+      </list>
+      <list>
+        <head>Series III. Printed Items, 1924-2010, undated. </head>
+        <item>Subseries 1. Ephemera, ca. 1924-2007, undated. </item>
+        <item>Subseries 2. Published Material, ca. 1936-2010, undated. </item>
+      </list>
+      <list>
+        <head>Series IV. Photographs, ca. 1930s-2005, undated. </head>
+      </list>
+      <list>
+        <head>Series V. Personal Papers, 1933-1952, undated.</head>
+      </list>
+    </arrangement>
+    <arrangement encodinganalog="351">
+<!--I know you haven't gotten to this part yet but the series descriptions should be within a <dsc> tag not as arrangement tag-->
+      <co1>
+        <unitid>Series I. Correspondence, 1937-2006, undated. Correspondence spans seven decades and reflects Jesse Bankston&#8217;s role in the Louisiana Democratic Party and in state government. Topics include political elections, candidates, and government health services. In his letters, Bankston also seeks employment (1940) and comments on higher education boards (1985). Also present is a list of businesses who hired female employees in Franklinton and Bogalusa; the list includes the average weekly wages of those employees (Feb. 23, 1940). A group of letters written in 1940 relate to Bankston&#8217;s job search, with one letter expressing his desire to find employment outside the sphere of politics (March 18, 1940). Correspondence with the Department of Political Science, University of North Carolina at Chapel Hill, discusses his proposed research topic on Louisiana state government (April-June 1945). In his letter of resignation to the Chairman of State Department of Institutions, Bankston points out the accomplishments of his four-year tenure (Sept. 2, 1952). Letters also discuss Gillis Long&#8217;s candidacy in the gubernatorial election (1963, 1969- 1971). Charles A. Patout mentions Long&#8217;s likely opponents in that race and he comments that voter turnout would be low for the youth vote and high for the African American vote (Dec. 29, 1969). implementation of the new Medicaid program, and he suggests a curtailment in Charity Hospital services (Dec. 30, 1968). Several letters express gratitude to Bankston for his political support. Correspondents include John McKeithen (Feb. 14, 1964), Edwin Edwards (June 14, 1974), Senator Russell Long (July 2, 1962), Hubert Humphrey (Sept. 28, 1964), and Bill Clinton (May 20, 1987). Bankston also promotes his own candidacy as a delegate to the upcoming constitutional convention (ca. 1970). </unitid>
+      </co1>
+      <co1>
+        <unitid>Series II. Political Files 1953-2007, undated. </unitid>
+        <p>Subseries 1. General Files, 1953-2007, undated. This subseries pertains to the activities of the Democratic State Central Committee of Louisiana and the Louisiana Democratic Party. It contains speeches, lists of Party members and contributors, and press releases. Speeches relate to healthcare (undated), the role of government, government policies, and political candidates. Press releases for the Democratic State Central Committee of Louisiana pertain to the Democratic Convention (Dec. 1981-March 1982). Also present is an autobiography of businessman and politician, Robert Angelle of St. Martin Parish (1896-1979). Other materials of note include transcriptions of two interviews conducted with Bankston by archivist, Lewis M. Morris (March 10, 1983) and university student, Jeremy Hammett (April 8, 2005). In both interviews, he discusses his involvement in Louisiana politics. Additionally, there is a 45-rpm recording of a Jimmy </p>
+        <p>Subseries 2. Earl K. Long File, ca. 1953-2003, undated. This group, comprised of correspondence and official statements, relates to Governor Earl K. Long&#8217;s confinement to a psychiatric hospital in the summer of 1959. They provide updates on the governor&#8217;s progress and state of mind. In personal narratives, Bankston describes his relationship to Long, and he recounts the events surrounding the hospitalization (July 8, 1986, Jan. May 16, 2002, undated). In an undelivered speech, Senator Russell Long praises his uncle&#8217;s political achievements, and he comments on Earl Long&#8217;s confinement (undated). as that of Senator Russell Long (Sept. 2, 2006). Correspondence written during 2002- 2003 pertains to the life and political accomplishments of Earl K. Long. </p>
+        <p>Subseries 3. Louisiana Hospital Files, 1941-1959. This subseries contains budget requests, financial reports, and a status report submitted by the Department of Institutions (1941-1944), and minutes and reports of the Louisiana State Hospital Board (Sept. 27, 1956-June 18, 1959). Papers of the Hospital Board detail programs and regulations proposed and implemented by the Board. </p>
+      </co1>
+      <co1>
+        <unitid>Series III. Printed Items, 1924-2010, undated. </unitid>
+        <p>Subseries 1. Ephemera, 1924-2007, undated. Most items in this subseries relate to political campaigns and events. This group contains programs, invitations, campaign buttons and bumper stickers, and items relating to the Mardi Gras celebration in Washington, D. C. Additionally, Huey P. Long&#8217;s opposition to the oil industry is explained in an open letter to the public in the form of a handbill (ca. 1924). Invitations extended to Jesse Bankston include inauguration ceremonies of presidents Jimmy Carter (1977) and Bill Clinton (1993), and Governor Kathleen Blanco of Louisiana (Jan. 2004). Also found in this group are Christmas cards sent by Governor Earl K. Long (ca. 1950, ca. 1957), and President Carter and Vice-President Mondale (1977-ca. 1979). Programs for the Capitol Correspondents Association Gridiron Show parody political figures, including Jesse Bankston (1960). </p>
+        <p>Subseries 2. Published Material, 1936-2010, undated.. Published material includes books, serials, and newspaper clippings. The book, booklet attempts made by Governor Jimmie Davis and the Louisiana Legislature to circumvent a federal desegregation order (1960). An issue of the administration of Governor Sam Houston Jones (Oct. /Nov. 1971). senator&#8217;s political achievements, and an issue of the Newspapers clippings report on political campaigns, political events, and the Louisiana Democratic Party. </p>
+      </co1>
+      <co1>
+        <unitid>Series IV. Photographs, ca. 1930s-2005, undated. This series contains portraits, group photographs, and snapshots, with group photographs making up a large part of this series. Among the earliest in the series are group photographs of Bankston family members (ca. 1930s-ca. 1957). The remaining images show politicians and members of the Democratic Party at political events. Photographs of Jesse Bankston include portraits and snapshots, and photographs taken by the press when he served as the Director of the State Hospital (1951), shortly after his dismissal in 1959, and when he served on the State Board of Education. This series also includes photographs of Bill and Hillary Clinton (1992), Jimmy Carter (1976), Edwin Edwards (ca. 1970s), and General Troy Middleton (ca. 1970-1975). </unitid>
+      </co1>
+      <co1>
+        <unitid>Series V. Personal Papers, 1933-1952, undated. This small group is comprised of social invitations, dance cards, Jesse Bankston&#8217;s LSU diploma (1936), his employment history, and an agreement for improving the drainage on his subdivision lot in Baton Rouge (1952).</unitid>
+      </co1>
+    </arrangement>
+  </archdesc>
+</ead>
