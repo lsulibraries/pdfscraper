@@ -324,7 +324,7 @@ class EadTest(ParametrizedTestCase):
 
     def test_get_ead(self):
         ead = self.findaid.get_ead()    
-        print ET.tostring(ead)
+        print ET.dump(ead)
    
     def testWhich_Field_Text_It_Belongs(self):
         self.assertEquals(FindingAidPDFtoEAD.which_field_text_it_belongs('Amite City (La.)--History--20th century.'), 'geoname')

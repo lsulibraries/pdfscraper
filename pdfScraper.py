@@ -166,20 +166,117 @@ class FindingAidPDFtoEAD():
     def get_text_recursive(self, element):
         return etree.tostring(element, method='text', encoding="UTF-8").strip()
 
+    def extract_title(self):
+        # titleproper - needs to account for multiple lines in some docs
+        wholetitle = []
+        titlelines = self.element_tree.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
+        for el in titlelines:
+            wholetitle.append(el.text.strip())
+        return 'A GUIDE TO THE ' + ' '.join(wholetitle)
+    
+    def extract_mss(self):
+        titlelines = self.element_tree.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
+
+        # figuring out what the top value of the last line of the title is
+        titlelineend = titlelines[-1].getparent().get('top')
+
+        # num - assume it is between 12 and 25 units below the last line of title
+        #    (a better way might have been to take next text node)
+        numlinenumberA = str(int(titlelineend) + 12)  # 347
+        numlinenumberB = str(int(titlelineend) + 25)  # 360
+        xpath_address = '//page[@number="1"]/text[@top>=' + numlinenumberA + ' and @top<=' + numlinenumberB + ']'
+        mss_elem = self.element_tree.xpath(xpath_address)[0]
+        return mss_elem.text
+
+    def extract_subtitle(self):
+        return 'A Collection in the Louisiana and Lower Mississippi Valley Collections'
+
+    def extract_author(self):
+        try:
+            pdfauthor = self.element_tree.xpath('//page[@number="1"]/text[text()[normalize-space(.)="Compiled by"]]')[0].getnext().text.strip()
+        except:
+            pdfauthor = 'Special Collections Staff'
+        return pdfauthor
+
+    def extract_date(self):
+        return self.element_tree.xpath('//page[@number="1"]/text[@width>"20"]')[-1].text.strip()
+## ||||||||||||||||||||||||||||||||||||||||||||||||||
+
     def get_ead(self):
         ead = ET.Element('ead', {'relatedencoding':"MARC21", 'type':"inventory", 'level':"collection"})
         ead.append(self.get_eadheader())
-        #ead.append(self.get_archdesc())
+        ead.append(self.get_archdesc())
         return ead
 
     def get_eadheader(self):
         el = ET.Element('eadheader')
         el.append(self.get_eadid())
+        el.append(self.get_filedesc())
         return el
 
     def get_eadid(self):
         return ET.Element('eadid', {'countrycode':'us', 'url':self.url})
 
+    def get_filedesc(self):
+        el = ET.Element('filedesc')
+        el.append(self.get_titlestmt())
+        el.append(self.get_publicationstmt())
+        return el
+
+    def get_titlestmt(self):
+        el = ET.Element('titlestmt')
+        el.append(self.get_titleproper())
+        el.append(self.get_subtitle())
+        el.append(self.get_author())
+        el.append(self.get_publicationstmt())
+        return el
+
+    def get_titleproper(self):
+        el = ET.Element('titleproper')
+        el.text = self.extract_title()
+        el.append(self.get_num())
+        return el
+
+    def get_num(self):
+        el = ET.Element('num', {'type':'Manuscript'})
+        el.text = self.extract_mss()
+        return el
+
+    def get_subtitle(self):
+        el = ET.Element('subtitle')
+        el.text = self.extract_subtitle()
+        return el
+
+    def get_author(self):
+        el = ET.Element('author')
+        el.text = self.extract_author()
+        return el
+
+    def get_publicationstmt(self):
+        el = ET.Element('publicationstmt')
+        el.append(self.get_publisher())
+        el.append(self.get_addressline())
+        el.append(self.get_date())
+        return el
+
+    def get_publisher(self):
+        el = ET.Element('publisher')
+        el.text = 'Louisiana State University Special Collections'
+        return el
+
+    def get_addressline(self):
+        el = ET.Element('addressline')
+        el.text = 'Hill Memorial Library\nBaton Rouge, LA 70803-3300\nhttp://www.lib.lsu.edu/special'
+        return el
+
+    def get_date(self):
+        el = ET.Element('date')
+        el.text = self.extract_date()
+        return el
+
+    def get_archdesc(self):
+        el = ET.Element('archdesc')
+        return el
 
     @staticmethod
     def which_field_text_it_belongs(text):
