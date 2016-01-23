@@ -8,6 +8,7 @@ import re
 from terms_dict_set import get_term_set_dict
 import xml.etree.ElementTree as ET
 from Logger import Logger as L
+from ReadNSV import ReadNSV
 
 class FindingAidPDFtoEAD():
     def __init__(self, url, logger):
@@ -674,11 +675,11 @@ list_of_urls = [
                ]
 
 if __name__ == '__main__':
-    logger = L('log', 'm')
-    for our_url in list_of_urls:
-        print our_url
-        A = FindingAidPDFtoEAD(our_url, logger)
-        # A.assemble_ead()        # old code flow - transitioning away
-        # A.print_xml_to_file()
-        # self.assemble_subject_terms_dictionary()
+    logger = L('log', 'd')
+    reader = ReadNSV('testList.nsv')
+    for uid in reader.getLines():
+        url_prefix = 'http://lib.lsu.edu/sites/default/files/sc/findaid/'
+        url = url_prefix + '{}.pdf'.format(uid)
+        print url
+        A = FindingAidPDFtoEAD(url, logger)
         A.run_conversion()    # new code flow - in development
