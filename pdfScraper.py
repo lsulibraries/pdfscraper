@@ -7,12 +7,19 @@ from lxml.builder import E
 import re
 from terms_dict_set import get_term_set_dict
 import xml.etree.ElementTree as ET
+from Logger import Logger as L
+import time
 
 
 class FindingAidPDFtoEAD():
-    def __init__(self, url):
+    def __init__(self, url, logger):
         self.url = url
+        self.logger = logger
         self.element_tree = self.read_url_return_etree(self.url)
+        
+    def log(self, msg):
+        date = time.strftime("%H:%M:%S")
+        self.logger.add('[{}] {}:   {} '.format(date, self.url, msg))
 
     def read_url_return_etree(self, url):
         '''normal 'pull pdf from web and interpret' code'''
@@ -27,6 +34,7 @@ class FindingAidPDFtoEAD():
             self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
             self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
             self.element_tree = etree.fromstring(self.xmldata)
+        self.log('opened file')
         return self.element_tree
 
     '''               '''
@@ -120,6 +128,7 @@ class FindingAidPDFtoEAD():
         else:
             for i in self.do_get_last_pages_if_last_header(beginning_page):
                 text_after_header.append(i)
+        if len(text_after_header) > 1: self.log('Got {} lines afer header {}'.format(len(text_after_header), header))
         return text_after_header
 
     def get_pdf_length(self):
@@ -668,9 +677,10 @@ list_of_urls = [
                ]
 
 if __name__ == '__main__':
+    logger = L('log')
     for our_url in list_of_urls:
         print our_url
-        A = FindingAidPDFtoEAD(our_url)
+        A = FindingAidPDFtoEAD(our_url, logger)
         # A.assemble_ead()        # old code flow - transitioning away
         # A.print_xml_to_file()
         # self.assemble_subject_terms_dictionary()
