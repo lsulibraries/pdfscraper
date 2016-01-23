@@ -8,8 +8,6 @@ import re
 from terms_dict_set import get_term_set_dict
 import xml.etree.ElementTree as ET
 from Logger import Logger as L
-import time
-
 
 class FindingAidPDFtoEAD():
     def __init__(self, url, logger):
@@ -17,9 +15,8 @@ class FindingAidPDFtoEAD():
         self.logger = logger
         self.element_tree = self.read_url_return_etree(self.url)
         
-    def log(self, msg):
-        date = time.strftime("%H:%M:%S")
-        self.logger.add('[{}] {}:   {} '.format(date, self.url, msg))
+    def log(self, msg, sev='i'):
+        self.logger.add('{}:   {} '.format(self.url, msg), sev)
 
     def read_url_return_etree(self, url):
         '''normal 'pull pdf from web and interpret' code'''
@@ -34,7 +31,7 @@ class FindingAidPDFtoEAD():
             self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
             self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
             self.element_tree = etree.fromstring(self.xmldata)
-        self.log('opened file')
+        self.log('opened file', 'm')
         return self.element_tree
 
     '''               '''
@@ -677,7 +674,7 @@ list_of_urls = [
                ]
 
 if __name__ == '__main__':
-    logger = L('log')
+    logger = L('log', 'm')
     for our_url in list_of_urls:
         print our_url
         A = FindingAidPDFtoEAD(our_url, logger)
