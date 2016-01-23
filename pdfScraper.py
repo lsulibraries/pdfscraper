@@ -665,15 +665,6 @@ class FindingAidPDFtoEAD():
     #
 
 
-
-list_of_urls = [
-                'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf',  # Bankston
-                'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf',  # Acy papers
-                'http://lib.lsu.edu/special/findaid/0826.pdf',  # Guion Diary
-                'http://lib.lsu.edu/sites/default/files/sc/findaid/4745.pdf',  # mutltiline title # Problem with the Contents of Inventory
-                'http://lib.lsu.edu/special/findaid/4452.pdf'  # Turnbull - multiple page biographical note
-               ]
-
 if __name__ == '__main__':
     logger = L('log', 'd')
     reader = ReadNSV('testList.nsv')
