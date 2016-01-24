@@ -177,10 +177,14 @@ class FindingAidPDFtoEAD():
     def get_text_recursive(self, element):
         return etree.tostring(element, method='text', encoding="UTF-8").strip()
 
+    def log_if_missing(self, element, xpath_result_len, message=''):
+        self.log('xpath failed to find title', 'm')
+
     def extract_title(self):
         # titleproper - needs to account for multiple lines in some docs
         wholetitle = []
         titlelines = self.element_tree.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
+
         for el in titlelines:
             wholetitle.append(el.text.strip())
         return 'A GUIDE TO THE ' + ' '.join(wholetitle)
