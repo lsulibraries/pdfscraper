@@ -238,10 +238,11 @@ class FindingAidPDFtoEAD():
         default_stub = "Element not pulled from pdf"
 
         archdesc = ET.Element('archdesc', attrib={'level': default_stub, 'relatedencoding': 'MARC21', 'type': default_stub}) # duped info from ead level??
+
         a = ET.SubElement(archdesc, 'did')
         a1 = ET.SubElement(a, 'head')
         a1.text = 'Overview of the Collection'
-        a2 = ET.SubElement(a, 'physdesc', attrib={'label': 'Size', 'encodinganalog': '300$a' })
+        a2 = ET.SubElement(a, 'physdesc', attrib={'label': 'Quantity: ', 'encodinganalog': '300$a' })
         a2a = ET.SubElement(a2, 'extent',)
         a2a.text = default_stub
         a3 = ET.SubElement(a, 'unitdate', attrib={'label': 'Dates:', 'type': 'inclusive', 'encodinganalog': '245$f', 'type': default_stub, })
@@ -251,7 +252,7 @@ class FindingAidPDFtoEAD():
         a5 = ET.SubElement(a, 'langmaterial')
         a5a = ET.SubElement(a5, 'language', attrib={'langcode': default_stub, })
         a5a.text = default_stub
-        a6 = ET.SubElement(a, 'abstract', attrib={'label': "Abstract", })
+        a6 = ET.SubElement(a, 'abstract', attrib={'label': "Abstract", 'encodinganalog': "520$a", })
         a6.text = default_stub
         a7 = ET.SubElement(a, 'repository', attrib={'label': 'Repository', 'encodinganalog': '825$a'})
         a7a = ET.SubElement(a7, 'corpname')
@@ -261,19 +262,22 @@ class FindingAidPDFtoEAD():
         a8 = ET.SubElement(a, 'physloc')
         a8.text = default_stub
         a9 = ET.SubElement(a, 'origination', attrib={'label': 'Creator: '})
-        a9a = ET.SubElement(a9, 'persname')
+        a9a = ET.SubElement(a9, 'persname', attrib={'encodinganalog': "100"})
         a9a.text = default_stub
-        a9b = ET.SubElement(a9, 'corpname')
+        a9b = ET.SubElement(a9, 'corpname', attrib={'encodinganalog': "110"})
         a9b.text = default_stub
         a10 = ET.SubElement(a, 'unitid', attrib={'countrycode': "US", 'encodinganalog': "099", 'label': "Identification: ", 'repositorycode': default_stub, })
         a10.text = default_stub
+        a11 = ET.SubElement(a, 'unittitle', attrib={'encodinganalog': "245$a", 'label': "Title: "})
+        a11.text = default_stub
 
 
         b = ET.SubElement(archdesc, 'accessrestrict')
         b1 = ET.SubElement(b, 'head')
-        b1.text = "Restrictions on access"
+        b1.text = "Access Restrictions"
         b2 = ET.SubElement(b, 'p')
         b2.text = default_stub
+        # possibly b2.text will always be "There are no access restrictions on this material."
 
         c = ET.SubElement(archdesc, 'relatedmaterial', attrib={'encodinganalog': '544 1'})
         c1 = ET.SubElement(c, 'head')
@@ -285,7 +289,7 @@ class FindingAidPDFtoEAD():
         d1 = ET.SubElement(d, 'head')
         d1.text = "Copyright"
         d2 = ET.SubElement(d, 'p')
-        d2.text = default_stub
+        d2.text = default_stub  # Copyright terms pulled from text
 
         e = ET.SubElement(archdesc, 'prefercite', attrib={'encodinganalog': '524'})
         e1 = ET.SubElement(e, 'head')
@@ -296,38 +300,79 @@ class FindingAidPDFtoEAD():
         f = ET.SubElement(archdesc, 'bioghist', attrib={'encodinganalog': '545'})
         f1 = ET.SubElement(f, 'head')
         f1.text = "BIOGRAPHICAL/HISTORICAL NOTE"
+        # for paragraph in Biographical Historical Note:
+        #     fx = ET.SubElement(f1, 'p')
+        #     fx.text = text of paragraph
         f2 = ET.SubElement(f, 'p')
         f2.text = default_stub
 
         g = ET.SubElement(archdesc, 'scopecontent', attrib={'encodinganalog': '520'})
         g1 = ET.SubElement(f, 'head')
-        g1.text = "SCOPE AND CONTENT NOTE"
+        g1.text = "Scope and Contents of the Collection"
         # for paragraph in Scope and Content:
-        #     gx =
+        #     gx = ET.SubElement(g, 'p')
         #     gx.text = text of paragraph
-        g2 = ET.SubElement(f, 'p')
+        g2 = ET.SubElement(g, 'p')
         g2.text = default_stub
 
         h = ET.SubElement(archdesc, 'relatedmaterial')
         i = ET.SubElement(archdesc, 'separatedmaterial')
-        j = ET.SubElement(archdesc, 'otherfindaid') # optional
+        i1 = ET.SubElement(i, 'head')
+        i1.text = 'Separated Material'
+        # for paragraph in Separated Material:
+        #     ix = ET.SubElement(i, 'p')
+        #     ix.text = text of paragraph
+
+        i2 = ET.SubElement(i, 'p')
+        i2.text = default_stub
+        j = ET.SubElement(archdesc, 'otherfindaid')  # optional
+
         k = ET.SubElement(archdesc, 'controlaccess')
+        k1 = ET.SubElement(k, 'head')
+        k1.text = "Subject and Genre Headings"
+        # for subject_term_item in Index_Terms:
+        #     kx = ET.SubElement(k, {persname, corpname, etc as string, attrib={'encodinganalog': "610", 'source': default_stub}
+                        ### source as aat, lcsh, local, etc if possible, else default_stub
+        #     kx.text = value of subject term as string
+
         l = ET.SubElement(archdesc, 'acqinfo')
+        l1 = ET.SubElement(l, 'head')
+        l1.text = 'Acquisition Information'
+        l2 = ET.SubElement(l, 'p')
+        l2.text = default_stub
+
         m = ET.SubElement(archdesc, 'appraisal')
         n = ET.SubElement(archdesc, 'accruals')
 
         o = ET.SubElement(archdesc, 'dsc')
         # for i in Series list:
         #     add a o1, o1a, o1b in the format below
-        # o1 = ET.SubElement(o, 'co1')
+        # o1 = ET.SubElement(o, 'co1', attrib={'level': 'series'})
         # o1a = ET.SubElement(o1, 'unitid')
         # o1a.text = Name of the Series
         # o1b = ET.SubElement(o1, 'p')
         # o1b.text = Text below that header
 
-        p = ET.SubElement(archdesc, 'arrangement', attrib={'encodinganalog': '351'})
-        p1 = ET.SubElement(p, 'list')
-        p1.text = default_stub  # how to handle series/subseries?
+        p = ET.SubElement(archdesc, 'arrangement', attrib={'encodinganalog': '351$a'})
+        p1 = ET.SubElement(p, 'head')
+        p1.text = 'Related Material'
+        # for paragraph in Scope and Content:
+        #     px = ET.SubElement(p, 'p')
+        #     px.text = text of paragraph
+        p2 = ET.SubElement(p, 'p')
+        p2.text = default_stub  # how to handle series/subseries?
+
+        q = ET.SubElement(archdesc, 'appraisal', attrib={'encodinganalog': "583"})
+        q1 = ET.SubElement(q, 'head')
+        q1.text = 'Appraisal Information'
+        q2 = ET.SubElement(q, 'p')
+        q2.text = default_stub
+
+        r = ET.SubElement(archdesc, 'accruals', attrib={'encodinganalog': "584"})
+        r1 = ET.SubElement(r, 'head')
+        r1.text = 'Accruals'
+        r2 = ET.SubElement(r, 'p')
+        r2.text = default_stub
 
         ''' Should include <origination>, <unitid>, and <unittitle>...<origination> may have to be added later since we do not include creator names on our summary pages but <unittitle> and <unitid> should come from the title page. <unittitle> is the collection title portion of <titleproper>. <unitid> is the Mss. number. EAD documents differentiate between the collection title and the title of the finding aid. This was difficult to convey in the tag document since our finding only have title for the collection, not the finding aid itself. '''
         return archdesc
@@ -389,13 +434,15 @@ class FindingAidPDFtoEAD():
         return el
 
     @staticmethod
-    def which_field_text_it_belongs(text):
+    def which_subject_heading_type(text):
         term_dict_set = get_term_set_dict()
         for term, values_set in term_dict_set.iteritems():
             if text in values_set:
-                return term
+                return subject_heading
         else:
             return None
+
+for word in str_a.split(' '):
 
     ''' Extra useful tidbits (for development) '''
 
