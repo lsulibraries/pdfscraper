@@ -215,7 +215,6 @@ class FindingAidPDFtoEAD():
 
     def extract_date(self):
         return self.element_tree.xpath('//page[@number="1"]/text[@width>"20"]')[-1].text.strip()
-## ||||||||||||||||||||||||||||||||||||||||||||||||||
 
     def get_ead(self):
         ead = ET.Element('ead', {'relatedencoding':"MARC21", 'type':"inventory", 'level':"collection"})
@@ -233,6 +232,7 @@ class FindingAidPDFtoEAD():
         return ET.Element('eadid', {'countrycode':'us', 'url':self.url})
 
     def get_archdesc(self):
+        print "it ran"
         archdesc = ET.Element('archdesc')
         a = ET.SubElement(archdesc, 'did')
         b = ET.SubElement(archdesc, 'accessrestrict')
@@ -325,10 +325,6 @@ class FindingAidPDFtoEAD():
     def get_date(self):
         el = ET.Element('date')
         el.text = self.extract_date()
-        return el
-
-    def get_archdesc(self):
-        el = ET.Element('archdesc')
         return el
 
     @staticmethod
