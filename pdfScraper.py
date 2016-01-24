@@ -11,7 +11,9 @@ from Logger import Logger as L
 from ReadNSV import ReadNSV
 
 class FindingAidPDFtoEAD():
-    def __init__(self, url, logger):
+    def __init__(self, url, logger=None):
+        if logger is None:
+            logger = L('log'.format(url))
         self.url = url
         self.logger = logger
         self.element_tree = self.read_url_return_etree(self.url)
