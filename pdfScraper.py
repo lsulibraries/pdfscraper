@@ -137,6 +137,8 @@ class FindingAidPDFtoEAD():
 
     def get_first_page_siblings_and_children(self, elem_of_header):
         list_of_sibling_children_text = []
+        if len(elem_of_header) < 1:
+            return list_of_sibling_children_text
         elems_following = elem_of_header[0].getparent().itersiblings()
         for sibling in elems_following:
             sibling_str = self.get_text_recursive(sibling)
