@@ -575,43 +575,6 @@ class FindingAidPDFtoEAD():
         #     pass
         return pdfdata.strip()
 
-    def getalltext(self, firstheader, secondheader, backupheader):
-        firstpagenumber, firstheadertop = self.getpagenum(firstheader)
-        secondpagenumber, secondheadertop = self.getpagenum(secondheader)
-        backuppagenumber, backupheadertop = self.getpagenum(backupheader)
-
-        if backuppagenumber < secondpagenumber or secondpagenumber == 19:
-            secondpagenumber, secondheadertop = backuppagenumber, backupheadertop
-
-        rawtext = []
-
-        if secondheadertop:
-            for p in range(firstpagenumber, secondpagenumber+1):
-                if p == secondpagenumber:
-                    bottom = secondheadertop
-                else:
-                    bottom = "1000"
-                thingie = '//page[@number={}]/text[@top>={}and @top<{}]|//page[@number={}]/text[@top>={}and @top<{}]/b'.format(
-                        str(p),
-                        str(int(firstheadertop)+3),
-                        str(int(bottom)-3),
-                        str(p),
-                        str(int(firstheadertop)+3),
-                        str(int(bottom)-3)
-                        )
-                data = self.element_tree.xpath(thingie)
-                for el in data:
-                    if not el.text:  # removes blank nodes
-                        continue
-                    rawtext.append(el.text.strip())
-        else:
-            # should we throw & catch Exception?
-            print '\nAttention!!   SecondHeaderTop == None.   The pdfscraper is broken in this case: ', self.url, '\n'
-
-        textalmost = ' '.join(rawtext)
-        alltext = ' '.join(textalmost.split())  # strips extra spaces
-        return alltext
-
     def getpagenum(self, term):
         termtop = ""
         # @TODO return '', '' if term is not found
@@ -673,8 +636,7 @@ if __name__ == '__main__':
     logger = L('log', 'd')
     reader = ReadNSV('testList.nsv')
     for uid in reader.getLines():
-        url_prefix = 'http://lib.lsu.edu/sites/default/files/sc/findaid/'
-        url = url_prefix + '{}.pdf'.format(uid)
+        url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
         print url
         A = FindingAidPDFtoEAD(url, logger)
         A.run_conversion()    # new code flow - in development

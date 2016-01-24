@@ -326,8 +326,13 @@ class EadTest(ParametrizedTestCase):
 
         self.assertEquals(result, "Scope and Content Note")
 
+    def test_getarchdesc(self):
+        arch = self.findaid.get_archdesc()
+        print ET.tostring(arch)
+
     def test_get_ead(self):
-        ead = self.findaid.get_ead()    
+        ead = self.findaid.get_ead()
+        #print ET.tostring(ead)
         pass
    
     def testWhich_Field_Text_It_Belongs(self):
@@ -343,8 +348,8 @@ if __name__ == "__main__":
     #    EadTest, url='http://www.lib.lsu.edu/sites/default/files/sc/findaid/0826.pdf'))
     suite.addTest(ParametrizedTestCase.parametrize(
         EadTest, url='http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf'))
-    # suite.addTest(ParametrizedTestCase.parametrize(
-    #    EadTest, url='http://www.lib.lsu.edu/sites/default/files/sc/findaid/4452.pdf'))
+    suite.addTest(ParametrizedTestCase.parametrize(
+       EadTest, url='http://www.lib.lsu.edu/sites/default/files/sc/findaid/4452.pdf'))
     unittest.TextTestRunner(verbosity=2).run(suite)
 
 # styles
