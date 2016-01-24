@@ -212,10 +212,13 @@ class EadTest(ParametrizedTestCase):
             ('Container List', (18, 18), """   """),
         ),
         }
+        if self.url not in sample_header_and_pages: 
+            self.assertEquals(False, True, "Missing expected values information for {}".format(self.url))
         current_pdfs_expected_answer = sample_header_and_pages[self.url]
+
         for section, page_nums, expected_text in current_pdfs_expected_answer:
             observed_result = self.findaid.get_text_after_header(
-                section, page_nums)
+                (section, page_nums))
         self.assertEquals(observed_result, expected_text, 'For url: {}\nUnexpected Value for: {}\nGot: {}\nExpected: {}\n\n'.format(
         
             self.url, section, observed_result, expected_text))
@@ -292,7 +295,6 @@ class EadTest(ParametrizedTestCase):
         path = '//text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a'
         elms = tree.xpath(path)
         collapsed = self.findaid.collapse(elms)
-        print collapsed
 
     def testCollapseRealPdfs(self):
         contents = self.findaid.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
@@ -326,7 +328,6 @@ class EadTest(ParametrizedTestCase):
 
     def test_get_ead(self):
         ead = self.findaid.get_ead()    
-        print ET.dump(ead)
         pass
    
     def testWhich_Field_Text_It_Belongs(self):
