@@ -8,7 +8,7 @@ class Logger():
             'd': (1, 'DEBUG'),
             'i': (2, 'INFO'),
             'm': (3, 'MISSING'),
-            'j': (4, 'JU_mapNKY'),
+            'j': (4, 'JUNKY'),
             'e': (5, 'ERROR')
         }
     severity = 2

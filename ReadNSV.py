@@ -6,7 +6,6 @@ class ReadNSV:
         self.file = path
 
     def getLines(self):
-        print 'hello'
         f = open(self.file, 'r')
         lines = []
         for line in f:
