@@ -89,6 +89,7 @@ class EadTest(ParametrizedTestCase):
     #         self.assertEquals(self.findaid.getpagenum(term)[0], page_num, '\n\nFor url :{}\nTerm: {}\nExpected Page #: {}\nActual Page #: {}\n'.format(
     #             self.url, term, page_num, self.findaid.getpagenum(term)[0]))
 
+
     def testGetRColData(self):
         # size = self.findaid.getrcoldata('Size.')
         pass
@@ -334,6 +335,31 @@ class EadTest(ParametrizedTestCase):
         ead = self.findaid.get_ead()
         #print ET.tostring(ead)
         pass
+
+    def test_get_index_terms(self):
+        fixture   = self.findaid.read_url_return_etree(self.url)
+        inventory = self.findaid.grab_contents_of_inventory()
+
+        next = None
+        has_index = False
+        for head, pages in inventory:
+            if has_index == True:
+                next = head
+                next_pages = pages
+            if 'index' in head.lower():
+                index_head = head
+                index_pages = pages
+                has_index  = True
+        if has_index:
+            result = self.findaid.get_text_after_header((index_head, index_pages), (next, next_pages))
+            print result
+        else: 
+            result = None
+
+        for term in result:
+            print self.findaid.which_field_text_it_belongs(term)
+        #print result
+
    
     def testWhich_Field_Text_It_Belongs(self):
         self.assertEquals(FindingAidPDFtoEAD.which_field_text_it_belongs('Amite City (La.)--History--20th century.'), 'geoname')
