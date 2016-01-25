@@ -51,12 +51,15 @@ class FindingAidPDFtoEAD():
         contents_of_inventory = self.grab_contents_of_inventory()
         self.c_o_i_ordered = sorted(contents_of_inventory, key=lambda item: int(item[1][0]))
         compiled_ead = self.get_ead()
+        self.columns_after_summary = self.get_columns_after_summary()
         # print etree.tostring(self.element_tree.xpath('/pdf2xml/page[@number=3]')[0], method='text', encoding='UTF-8')
-        summary = Page.get_table(self.element_tree.xpath('/pdf2xml/page[@number=3]')[0])
-        # print(summary)
-
-        print summary
-        # self.print_ead_to_file(compiled_ead)
+        
+    def get_columns_after_summary(self):
+        summary_header_pages = [elem for elem in self.c_o_i_ordered if 'summ' in elem[0]]
+        header, (beginning_page, end_page) = summary_header_pages[0]
+        self.summary_columns = Page.get_table(self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(beginning_page, header.lower().strip()))[0])
+        print self.summary_columns
+        return
 
     def grab_contents_of_inventory(self):
         contents = self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
@@ -136,7 +139,6 @@ class FindingAidPDFtoEAD():
                     return self.get_text_after_header(i, self.c_o_i_ordered[pos+1])
         return 'Element not pulled from pdf'
 
-
     def convert_text_in_column_to_string(self, column_title):
         possible_options = {'summary': set(['summary', 'Summary.',]),
                             'size': set(['Size.', 'Size', ]),
@@ -146,10 +148,9 @@ class FindingAidPDFtoEAD():
                             'related collections': set(['related collections.', 'related collection', 'related collection']),
                             }
 
-        pass
+        return 
         # maybe also -- if text_a in ['summary', 'sumary', 'summaary']:   do x()
         # here goes how to pull values of a column title (i.e., size) & return as text.decode('utf-8')
-
 
     def get_text_after_header(self, inventory_item, following_inventory_item=None):
         header, (beginning_page, end_page) = inventory_item
