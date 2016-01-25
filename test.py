@@ -357,13 +357,13 @@ class EadTest(ParametrizedTestCase):
             result = None
 
         for term in result:
-            print self.findaid.which_field_text_it_belongs(term)
+            print self.findaid.which_subject_heading_type(term)
         #print result
 
    
-    def testWhich_Field_Text_It_Belongs(self):
-        self.assertEquals(FindingAidPDFtoEAD.which_field_text_it_belongs('Amite City (La.)--History--20th century.'), 'geoname')
-        self.assertEquals(FindingAidPDFtoEAD.which_field_text_it_belongs('goobergobber'), None)
+    def testWhich_Subject_Heading_Type(self):
+        self.assertEquals(FindingAidPDFtoEAD.which_subject_heading_type('Amite City (La.)--History--20th century.'), 'geoname')
+        self.assertEquals(FindingAidPDFtoEAD.which_subject_heading_type('goobergobber'), None)
 
 if __name__ == "__main__":
     #  dev -- don't worry about tests calling out on the internet -- pdfScraper.read_url_return_etree() is switched to read from cached file.

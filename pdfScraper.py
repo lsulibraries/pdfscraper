@@ -1,14 +1,15 @@
 #!/usr/bin/env python2.7
 
 import scraperwiki
-import urllib2
+# import urllib2
 from lxml import etree
-from lxml.builder import E
+# from lxml.builder import E
 import re
 from terms_dict_set import get_term_set_dict
 import xml.etree.ElementTree as ET
 from Logger import Logger as L
 from ReadNSV import ReadNSV
+
 
 class FindingAidPDFtoEAD():
     def __init__(self, url, logger=None):
@@ -17,7 +18,7 @@ class FindingAidPDFtoEAD():
         self.url = url
         self.logger = logger
         self.element_tree = self.read_url_return_etree(self.url)
-        
+
     def log(self, msg, sev='i'):
         self.logger.add('{}:   {} '.format(self.url, msg), sev)
 
@@ -37,8 +38,6 @@ class FindingAidPDFtoEAD():
         self.log('opened file', 'm')
         return self.element_tree
 
-    '''               '''
-    ''' new code flow '''
     def run_conversion(self):
         # print etree.tostring(self.element_tree, pretty_print=True)  # dev only
         # self.print_xml_to_file()                                    # dev only
@@ -49,11 +48,11 @@ class FindingAidPDFtoEAD():
                 self.get_text_after_header(i)
             else:
                 self.get_text_after_header(i, c_o_i_ordered[pos+1])
- 
+
     def grab_contents_of_inventory(self):
         contents = self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
         pruned_elem_list = self.remove_non_text_elements(contents)
-        if re.findall('[a-zA-Z]', etree.tostring(pruned_elem_list[0], method='text')) and re.findall('[0-9]', etree.tostring(pruned_elem_list[0], method='text')): 
+        if re.findall('[a-zA-Z]', etree.tostring(pruned_elem_list[0], method='text')) and re.findall('[0-9]', etree.tostring(pruned_elem_list[0], method='text')):
             top_header_page_dict = self.collapse(contents)
             inventory = []
             for top, header_page in top_header_page_dict.iteritems():
@@ -128,7 +127,8 @@ class FindingAidPDFtoEAD():
         else:
             for i in self.do_get_last_pages_if_last_header(beginning_page):
                 text_after_header.append(i)
-        if len(text_after_header) > 1: self.log('Got {} lines afer header {}'.format(len(text_after_header), header))
+        if len(text_after_header) > 1:
+            self.log('Got {} lines afer header {}'.format(len(text_after_header), header))
         return text_after_header
 
     def get_pdf_length(self):
@@ -188,7 +188,7 @@ class FindingAidPDFtoEAD():
         for el in titlelines:
             wholetitle.append(el.text.strip())
         return 'A GUIDE TO THE ' + ' '.join(wholetitle)
-    
+
     def extract_mss(self):
         titlelines = self.element_tree.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
 
@@ -217,7 +217,7 @@ class FindingAidPDFtoEAD():
         return self.element_tree.xpath('//page[@number="1"]/text[@width>"20"]')[-1].text.strip()
 
     def get_ead(self):
-        ead = ET.Element('ead', attrib={'relatedencoding': "MARC21", 'type': "inventory", 'level': "collection"}) 
+        ead = ET.Element('ead', attrib={'relatedencoding': "MARC21", 'type': "inventory", 'level': "collection", })
         ead.append(self.get_eadheader())
         ead.append(self.get_archdesc())
         ''' some preface on all xmls like this:::::?
@@ -232,17 +232,17 @@ class FindingAidPDFtoEAD():
         return el
 
     def get_eadid(self):
-        return ET.Element('eadid', {'countrycode':'us', 'url':self.url})
+        return ET.Element('eadid', attrib={'countrycode': 'us', 'url': self.url}, )
 
     def get_archdesc(self):
         default_stub = "Element not pulled from pdf"
 
-        archdesc = ET.Element('archdesc', attrib={'level': default_stub, 'relatedencoding': 'MARC21', 'type': default_stub}) # duped info from ead level??
+        archdesc = ET.Element('archdesc', attrib={'level': default_stub, 'relatedencoding': 'MARC21', 'type': default_stub})  # duped info from ead level??
 
         a = ET.SubElement(archdesc, 'did')
         a1 = ET.SubElement(a, 'head')
         a1.text = 'Overview of the Collection'
-        a2 = ET.SubElement(a, 'physdesc', attrib={'label': 'Quantity: ', 'encodinganalog': '300$a' })
+        a2 = ET.SubElement(a, 'physdesc', attrib={'label': 'Quantity: ', 'encodinganalog': '300$a', })
         a2a = ET.SubElement(a2, 'extent',)
         a2a.text = default_stub
         a3 = ET.SubElement(a, 'unitdate', attrib={'label': 'Dates:', 'type': 'inclusive', 'encodinganalog': '245$f', 'type': default_stub, })
@@ -271,7 +271,6 @@ class FindingAidPDFtoEAD():
         a11 = ET.SubElement(a, 'unittitle', attrib={'encodinganalog': "245$a", 'label': "Title: "})
         a11.text = default_stub
 
-
         b = ET.SubElement(archdesc, 'accessrestrict')
         b1 = ET.SubElement(b, 'head')
         b1.text = "Access Restrictions"
@@ -294,8 +293,8 @@ class FindingAidPDFtoEAD():
         e = ET.SubElement(archdesc, 'prefercite', attrib={'encodinganalog': '524'})
         e1 = ET.SubElement(e, 'head')
         e1.text = "Preferred Citation"
-        e2 = ET.SubElement(e, 'p')     
-        e2.text = default_stub   
+        e2 = ET.SubElement(e, 'p')   
+        e2.text = default_stub
 
         f = ET.SubElement(archdesc, 'bioghist', attrib={'encodinganalog': '545'})
         f1 = ET.SubElement(f, 'head')
@@ -331,9 +330,9 @@ class FindingAidPDFtoEAD():
         k1 = ET.SubElement(k, 'head')
         k1.text = "Subject and Genre Headings"
         # for subject_term_item in Index_Terms:
-        #     kx = ET.SubElement(k, {persname, corpname, etc as string, attrib={'encodinganalog': "610", 'source': default_stub}
-                        ### source as aat, lcsh, local, etc if possible, else default_stub
-        #     kx.text = value of subject term as string
+        #    kx = ET.SubElement(k, {persname, corpname, etc as string, attrib={'encodinganalog': "610", 'source': default_stub}
+        #     source as aat, lcsh, local, etc if possible, else default_stub
+        #    kx.text = value of subject term as string
 
         l = ET.SubElement(archdesc, 'acqinfo')
         l1 = ET.SubElement(l, 'head')
@@ -397,7 +396,7 @@ class FindingAidPDFtoEAD():
         return el
 
     def get_num(self):
-        el = ET.Element('num', {'type':'Manuscript'})
+        el = ET.Element('num', attrib={'type': 'Manuscript'})
         el.text = self.extract_mss()
         return el
 
@@ -436,16 +435,13 @@ class FindingAidPDFtoEAD():
     @staticmethod
     def which_subject_heading_type(text):
         term_dict_set = get_term_set_dict()
-        for term, values_set in term_dict_set.iteritems():
+        for subject_heading, values_set in term_dict_set.iteritems():
             if text in values_set:
                 return subject_heading
         else:
             return None
 
-for word in str_a.split(' '):
-
     ''' Extra useful tidbits (for development) '''
-
     def print_xml_to_file(self):
         file_name = 'cached_pdfs/{}.xml'.format(self.url[-8:-4])
         with open(file_name, 'w') as f:
