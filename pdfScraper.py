@@ -319,10 +319,10 @@ class FindingAidPDFtoEAD():
         a2a.text = self.convert_text_in_column_to_string('size')
 
         a3 = ET.SubElement(a, 'unitdate', attrib={'label': 'Dates:', 'type': 'inclusive', 'encodinganalog': '245$f', 'type': default_stub, })
-        a3.text = default_stub
+        a3.text = self.convert_text_in_column_to_string('dates inclusive')
 
         a4 = ET.SubElement(a, 'unitdate', attrib={'label': 'Dates:', 'type': 'bulk', 'encodinganalog': default_stub, 'type': default_stub, })
-        a4.text = default_stub
+        a4.text = self.convert_text_in_column_to_string('dates bulk')
 
         a5 = ET.SubElement(a, 'langmaterial')
         try:
@@ -333,17 +333,17 @@ class FindingAidPDFtoEAD():
         except:
             pass
 
-        a6 = ET.SubElement(a, 'abstract', attrib={'label': "Abstract", 'encodinganalog': "520$a", })
+        a6 = ET.SubElement(a, 'abstract', attrib={'label': "Summary", 'encodinganalog': "520$a", })
         a6.text = self.convert_text_in_column_to_string('summary')
 
         a7 = ET.SubElement(a, 'repository', attrib={'label': 'Repository', 'encodinganalog': '825$a'})
         a7a = ET.SubElement(a7, 'corpname')
-        a7a.text = default_stub
+        a7a.text = "Louisiana State University Special Collections"
         a7b = ET.SubElement(a7, 'subarea')
-        a7b.text = default_stub
+        a7b.text = "Louisiana and Lower Mississippi Valley Collection"
 
         a8 = ET.SubElement(a, 'physloc')
-        a8.text = default_stub
+        a8.text = self.convert_text_in_column_to_string('stack location')
 
         a9 = ET.SubElement(a, 'origination', attrib={'label': 'Creator: '})
         a9a = ET.SubElement(a9, 'persname', attrib={'encodinganalog': "100"})
@@ -357,30 +357,29 @@ class FindingAidPDFtoEAD():
         a11 = ET.SubElement(a, 'unittitle', attrib={'encodinganalog': "245$a", 'label': "Title: "})
         a11.text = default_stub
 
-        b = ET.SubElement(archdesc, 'accessrestrict')
+        b = ET.SubElement(archdesc, 'accessrestrict', attrib={'encodinganalog': '506'})
         b1 = ET.SubElement(b, 'head')
         b1.text = "Access Restrictions"
         b2 = ET.SubElement(b, 'p')
-        b2.text = default_stub
-        # possibly b2.text will always be "There are no access restrictions on this material."
+        b2.text = self.convert_text_in_column_to_string('access restrictions or restrictions on access or something')
 
         c = ET.SubElement(archdesc, 'relatedmaterial', attrib={'encodinganalog': '544 1'})
         c1 = ET.SubElement(c, 'head')
         c1.text = "Related Collections"
         c2 = ET.SubElement(c, 'p')
-        c2.text = default_stub
+        c2.text = self.convert_text_in_column_to_string('related collections')
 
         d = ET.SubElement(archdesc, 'userestrict', attrib={'encodinganalog': '540'})
         d1 = ET.SubElement(d, 'head')
         d1.text = "Copyright"
         d2 = ET.SubElement(d, 'p')
-        d2.text = default_stub  # Copyright terms pulled from text
+        d2.text = self.convert_text_in_column_to_string('copyright')
 
         e = ET.SubElement(archdesc, 'prefercite', attrib={'encodinganalog': '524'})
         e1 = ET.SubElement(e, 'head')
         e1.text = "Preferred Citation"
         e2 = ET.SubElement(e, 'p')
-        e2.text = default_stub
+        e2.text = self.convert_text_in_column_to_string('citation')
 
         f = ET.SubElement(archdesc, 'bioghist', attrib={'encodinganalog': '545'})
         f1 = ET.SubElement(f, 'head')
@@ -408,7 +407,11 @@ class FindingAidPDFtoEAD():
 
         k = ET.SubElement(archdesc, 'controlaccess')
         k1 = ET.SubElement(k, 'head')
-        k1.text = "Subject and Genre Headings"
+        k1.text = "Index Terms"
+        if self.get_index_terms():
+            for i in self.get_index_terms:
+                elem = copy this algorhythm from other similar call
+
         # for subject_term_item in Index_Terms:
         #    kx = ET.SubElement(k, {persname, corpname, etc as string, attrib={'encodinganalog': "610", 'source': default_stub}
         #     source as aat, lcsh, local, etc if possible, else default_stub
@@ -423,7 +426,9 @@ class FindingAidPDFtoEAD():
         m = ET.SubElement(archdesc, 'appraisal')
         n = ET.SubElement(archdesc, 'accruals')
 
-        o = ET.SubElement(archdesc, 'dsc')
+        o = ET.SubElement(archdesc, 'dsc', attrib={'type': 'in-depth',})
+        o1 = ET.SubElement(o, 'head')
+        o1.tex
         # for i in Series list:
         #     add a o1, o1a, o1b in the format below
         # o1 = ET.SubElement(o, 'co1', attrib={'level': 'series'})
