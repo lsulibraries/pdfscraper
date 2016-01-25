@@ -38,14 +38,14 @@ African Americans--Crimes against--Louisiana.
 African Americans--Education--Louisiana.
 African Americans--Employment--Louisiana.
 African Americans--Folklore.
-African Americans--Illinois--Chicago.
+
 African Americans--Legal status, laws, etc.
 African Americans--Louisiana.
 African Americans--Louisiana--Baton Rouge.
 African Americans--Louisiana--Photographs.
 African Americans--Migrations--Kansas.
 African Americans--Mississippi.
-African Americans--Missouri--Saint Louis.
+
 African Americans--Oklahoma--Photographs.
 African Americans--Psychology.
 African Americans--Segregation.
@@ -795,7 +795,6 @@ Creationism.
 Creek Indians.
 Creek Indians--Politics and government.
 Creek War, 1836.
-Creole cottages.--aat
 Creoles--Louisiana--Baton Rouge.
 Criminal justice, Administration of--Louisiana.
 Criminal justice, Administration of--Louisiana--Acadia Parish.
@@ -921,7 +920,7 @@ Earthquakes--California--San Francisco Bay Area.
 Echo (Artificial satellite)
 Economic development--Political aspects--Louisiana.
 Education, Elementary--Louisiana.
-Education, Higher.
+
 Education, Higher--Louisiana.
 Education, Higher--Louisiana--Finance.
 Education, Higher--Louisiana--Pineville.
@@ -1113,7 +1112,7 @@ Free African Americans--Louisiana--West Feliciana Parish.
 Free African Americans--Mississippi.
 Free African Americans--Mississippi--Natchez.
 Free African Americans--Pennsylvania--Philadelphia.
-Free blacks--Mexico.
+
 Freedman--Employment--Louisiana.
 Freedmen--Education--Louisiana.
 Freedmen--Louisiana.
@@ -1185,7 +1184,6 @@ Greek letter societies--Louisiana.
 Greek letter societies--Louisiana--Baton Rouge.
 Greek revival (Architecture)--Louisiana--Photographs.
 Grocery trade--Mississippi.
-Groundbreakings.--aat
 Group homes for people with mental disabilities--Louisiana--New Orleans.
 Gun control--United States.
 Hairstyles.
@@ -1243,7 +1241,7 @@ Houseboats.
 Household employees--Louisiana.
 Housing development--Louisiana--Baton Rouge--Aerial photographs.
 Human reproduction--Political aspects.
-Humanities.
+
 Hungarians--United States.
 Hunting--Louisiana
 Hurricane Audrey, 1957.
@@ -1340,7 +1338,7 @@ Lakes--Louisiana--Photographs.
 Land acquisition--Texas.
 Land grants--Florida.
 Land grants--Kentucky.
-Land grants--Louisiana.
+
 Land grants--Louisiana--Opelousas.
 Land grants--Louisiana--West Feliciana Parish.
 Land grants--Texas.
@@ -2071,7 +2069,7 @@ Slaves--Emancipation--Louisiana.
 Slaves--Emancipation--United States.
 Slaves--Haiti.
 Slaves--Health and hygiene--Louisiana.
-Slaves--Louisiana.
+
 Slaves--Louisiana--Iberia Parish.
 Slaves--Louisiana--Plaquemines Parish.
 Slaves--Louisiana--Rapides Parish.
@@ -2083,7 +2081,7 @@ Slaves--Louisiana--West Feliciana Parish.
 Slaves--Medical care--Louisiana.
 Slaves--Medical care--Mississippi.
 Slaves--Medical care--Southern States.
-Slaves--Mexico.
+
 Slaves--Mississippi.
 Slaves--Mississippi--Social conditions.
 Slaves--Southern States--Social conditions.
@@ -2381,7 +2379,7 @@ Women in agriculture--Florida--Gainesville.
 Women in agriculture--Louisiana--New Llano.
 Women in the professions--Louisiana.
 Women landowners--Louisiana.
-Women musicians--Louisiana--New Orleans
+
 Women socialists--Florida--Gainesville.
 Women socialists--Louisiana--New Llano.
 Women veterans--Louisiana.
