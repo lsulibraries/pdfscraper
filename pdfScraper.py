@@ -126,7 +126,25 @@ class FindingAidPDFtoEAD():
                     return ' '.join(self.get_text_after_header(i, self.c_o_i_ordered[pos+1])).decode("utf8")
         return 'Element not pulled from pdf'
 
+    def convert_text_after_header_to_list(self, header_snippet):
+        for pos, i in enumerate(self.c_o_i_ordered):
+            if header_snippet.lower() in i[0].lower():
+                if pos == len(self.c_o_i_ordered)-1:
+                    return self.get_text_after_header(i)
+                else:
+                    return self.get_text_after_header(i, self.c_o_i_ordered[pos+1])
+        return 'Element not pulled from pdf'
+
+
     def convert_text_in_column_to_string(self, column_title):
+        possible_options = {'summary': set(['summary', 'Summary.',]),
+                            'size': set(['Size.', 'Size', ]),
+                            'dates inclusive': set(['Inclusive dates.', 'Inclusive dates']),
+                            'languages': set(['languages.', 'languages', 'language']),
+                            'access restriction': set(['Restrictions of Access', 'Access Restrictions', ]),
+                            'related collections': set(['related collections.', 'related collection', 'related collection']),
+                            }
+
         pass
         # maybe also -- if text_a in ['summary', 'sumary', 'summaary']:   do x()
         # here goes how to pull values of a column title (i.e., size) & return as text.decode('utf-8')
@@ -415,15 +433,11 @@ class FindingAidPDFtoEAD():
         k = ET.SubElement(archdesc, 'controlaccess')
         k1 = ET.SubElement(k, 'head')
         k1.text = "Index Terms"
-        # if self.get_index_terms():
-        #     for i in self.get_index_terms:
-        #         pass
-                # elem = copy this algorhythm from other similar call
 
-        # for subject_term_item in Index_Terms:
-        #    kx = ET.SubElement(k, {persname, corpname, etc as string, attrib={'encodinganalog': "610", 'source': default_stub}
-        #     source as aat, lcsh, local, etc if possible, else default_stub
-        #    kx.text = value of subject term as string
+        for i in self.convert_text_after_header_to_list('index'):
+            elem = ET.Element(pdfScaper.which_subject_heading_type(i), attrib={'source': this_thingie, 'encodinganalog': '600$a'})
+            elem.text = i
+
 
         l = ET.SubElement(archdesc, 'acqinfo')
         l1 = ET.SubElement(l, 'head')
@@ -437,6 +451,7 @@ class FindingAidPDFtoEAD():
         o = ET.SubElement(archdesc, 'dsc', attrib={'type': 'in-depth',})
         o1 = ET.SubElement(o, 'head')
         # o1.text 
+
         # for i in Series list:
         #     add a o1, o1a, o1b in the format below
         # o1 = ET.SubElement(o, 'co1', attrib={'level': 'series'})
@@ -470,7 +485,7 @@ class FindingAidPDFtoEAD():
         return archdesc
 
     def what_language_used():
-        return 'call to function that returns a list of values of Language used'
+        return self.convert_text_in_column_to_string('langua')
 
     def abbreviate_lang(language):
         lang_abbr_dict = self.get_langs_and_abbr()

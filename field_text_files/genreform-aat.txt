@@ -1,6 +1,5 @@
 45 rpm records.
 Abstracts (summaries)
-Abstracts of title--Louisiana--Saint Tammany Parish.
 Account books.
 Accounts.
 Administrative records.
@@ -15,8 +14,6 @@ Ambrotypes (photographs)
 Ambrotypes.
 Announcements.
 Annual reports.
-Antenuptial contracts.
-Anthropologists' writings, American--Louisiana.
 Application forms.
 Appointment books.
 Appraisals.
@@ -34,9 +31,8 @@ Audiotapes.
 Audits.
 Autobiographies.
 Autographs (manuscripts)
-Baccalaureate addresses.
-Badges
 Badges.
+Badges
 Balance sheets.
 Ballots.
 Bank statements.
@@ -51,8 +47,8 @@ Birth certificates.
 Birth records.
 Black and white photographs.
 Black-and-white negatives.
-Black-and-white photographs
 Black-and-white photographs.
+Black-and-white photographs
 Black-and-white prints (photographs)
 Blueprints (reprographic copies)
 Bonds (financial instruments)
@@ -77,9 +73,6 @@ Bylaws.
 Cabinet photographs.
 Cadastral maps.
 Calendars.
-Cameras.
-Campaign literature--Louisiana.
-Campaign literature--United States.
 Card indexes.
 Card photographs (photographs)
 Card photographs.
@@ -88,7 +81,6 @@ Case files.
 Cash books.
 Cashbooks.
 Catalogs.
-Census records.--lcsh
 Certificates.
 Checkbooks.
 Checks (bank checks)
@@ -115,27 +107,23 @@ Conveyances.
 Cookbooks.
 Copper engraving (printing process)
 Copy prints.
-Correspondence
 Correspondence.
+Correspondence
 Criminal court records.
 Criticism.
 Cyanotypes (photographic prints)
 Daguerreotypes (photographs)
 Daguerreotypes.
 Daybooks.
-Death notices--France--Paris.
-Death notices--Louisiana.
-Death notices--Louisiana--Baton Rouge.
 Death records.
 Decisions.
 Decrees.
-Deeds
 Deeds.
+Deeds
 Depositions.
 Devotional pictures.
 Diagrams.
 Diaries.
-Digital prints.--gmgpc
 Diplomas.
 Directories.
 Discharges.
@@ -146,7 +134,6 @@ Drawings (visual works)
 Drawings.
 Dry collodion negatives.
 Dry collodion negatives.$
-Dry plate negatives.--gmgpc
 Election returns.
 Engravings (prints)
 Ephemera.
@@ -170,8 +157,6 @@ Forms (documents)
 Formularies.
 Galley proofs.
 Gelatin dry plate negatives.
-Gelatin silver prints.
-Gelatin silver prints.--gmgpc
 Genealogical tables.
 Genealogies (histories)
 Genealogies.
@@ -195,30 +180,24 @@ Invoices.
 Itineraries.
 Journals (accounts)
 Journals (periodicals)
-Judicial opinions--Louisiana.
-Kodak camera.
 Land grants.
-Land grants--Louisiana--Ouachita Parish.
 Land patents.
 Land surveys.
-Landscape photography--Louisiana--Jefferson Parish.
 Lantern slides.
 Lapel pins.
 Leases.
 Lecture notes.
 Lectures.
-Ledgers (account books)
 Ledgers (account books).
+Ledgers (account books)
 Legal correspondence.
-Legal documents
 Legal documents.
+Legal documents
 Legal files.
 Legal instruments.
-Legal opinions--Louisiana.
 Legislative records.
 Letter books.
 Letters (correspondence)
-Letters (correspondence)-- aat
 Lists.
 Literary criticism.
 Logs (records)
@@ -246,21 +225,19 @@ Minute books.
 Minutes (administrative records).
 Minutes.
 Money.
-Money--Confederate States of America.
 Monographs.
 Mortgages.
 Motion pictures (visual works)
 Muster rolls.
 Narratives (document genres)
-Negatives (photographic)
 Negatives (photographic).
+Negatives (photographic)
 Negatives (photographs)
 New Year cards.
 News bulletins.
 Newsletters.
 Newspapers.
 Newsreels.
-Nitrate negatives.--gmgpc
 Notebooks.
 Notes.
 Oaths.
@@ -272,12 +249,10 @@ Oil paintings (visual works)
 Oral histories.
 Orders (military records)
 Ordinances.
-Outdoor photography.
 Page proofs.
-Pamphlets
 Pamphlets.
+Pamphlets
 Paper money.
-Paper money--Mississippi.
 Pardons.
 Passports.
 Patents.
@@ -292,10 +267,10 @@ Phonograph records.
 Photocopies.
 Photograph albums.
 Photographic postcards.
-Photographic prints
 Photographic prints.
-Photographs
+Photographic prints
 Photographs.
+Photographs
 Photogrpahic prints.
 Photomechanical prints.
 Picture postcards.
@@ -306,12 +281,8 @@ Poems.
 Poetry.
 Political cartoons.
 Political posters.
-Portraits, Group--Louisiana.
 Portraits.
 Postcards.
-Postcards--Louisiana.
-Postcards--Mississippi.
-Postcards--Wyoming.
 Posters.
 Prayers.
 Press releases.
@@ -324,8 +295,8 @@ Programs.
 Project files.
 Promissory notes.
 Proofs (printed matter)
-Property records
 Property records.
+Property records
 Publications (document genre)
 Publications.
 Purchase orders.
@@ -334,16 +305,12 @@ Receipts (financial records)
 Receipts.
 Recipes.
 Registers (lists)
-Religious articles.
 Reminiscences.
 Report cards.
 Reports.
 Research (document genres)
 Research notes.
 Research.
-Resin coated paper prints.--gmgpc
-Resin-coated paper prints.
-Resin-coated paper prints.--gmgpc
 Resin-coated paper.
 Resolutions (administrative records)
 Resumes.
@@ -354,25 +321,10 @@ Scores.
 Scrapbooks.
 Scripts.
 Sermons.
-Sheet music
 Sheet music.
+Sheet music
 Signatures (names)
 Sketches.
-Slave bills of sale--Louisiana.
-Slave bills of sale--Louisiana--East Baton Rouge Parish.
-Slave bills of sale.
-Slave bills of sale--Arkansas.
-Slave bills of sale--Louisiana.
-Slave bills of sale--Louisiana--Baton Rouge.
-Slave bills of sale--Louisiana--West Feliciana Parish.
-Slave bills of sale--Mississippi.
-Slave bills of sale--Mississippi--Natchez.
-Slave bills of sale--North Carolina.
-Slave bills of sale--South Carolina.
-Slave records.
-Slave records--Louisiana.
-Slave records--Mississippi.
-Slaves--Louisiana--East Baton Rouge Parish.
 Slide projectors.
 Slides (photographs)
 Snapshots.
@@ -381,10 +333,8 @@ Souvenirs.
 Specifications.
 Speeches (documents)
 Speeches.
-Speeches. -- aat
+Speeches.
 Statistics.
-Stereographs.
-Stereographs.--gmgpc
 Stock certificates.
 Stocks certificates.
 Studio portraits.
@@ -407,8 +357,6 @@ Training manuals.
 Transcripts.
 Translations.
 Transportation maps.
-Trick photography.
-Tripods.
 Typescripts.
 Valentines.
 Videocassettes.

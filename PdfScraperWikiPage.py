@@ -19,7 +19,7 @@ class PdfScraperWikiPage():
 
 
     def get_lines(self):
-        path = './/text'
+        path = '//text'
         lines = self.tree.xpath(path)
         lefts = {}
         tops  = {}

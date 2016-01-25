@@ -7,9 +7,6 @@ African American college administrators--Louisiana.
 African American college teachers--Louisiana.
 African American dentists--Louisiana--Baton Rouge.
 African American farmers--Louisiana.
-Agricultural laborers, Foreign--United States.
-Agricultural laborers--Louisiana.
-Agricultural laborers--Mississippi.
 Agricultural laborers--Florida--Gainesville.
 Agricultural laborers--Louisiana.
 Agricultural laborers--Louisiana--New Llano.
@@ -42,7 +39,6 @@ Blacksmiths--Mississippi.
 Book editors--United States.
 Botanists--France.
 Brokers--Louisiana--New Orleans.
-Businessmen--Louisiana--Baton Rouge.
 Businessmen--Louisiana--East Baton Rouge Parish.
 Businessmen--Louisiana--New Orleans.
 Butchers--Louisiana.
@@ -88,7 +84,6 @@ Farmers--Louisiana--Natchitoches Parish.
 Farmers--Mississippi.
 Farmers--United States.
 Folk artists--Louisiana.
-Folklorists--Louisiana.
 Generals--United States.
 Geographers--United States.
 Geography teachers--California--San Diego.
@@ -101,7 +96,6 @@ Historians.
 Historians--Louisiana.
 Historians--Louisiana--Orleans Parish.
 Horse breeders--Louisiana.
-Horticulturist.--Louisiana.
 Horticulturists--Louisiana--New Iberia.
 Horticulturists--United States.
 Indian agents--Louisiana.
@@ -123,7 +117,6 @@ Landscape architects--Louisiana.
 Law clerks--Mississippi.
 Lawyers--Georgia.
 Lawyers--Louisiana.
-Lawyers--Louisiana--Baton Rouge.
 Lawyers--Louisiana--Bogalusa.
 Lawyers--Louisiana--Catahoula Parish.
 Lawyers--Louisiana--Clinton.
@@ -146,7 +139,6 @@ Loggers--Louisiana--Saint James Parish.
 Lumbermen--Louisiana.
 Lumbermen--Michigan--Allegan County.
 Mayors--Louisiana.
-Mayors--Louisiana--Baton Rouge--Photographs.
 Mechanical engineers--Cuba.
 Mechanical engineers--Louisiana.
 Merchant mariners--Maine.
@@ -171,7 +163,6 @@ Newspaper editors--Louisiana--New Orleans.
 Notaries--Louisiana--New Orleans.
 Notaries--Louisiana--Orleans Parish.
 Novelists, American--Louisiana.
-Nuns--Louisiana--New Orleans.
 Nurses--Confederate States of America.
 Nurses--Louisiana.
 Nurses--Training of--Louisiana--New Orleans.
@@ -183,14 +174,11 @@ Pharmacists--Louisiana.
 Pharmacists--Mississippi.
 Pharmacists--Mississippi--Osyka.
 Photographers--Louisiana.
-Photographers--New York (State)
-Photographers--Louisiana.
 Photographers--Louisiana--Baton Rouge.
 Photographers--Louisiana--New Orleans.
 Photographers--Minnesota--Saint Paul.
 Photographers--New York (State)--New York.
 Photographers--Texas--Waco.
-Photographic prints.--aat
 Physicians.
 Physicians--Arkansas.
 Physicians--Illinois.
@@ -204,12 +192,9 @@ Physicians--Maine.
 Physicians--Mississippi.
 Plantation overseers--Louisiana.
 Plantation owners.
-Plantation owners--Louisiana.
-Plantation owners--Louisiana--West Feliciana Parish.
 Plantation owners--Arkansas.
 Plantation owners--Family relationships--Louisiana.
 Plantation owners--Georgia.
-Plantation owners--Louisiana
 Plantation owners--Louisiana.
 Plantation owners--Louisiana--Assumption Parish.
 Plantation owners--Louisiana--Baton Rouge.
@@ -219,6 +204,7 @@ Plantation owners--Louisiana--East Feliciana Parish.
 Plantation owners--Louisiana--Fiction.
 Plantation owners--Louisiana--Iberia Parish.
 Plantation owners--Louisiana--Iberville Parish.
+Plantation owners--Louisiana
 Plantation owners--Louisiana--Pointe Coupee Parish.
 Plantation owners--Louisiana--Rapides Parish.
 Plantation owners--Louisiana--Red River Parish.
@@ -316,7 +302,6 @@ Women musicians--Louisiana.
 Women novelists--Mississippi.
 Women plantation owners--Family relationships--Louisiana.
 Women plantation owners--Louisiana.
-Women plantation owners--Louisiana--West Feliciana Parish.
 Women plantation owners--Mississippi.
 Women poets, American--Louisiana--New Orleans.
 Women poets, American--Mississippi.
