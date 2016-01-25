@@ -3,3 +3,4 @@ env/*
 dbg.xml
 .vagrant/*
 *.xml
+log
