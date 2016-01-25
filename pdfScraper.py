@@ -12,6 +12,7 @@ import xml.etree.ElementTree as ET
 from ReadNSV import ReadNSV
 from Logger import Logger as L
 from terms_dict_set import get_term_set_dict
+from langs_and_abbr import get_langs_and_abbr
 
 
 class FindingAidPDFtoEAD():
@@ -42,13 +43,12 @@ class FindingAidPDFtoEAD():
         return self.element_tree
 
     def run_conversion(self):
-        # print etree.tostring(self.element_tree, pretty_print=True)  # dev only
-        # self.print_xml_to_file()                                    # dev only
+        # print etree.tostring(self.element_tree, pretty_print=True)    # dev only
+        self.print_xml_to_file()                                    # dev only
         contents_of_inventory = self.grab_contents_of_inventory()
         self.c_o_i_ordered = sorted(contents_of_inventory, key=lambda item: int(item[1][0]))
-        print 'COI: ', self.c_o_i_ordered
         compiled_ead = self.get_ead()
-        self.print_ead_to_file(compiled_ead)
+        # self.print_ead_to_file(compiled_ead)
 
     def grab_contents_of_inventory(self):
         contents = self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
@@ -117,6 +117,13 @@ class FindingAidPDFtoEAD():
                     return ' '.join(self.get_text_after_header(i)).decode("utf8")
                 else:
                     return ' '.join(self.get_text_after_header(i, self.c_o_i_ordered[pos+1])).decode("utf8")
+        return 'Element not pulled from pdf'
+
+    def convert_text_in_column_to_string(self, column_title):
+        pass
+        # maybe also -- if text_a in ['summary', 'sumary', 'summaary']:   do x()
+        # here goes how to pull values of a column title (i.e., size) & return as text.decode('utf-8')
+
 
     def get_text_after_header(self, inventory_item, following_inventory_item=None):
         header, (beginning_page, end_page) = inventory_item
@@ -301,37 +308,52 @@ class FindingAidPDFtoEAD():
     def get_archdesc(self):
         default_stub = "Element not pulled from pdf"
 
-        archdesc = ET.Element('archdesc', attrib={'level': default_stub, 'relatedencoding': 'MARC21', 'type': default_stub})  # duped info from ead level??
+        archdesc = ET.Element('archdesc', attrib={'level': "collection", 'relatedencoding': 'MARC21', 'type': "inventory"})
 
         a = ET.SubElement(archdesc, 'did')
         a1 = ET.SubElement(a, 'head')
         a1.text = 'Overview of the Collection'
-        a2 = ET.SubElement(a, 'physdesc', attrib={'label': 'Quantity: ', 'encodinganalog': '300$a', })
+
+        a2 = ET.SubElement(a, 'physdesc', attrib={'label': 'Size', 'encodinganalog': '300$a', })
         a2a = ET.SubElement(a2, 'extent',)
-        a2a.text = default_stub
+        a2a.text = self.convert_text_in_column_to_string('size')
+
         a3 = ET.SubElement(a, 'unitdate', attrib={'label': 'Dates:', 'type': 'inclusive', 'encodinganalog': '245$f', 'type': default_stub, })
         a3.text = default_stub
+
         a4 = ET.SubElement(a, 'unitdate', attrib={'label': 'Dates:', 'type': 'bulk', 'encodinganalog': default_stub, 'type': default_stub, })
         a4.text = default_stub
+
         a5 = ET.SubElement(a, 'langmaterial')
-        a5a = ET.SubElement(a5, 'language', attrib={'langcode': default_stub, })
-        a5a.text = default_stub
+        try:
+            for i in self.what_language_used():
+                elem = ET.Element('language', attrib={'langcode': self.abbreviate_lang(i), })
+                elem.text = i
+                a5.append(elem)
+        except:
+            pass
+
         a6 = ET.SubElement(a, 'abstract', attrib={'label': "Abstract", 'encodinganalog': "520$a", })
-        a6.text = default_stub
+        a6.text = self.convert_text_in_column_to_string('summary')
+
         a7 = ET.SubElement(a, 'repository', attrib={'label': 'Repository', 'encodinganalog': '825$a'})
         a7a = ET.SubElement(a7, 'corpname')
         a7a.text = default_stub
         a7b = ET.SubElement(a7, 'subarea')
         a7b.text = default_stub
+
         a8 = ET.SubElement(a, 'physloc')
         a8.text = default_stub
+
         a9 = ET.SubElement(a, 'origination', attrib={'label': 'Creator: '})
         a9a = ET.SubElement(a9, 'persname', attrib={'encodinganalog': "100"})
         a9a.text = default_stub
         a9b = ET.SubElement(a9, 'corpname', attrib={'encodinganalog': "110"})
         a9b.text = default_stub
+
         a10 = ET.SubElement(a, 'unitid', attrib={'countrycode': "US", 'encodinganalog': "099", 'label': "Identification: ", 'repositorycode': default_stub, })
         a10.text = default_stub
+
         a11 = ET.SubElement(a, 'unittitle', attrib={'encodinganalog': "245$a", 'label': "Title: "})
         a11.text = default_stub
 
@@ -364,19 +386,13 @@ class FindingAidPDFtoEAD():
         f1 = ET.SubElement(f, 'head')
         f1.text = "BIOGRAPHICAL/HISTORICAL NOTE"
         f2 = ET.SubElement(f, 'p')
-        try:
-            f2.text = self.convert_text_after_header_to_string('biog')
-        except:
-            f2.text = default_stub
+        f2.text = self.convert_text_after_header_to_string('biog')
 
         g = ET.SubElement(archdesc, 'scopecontent', attrib={'encodinganalog': '520'})
         g1 = ET.SubElement(f, 'head')
         g1.text = "Scope and Contents of the Collection"
         g2 = ET.SubElement(g, 'p')
-        try:
-            g2.text = self.convert_text_after_header_to_string('scope')
-        except:
-            g2.text = default_stub
+        g2.text = self.convert_text_after_header_to_string('scope')
 
         h = ET.SubElement(archdesc, 'relatedmaterial')
         i = ET.SubElement(archdesc, 'separatedmaterial')
@@ -423,10 +439,7 @@ class FindingAidPDFtoEAD():
         #     px = ET.SubElement(p, 'p')
         #     px.text = text of paragraph
         p2 = ET.SubElement(p, 'p')
-        try:
-            p2.text = self.convert_text_after_header_to_string('series')
-        except:
-            p2.text = default_stub
+        p2.text = self.convert_text_after_header_to_string('series')
 
         q = ET.SubElement(archdesc, 'appraisal', attrib={'encodinganalog': "583"})
         q1 = ET.SubElement(q, 'head')
@@ -443,6 +456,14 @@ class FindingAidPDFtoEAD():
         ''' Should include <origination>, <unitid>, and <unittitle>...<origination> may have to be added later since we do not include creator names on our summary pages but <unittitle> and <unitid> should come from the title page. <unittitle> is the collection title portion of <titleproper>. <unitid> is the Mss. number. EAD documents differentiate between the collection title and the title of the finding aid. This was difficult to convey in the tag document since our finding only have title for the collection, not the finding aid itself. '''
         return archdesc
 
+    def what_language_used():
+        return 'call to function that returns a list of values of Language used'
+
+    def abbreviate_lang(language):
+        lang_abbr_dict = self.get_langs_and_abbr()
+        if lang_abbr_dict[language]:
+            return lang_abbr_dict[language]
+        return None
 
 
     @staticmethod
@@ -468,7 +489,6 @@ class FindingAidPDFtoEAD():
         path_file_name = 'exported_eads/{}.xml'.format(file_name)
         with open(path_file_name, 'w') as f:
             f.write(ET.tostring(ead, encoding="UTF-8", method="xml"))
-
 
     #
     # def getDefListItem(self, label):
