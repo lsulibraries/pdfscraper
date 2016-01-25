@@ -19,7 +19,7 @@ class PdfScraperWikiPage():
 
 
     def get_lines(self):
-        path = '//text'
+        path = './/text'
         lines = self.tree.xpath(path)
         lefts = {}
         tops  = {}
@@ -38,10 +38,28 @@ class PdfScraperWikiPage():
 
     def check_for_long_left_column_lines(self, left, right):
         for line in self.lines_by_left[left]:
-            print type(line)
-            if line.get('left') + line.get('width') > right:
+            leftpos = line.get('left')
+            width   = line.get('width')
+            print left, width, right
+            if leftpos + width > right:
                 text = etree.tostring(line, method='text', encoding="UTF-8").strip()
-                common_terms = Set(['Size', 'Geographic locations', 'Inclusive dates', 'Bulk dates', 'Languages', 'Summary', 'Source', 'Related collection', 'Copyright', 'Citation'])
+                print 'pound long line ' + text
+                common_terms = ['Size', 'Geographic locations', 'Inclusive dates', 'Bulk dates', 'Languages', 'Summary', 'Source', 'Related collection', 'Copyright', 'Citation']
+                head = text.split()
+                head = head[:2].join(' ') # first three words...
+                left_text, right_text = ''
+
+                for term in common_terms:
+                    first_word_of_term = term.split()[0]
+                    if term.lower() in head.lower() or first_word_of_term in head.lower():
+                        length = len(term.split()) 
+                        left_text = text[:left_text]
+                        right_text = text[left_text:]
+
+                line.text = left_text
+                new_right_element = etree.Element('text', {'left':right, 'top':line.get('top')})
+                self.lines_by_left[right].append(new_right_element)
+
 
                 # for term in 
     # def get_columnar_lines(self):
@@ -127,6 +145,7 @@ class PdfScraperWikiPage():
         instance.check_for_long_left_column_lines(left[0], right[0])
 
         left_cells = instance.get_col_cells(left[0])
+        # print left_cells
         right_cells = instance.get_col_cells(right[0])
         
         if len(left_cells) > len(right_cells):
@@ -135,18 +154,18 @@ class PdfScraperWikiPage():
         left_cells = instance.remove_empty_string_list_items(left_cells)
         right_cells = instance.remove_empty_string_list_items(right_cells)
 
-        # print left_cells, right_cells
+        print left_cells
 
         table = {}
         i = 0
-        print left_cells
+
         for cell in left_cells:
             if i > len(right_cells) - 1:
                 table[cell.strip()] = ''
             else:
                 table[cell.strip()] = right_cells[i].strip()
             i += 1
-        # for key, value in table.iteritems():
-        #     print '{} ------>>>>> {}'.format(key,value)
+        for key, value in table.iteritems():
+            print '{} ------>>>>> {}'.format(key,value)
         print '\n'
         return table
