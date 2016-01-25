@@ -18,6 +18,7 @@ class PdfScraperWikiPage():
 
 
     def get_lines(self):
+        print(self.tree)
         path = '//text'
         lines = self.tree.xpath(path)
         lefts = {}
