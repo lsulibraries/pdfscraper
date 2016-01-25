@@ -57,9 +57,9 @@ class FindingAidPDFtoEAD():
     def get_columns_after_summary(self):
         summary_header_pages = [elem for elem in self.c_o_i_ordered if 'summ' in elem[0]]
         header, (beginning_page, end_page) = summary_header_pages[0]
-        self.summary_columns = Page.get_table(self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(beginning_page, header.lower().strip()))[0])
-        print self.summary_columns
-        return
+        summary_columns = Page.get_table(self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(beginning_page, header.lower().strip()))[0])
+        print summary_columns
+        return summary_columns
 
     def grab_contents_of_inventory(self):
         contents = self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
@@ -139,18 +139,11 @@ class FindingAidPDFtoEAD():
                     return self.get_text_after_header(i, self.c_o_i_ordered[pos+1])
         return 'Element not pulled from pdf'
 
-    def convert_text_in_column_to_string(self, column_title):
-        possible_options = {'summary': set(['summary', 'Summary.',]),
-                            'size': set(['Size.', 'Size', ]),
-                            'dates inclusive': set(['Inclusive dates.', 'Inclusive dates']),
-                            'languages': set(['languages.', 'languages', 'language']),
-                            'access restriction': set(['Restrictions of Access', 'Access Restrictions', ]),
-                            'related collections': set(['related collections.', 'related collection', 'related collection']),
-                            }
-
-        return 
-        # maybe also -- if text_a in ['summary', 'sumary', 'summaary']:   do x()
-        # here goes how to pull values of a column title (i.e., size) & return as text.decode('utf-8')
+    def convert_text_in_column_to_string(self, column_snippet):
+        for i in self.columns_after_summary.iteritems():
+            if column_snippet.lower() in i[0].lower():
+                return self.columns_after_summary[i]
+        return 'Element not pulled from pdf'
 
     def get_text_after_header(self, inventory_item, following_inventory_item=None):
         header, (beginning_page, end_page) = inventory_item
