@@ -46,6 +46,7 @@ class FindingAidPDFtoEAD():
         # self.print_xml_to_file()                                    # dev only
         contents_of_inventory = self.grab_contents_of_inventory()
         self.c_o_i_ordered = sorted(contents_of_inventory, key=lambda item: int(item[1][0]))
+        print 'COI: ', self.c_o_i_ordered
         compiled_ead = self.get_ead()
         self.print_ead_to_file(compiled_ead)
 
