@@ -45,14 +45,17 @@ class FindingAidPDFtoEAD():
         # print etree.tostring(self.element_tree, pretty_print=True)  # dev only
         # self.print_xml_to_file()                                    # dev only
         contents_of_inventory = self.grab_contents_of_inventory()
-        c_o_i_ordered = sorted(contents_of_inventory, key=lambda item: int(item[1][0]))
-        for pos, i in enumerate(c_o_i_ordered):
-            if pos == len(c_o_i_ordered)-1:
-                self.get_text_after_header(i)
-            else:
-                self.get_text_after_header(i, c_o_i_ordered[pos+1])
+        self.c_o_i_ordered = sorted(contents_of_inventory, key=lambda item: int(item[1][0]))
         compiled_ead = self.get_ead()
         self.print_ead_to_file(compiled_ead)
+
+    def convert_text_after_header_to_string(self, header_snippet):
+        for pos, i in enumerate(self.c_o_i_ordered):
+            if header_snippet.lower() in i[0].lower():
+                if pos == len(self.c_o_i_ordered)-1:
+                    return ' '.join(self.get_text_after_header(i))
+                else:
+                    return ' '.join(self.get_text_after_header(i, self.c_o_i_ordered[pos+1]))
 
     def grab_contents_of_inventory(self):
         contents = self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
@@ -119,23 +122,22 @@ class FindingAidPDFtoEAD():
         elem_of_header = self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(beginning_page, header.lower().strip()))
         text_after_header = []
         for i in self.get_first_page_siblings_and_children(elem_of_header):
-            text_after_header.append(i)
+            text_after_header.append(i.strip())
         if following_inventory_item:
             following_header, (following_beginning_page, following_end_page) = following_inventory_item
             if following_beginning_page - beginning_page > 1:
                 for page in xrange(beginning_page+1, following_beginning_page):
                     self.get_middle_page_siblings_and_childrent(page)
-
+                    text_after_header.append(i.strip())
             if self.get_last_page_siblings_and_children(following_header, following_beginning_page):
                 for i in self.get_last_page_siblings_and_children(following_header, following_beginning_page):
-                    text_after_header.append(i)
+                    text_after_header.append(i.strip())
         else:
             for i in self.do_get_last_pages_if_last_header(beginning_page):
-                text_after_header.append(i)
+                text_after_header.append(i.strip())
         if len(text_after_header) > 1:
             self.log('Got {} lines afer header {}'.format(len(text_after_header), header))
         return text_after_header
-
 
     def get_first_page_siblings_and_children(self, elem_of_header):
         list_of_sibling_children_text = []
@@ -185,7 +187,6 @@ class FindingAidPDFtoEAD():
 
     # def log_if_missing(self, element, xpath_result_len, message=''):
     #     self.log('xpath failed to find title', 'm')
-
 
     def get_ead(self):
         ead = ET.Element('ead', attrib={'relatedencoding': "MARC21", 'type': "inventory", 'level': "collection", })
@@ -361,11 +362,11 @@ class FindingAidPDFtoEAD():
         f = ET.SubElement(archdesc, 'bioghist', attrib={'encodinganalog': '545'})
         f1 = ET.SubElement(f, 'head')
         f1.text = "BIOGRAPHICAL/HISTORICAL NOTE"
-        # for paragraph in Biographical Historical Note:
-        #     fx = ET.SubElement(f1, 'p')
-        #     fx.text = text of paragraph
         f2 = ET.SubElement(f, 'p')
-        f2.text = default_stub
+        try:
+            f2.text = self.convert_text_after_header_to_string('biogr')
+        except:
+            f2.text = default_stub
 
         g = ET.SubElement(archdesc, 'scopecontent', attrib={'encodinganalog': '520'})
         g1 = ET.SubElement(f, 'head')
@@ -461,8 +462,8 @@ class FindingAidPDFtoEAD():
             os.mkdir('{}/exported_eads'.format(os.getcwd()))
         file_name = os.path.splitext(os.path.basename(self.url))[0]
         path_file_name = 'exported_eads/{}.xml'.format(file_name)
-        with open(path_file_name, 'w') as f:
-            f.write(ET.tostring(ead, encoding="utf-8", method="xml"))
+        # with open(path_file_name, 'w') as f:
+        #     f.write(ET.tostring(ead, encoding="utf-8", method="xml"))
 
 
     #
