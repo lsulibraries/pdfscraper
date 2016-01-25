@@ -49,14 +49,6 @@ class FindingAidPDFtoEAD():
         compiled_ead = self.get_ead()
         self.print_ead_to_file(compiled_ead)
 
-    def convert_text_after_header_to_string(self, header_snippet):
-        for pos, i in enumerate(self.c_o_i_ordered):
-            if header_snippet.lower() in i[0].lower():
-                if pos == len(self.c_o_i_ordered)-1:
-                    return ' '.join(self.get_text_after_header(i))
-                else:
-                    return ' '.join(self.get_text_after_header(i, self.c_o_i_ordered[pos+1]))
-
     def grab_contents_of_inventory(self):
         contents = self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
         pruned_elem_list = self.remove_non_text_elements(contents)
@@ -116,6 +108,14 @@ class FindingAidPDFtoEAD():
         else:
             start, end = text, text
         return (start, end)
+
+    def convert_text_after_header_to_string(self, header_snippet):
+        for pos, i in enumerate(self.c_o_i_ordered):
+            if header_snippet.lower() in i[0].lower():
+                if pos == len(self.c_o_i_ordered)-1:
+                    return ' '.join(self.get_text_after_header(i)).decode("utf8")
+                else:
+                    return ' '.join(self.get_text_after_header(i, self.c_o_i_ordered[pos+1])).decode("utf8")
 
     def get_text_after_header(self, inventory_item, following_inventory_item=None):
         header, (beginning_page, end_page) = inventory_item
@@ -364,18 +364,18 @@ class FindingAidPDFtoEAD():
         f1.text = "BIOGRAPHICAL/HISTORICAL NOTE"
         f2 = ET.SubElement(f, 'p')
         try:
-            f2.text = self.convert_text_after_header_to_string('biogr')
+            f2.text = self.convert_text_after_header_to_string('biog')
         except:
             f2.text = default_stub
 
         g = ET.SubElement(archdesc, 'scopecontent', attrib={'encodinganalog': '520'})
         g1 = ET.SubElement(f, 'head')
         g1.text = "Scope and Contents of the Collection"
-        # for paragraph in Scope and Content:
-        #     gx = ET.SubElement(g, 'p')
-        #     gx.text = text of paragraph
         g2 = ET.SubElement(g, 'p')
-        g2.text = default_stub
+        try:
+            g2.text = self.convert_text_after_header_to_string('scope')
+        except:
+            g2.text = default_stub
 
         h = ET.SubElement(archdesc, 'relatedmaterial')
         i = ET.SubElement(archdesc, 'separatedmaterial')
@@ -422,7 +422,10 @@ class FindingAidPDFtoEAD():
         #     px = ET.SubElement(p, 'p')
         #     px.text = text of paragraph
         p2 = ET.SubElement(p, 'p')
-        p2.text = default_stub  # how to handle series/subseries?
+        try:
+            p2.text = self.convert_text_after_header_to_string('series')
+        except:
+            p2.text = default_stub
 
         q = ET.SubElement(archdesc, 'appraisal', attrib={'encodinganalog': "583"})
         q1 = ET.SubElement(q, 'head')
@@ -462,8 +465,8 @@ class FindingAidPDFtoEAD():
             os.mkdir('{}/exported_eads'.format(os.getcwd()))
         file_name = os.path.splitext(os.path.basename(self.url))[0]
         path_file_name = 'exported_eads/{}.xml'.format(file_name)
-        # with open(path_file_name, 'w') as f:
-        #     f.write(ET.tostring(ead, encoding="utf-8", method="xml"))
+        with open(path_file_name, 'w') as f:
+            f.write(ET.tostring(ead, encoding="UTF-8", method="xml"))
 
 
     #
