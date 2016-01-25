@@ -1,15 +1,17 @@
 #!/usr/bin/env python2.7
 
-import scraperwiki
-# import urllib2
-from lxml import etree
-# from lxml.builder import E
-import re
-from terms_dict_set import get_term_set_dict
-import xml.etree.ElementTree as ET
-from Logger import Logger as L
-from ReadNSV import ReadNSV
 import os
+import re
+# import urllib2
+
+import scraperwiki
+# from lxml.builder import E
+from lxml import etree
+import xml.etree.ElementTree as ET
+
+from ReadNSV import ReadNSV
+from Logger import Logger as L
+from terms_dict_set import get_term_set_dict
 
 
 class FindingAidPDFtoEAD():
@@ -79,6 +81,13 @@ class FindingAidPDFtoEAD():
                     inventory.append((header, pages_tuple))
         return inventory
 
+    def remove_non_text_elements(self, elem_list):
+        elements_with_text = []
+        for pos, item in enumerate(elem_list):
+            if re.findall('([A-Za-z0-9]+)', etree.tostring(item, method='text')):
+                elements_with_text.append(item)
+        return elements_with_text
+
     def collapse(self, elem_list):
         collapsed = {}
         for elm in elem_list:
@@ -88,13 +97,6 @@ class FindingAidPDFtoEAD():
             else:
                 collapsed[top] = '' + etree.tostring(elm, method='text').strip().lower()
         return collapsed
-
-    def remove_non_text_elements(self, elem_list):
-        elements_with_text = []
-        for pos, item in enumerate(elem_list):
-            if re.findall('([A-Za-z0-9]+)', etree.tostring(item, method='text')):
-                elements_with_text.append(item)
-        return elements_with_text
 
     def join_disjointed_header_page(self, elem_list):
         num_of_elems = len(elem_list)
@@ -134,9 +136,6 @@ class FindingAidPDFtoEAD():
             self.log('Got {} lines afer header {}'.format(len(text_after_header), header))
         return text_after_header
 
-    def get_pdf_length(self):
-        list_of_all_page_nums = [int(i) for i in self.element_tree.xpath('//page/@number')]
-        return max(list_of_all_page_nums)
 
     def get_first_page_siblings_and_children(self, elem_of_header):
         list_of_sibling_children_text = []
@@ -177,47 +176,16 @@ class FindingAidPDFtoEAD():
             count += 1
         return temp_text_list
 
+    def get_pdf_length(self):
+        list_of_all_page_nums = [int(i) for i in self.element_tree.xpath('//page/@number')]
+        return max(list_of_all_page_nums)
+
     def get_text_recursive(self, element):
         return etree.tostring(element, method='text', encoding="UTF-8").strip()
 
-    def log_if_missing(self, element, xpath_result_len, message=''):
-        self.log('xpath failed to find title', 'm')
+    # def log_if_missing(self, element, xpath_result_len, message=''):
+    #     self.log('xpath failed to find title', 'm')
 
-    def extract_title(self):
-        # titleproper - needs to account for multiple lines in some docs
-        wholetitle = []
-        titlelines = self.element_tree.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
-
-        for el in titlelines:
-            wholetitle.append(el.text.strip())
-        return 'A GUIDE TO THE ' + ' '.join(wholetitle)
-
-    def extract_mss(self):
-        titlelines = self.element_tree.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
-
-        # figuring out what the top value of the last line of the title is
-        titlelineend = titlelines[-1].getparent().get('top')
-
-        # num - assume it is between 12 and 25 units below the last line of title
-        #    (a better way might have been to take next text node)
-        numlinenumberA = str(int(titlelineend) + 12)  # 347
-        numlinenumberB = str(int(titlelineend) + 25)  # 360
-        xpath_address = '//page[@number="1"]/text[@top>=' + numlinenumberA + ' and @top<=' + numlinenumberB + ']'
-        mss_elem = self.element_tree.xpath(xpath_address)[0]
-        return mss_elem.text
-
-    def extract_subtitle(self):
-        return 'A Collection in the Louisiana and Lower Mississippi Valley Collections'
-
-    def extract_author(self):
-        try:
-            pdfauthor = self.element_tree.xpath('//page[@number="1"]/text[text()[normalize-space(.)="Compiled by"]]')[0].getnext().text.strip()
-        except:
-            pdfauthor = 'Special Collections Staff'
-        return pdfauthor
-
-    def extract_date(self):
-        return self.element_tree.xpath('//page[@number="1"]/text[@width>"20"]')[-1].text.strip()
 
     def get_ead(self):
         ead = ET.Element('ead', attrib={'relatedencoding': "MARC21", 'type': "inventory", 'level': "collection", })
@@ -236,6 +204,97 @@ class FindingAidPDFtoEAD():
 
     def get_eadid(self):
         return ET.Element('eadid', attrib={'countrycode': 'us', 'url': self.url}, )
+
+    def get_filedesc(self):
+        el = ET.Element('filedesc')
+        el.append(self.get_titlestmt())
+        el.append(self.get_publicationstmt())
+        return el
+
+    def get_titlestmt(self):
+        el = ET.Element('titlestmt')
+        el.append(self.get_titleproper())
+        el.append(self.get_subtitle())
+        el.append(self.get_author())
+        return el
+
+    def get_titleproper(self):
+        el = ET.Element('titleproper')
+        el.text = self.extract_title()
+        el.append(self.get_num())
+        return el
+
+    def extract_title(self):
+        # titleproper - needs to account for multiple lines in some docs
+        wholetitle = []
+        titlelines = self.element_tree.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
+        for el in titlelines:
+            wholetitle.append(el.text.strip())
+        return 'A GUIDE TO THE ' + ' '.join(wholetitle)
+
+    def get_num(self):
+        el = ET.Element('num', attrib={'type': 'Manuscript'})
+        el.text = self.extract_mss()
+        return el
+
+    def extract_mss(self):
+        titlelines = self.element_tree.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
+
+        # figuring out what the top value of the last line of the title is
+        titlelineend = titlelines[-1].getparent().get('top')
+
+        # num - assume it is between 12 and 25 units below the last line of title
+        #    (a better way might have been to take next text node)
+        numlinenumberA = str(int(titlelineend) + 12)  # 347
+        numlinenumberB = str(int(titlelineend) + 25)  # 360
+        xpath_address = '//page[@number="1"]/text[@top>=' + numlinenumberA + ' and @top<=' + numlinenumberB + ']'
+        mss_elem = self.element_tree.xpath(xpath_address)[0]
+        return mss_elem.text
+
+    def get_subtitle(self):
+        el = ET.Element('subtitle')
+        el.text = self.extract_subtitle()
+        return el
+
+    def extract_subtitle(self):
+        return 'A Collection in the Louisiana and Lower Mississippi Valley Collections'
+
+    def get_author(self):
+        el = ET.Element('author')
+        el.text = self.extract_author()
+        return el
+
+    def extract_author(self):
+        try:
+            pdfauthor = self.element_tree.xpath('//page[@number="1"]/text[text()[normalize-space(.)="Compiled by"]]')[0].getnext().text.strip()
+        except:
+            pdfauthor = 'Special Collections Staff'
+        return pdfauthor
+
+    def get_publicationstmt(self):
+        el = ET.Element('publicationstmt')
+        el.append(self.get_publisher())
+        el.append(self.get_addressline())
+        el.append(self.get_date())
+        return el
+
+    def get_publisher(self):
+        el = ET.Element('publisher')
+        el.text = 'Louisiana State University Special Collections'
+        return el
+
+    def get_addressline(self):
+        el = ET.Element('addressline')
+        el.text = 'Hill Memorial Library\nBaton Rouge, LA 70803-3300\nhttp://www.lib.lsu.edu/special'
+        return el
+
+    def get_date(self):
+        el = ET.Element('date')
+        el.text = self.extract_date()
+        return el
+
+    def extract_date(self):
+        return self.element_tree.xpath('//page[@number="1"]/text[@width>"20"]')[-1].text.strip()
 
     def get_archdesc(self):
         default_stub = "Element not pulled from pdf"
@@ -379,61 +438,7 @@ class FindingAidPDFtoEAD():
         ''' Should include <origination>, <unitid>, and <unittitle>...<origination> may have to be added later since we do not include creator names on our summary pages but <unittitle> and <unitid> should come from the title page. <unittitle> is the collection title portion of <titleproper>. <unitid> is the Mss. number. EAD documents differentiate between the collection title and the title of the finding aid. This was difficult to convey in the tag document since our finding only have title for the collection, not the finding aid itself. '''
         return archdesc
 
-    def get_filedesc(self):
-        el = ET.Element('filedesc')
-        el.append(self.get_titlestmt())
-        el.append(self.get_publicationstmt())
-        return el
 
-    def get_titlestmt(self):
-        el = ET.Element('titlestmt')
-        el.append(self.get_titleproper())
-        el.append(self.get_subtitle())
-        el.append(self.get_author())
-        return el
-
-    def get_titleproper(self):
-        el = ET.Element('titleproper')
-        el.text = self.extract_title()
-        el.append(self.get_num())
-        return el
-
-    def get_num(self):
-        el = ET.Element('num', attrib={'type': 'Manuscript'})
-        el.text = self.extract_mss()
-        return el
-
-    def get_subtitle(self):
-        el = ET.Element('subtitle')
-        el.text = self.extract_subtitle()
-        return el
-
-    def get_author(self):
-        el = ET.Element('author')
-        el.text = self.extract_author()
-        return el
-
-    def get_publicationstmt(self):
-        el = ET.Element('publicationstmt')
-        el.append(self.get_publisher())
-        el.append(self.get_addressline())
-        el.append(self.get_date())
-        return el
-
-    def get_publisher(self):
-        el = ET.Element('publisher')
-        el.text = 'Louisiana State University Special Collections'
-        return el
-
-    def get_addressline(self):
-        el = ET.Element('addressline')
-        el.text = 'Hill Memorial Library\nBaton Rouge, LA 70803-3300\nhttp://www.lib.lsu.edu/special'
-        return el
-
-    def get_date(self):
-        el = ET.Element('date')
-        el.text = self.extract_date()
-        return el
 
     @staticmethod
     def which_subject_heading_type(text):
@@ -477,4 +482,4 @@ if __name__ == '__main__':
         url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
         print url
         A = FindingAidPDFtoEAD(url, logger)
-        A.run_conversion()    # new codlow - in development
+        A.run_conversion()
