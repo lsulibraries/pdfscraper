@@ -130,7 +130,7 @@ class TestPageMethods(unittest.TestCase):
             i += 1
 
     def test_get_table(self):
-        table = self.instance.get_table()
+        table = Page.get_table(self.tree)
         for key,value in table.iteritems():
             print '{} ### {}'.format(key,value)
 

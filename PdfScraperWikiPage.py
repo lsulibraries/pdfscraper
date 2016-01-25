@@ -79,8 +79,10 @@ class PdfScraperWikiPage():
                 text = ''
         return cells
 
-    def get_table(self):
-        cols = self.get_column_lefts()
+    @staticmethod
+    def get_table(tree):
+        instance = PdfScraperWikiPage(tree)
+        cols = instance.get_column_lefts()
         one, two = cols
         if one[0] > two[0]:
             left = two
@@ -89,8 +91,8 @@ class PdfScraperWikiPage():
             left = one
             right = two
 
-        left_cells = self.get_col_cells(left[0])
-        right_cells = self.get_col_cells(right[0])
+        left_cells = instance.get_col_cells(left[0])
+        right_cells = instance.get_col_cells(right[0])
 
         table = {}
         i = 0
