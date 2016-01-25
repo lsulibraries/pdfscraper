@@ -55,7 +55,7 @@ class FindingAidPDFtoEAD():
         summary = Page.get_table(self.element_tree.xpath('/pdf2xml/page[@number=3]')[0])
         # print(summary)
 
-        # print summary
+        print summary
         # self.print_ead_to_file(compiled_ead)
 
     def grab_contents_of_inventory(self):
