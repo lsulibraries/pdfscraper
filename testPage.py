@@ -9,91 +9,81 @@ class TestPageMethods(unittest.TestCase):
     def setUp(self):
         self.fixture = self.tree = etree.fromstring('''
             <page number="3" position="absolute" top="0" left="0" height="1188" width="918">
-                <text top="112" left="108" width="251" height="16" font="0"><b>ACY (WILLIAM) JR. PAPERS </b></text>
-                <text top="106" left="360" width="5" height="24" font="1"> </text>
-                <text top="106" left="459" width="5" height="24" font="1"> </text>
-                <text top="112" left="707" width="108" height="16" font="0"><b>Mss. 717, 772 </b></text>
-                <text top="127" left="108" width="82" height="24" font="1">1844-1909 </text>
-                <text top="127" left="459" width="5" height="24" font="1"> </text>
-                <text top="127" left="563" width="252" height="24" font="1">LSU Libraries Special Collections </text>
-                <text top="1037" left="418" width="86" height="24" font="1">Page <b>3</b> of <b>9</b> </text>
-                <text top="1058" left="108" width="5" height="24" font="1"> </text>
-                <text top="190" left="459" width="5" height="16" font="0"><b> </b></text>
-                <text top="211" left="108" width="96" height="16" font="0"><b>SUMMARY</b></text>
-                <text top="205" left="204" width="5" height="24" font="1"> </text>
-                <text top="225" left="108" width="5" height="24" font="1"> </text>
-                <text top="246" left="108" width="5" height="24" font="1"> </text>
-                <text top="273" left="116" width="35" height="16" font="0"><b>Size.</b></text>
-                <text top="267" left="152" width="23" height="24" font="1">   </text>
-                <text top="267" left="231" width="5" height="24" font="1"> </text>
-                <text top="267" left="278" width="5" height="24" font="1"> </text>
-                <text top="267" left="332" width="5" height="24" font="1"> </text>
-                <text top="267" left="386" width="5" height="24" font="1"> </text>
-                <text top="267" left="440" width="18" height="24" font="1">   </text>
-                <text top="267" left="312" width="231" height="24" font="1">1 linear ft.; 18 mss. v.; 22 pr. v. </text>
-                <text top="267" left="582" width="5" height="24" font="1"> </text>
-                <text top="294" left="116" width="5" height="16" font="0"><b> </b></text>
-                <text top="288" left="312" width="5" height="24" font="1"> </text>
-                <text top="314" left="116" width="167" height="16" font="0"><b>Geographic locations.</b></text>
-                <text top="309" left="283" width="5" height="24" font="1"> </text>
-                <text top="308" left="312" width="251" height="24" font="1">Louisiana; Maryland; England.      </text>
-                <text top="335" left="116" width="5" height="16" font="0"><b> </b></text>
-                <text top="329" left="312" width="5" height="24" font="1"> </text>
-                <text top="355" left="116" width="114" height="16" font="0"><b>Inclusive dates</b></text>
-                <text top="350" left="230" width="9" height="24" font="1">. </text>
-                <text top="350" left="278" width="5" height="24" font="1"> </text>
-                <text top="350" left="312" width="87" height="24" font="1">1844-1909. </text>
-                <text top="370" left="116" width="5" height="24" font="1"> </text>
-                <text top="370" left="170" width="5" height="24" font="1"> </text>
-                <text top="370" left="312" width="5" height="24" font="1"> </text>
-                <text top="397" left="116" width="88" height="16" font="0"><b>Languages.</b></text>
-                <text top="391" left="204" width="32" height="24" font="1">   </text>
-                <text top="391" left="312" width="64" height="24" font="1">English. </text>
-                <text top="418" left="116" width="5" height="16" font="0"><b> </b></text>
-                <text top="412" left="312" width="5" height="24" font="1"> </text>
-                <text top="439" left="116" width="80" height="16" font="0"><b>Summary.</b></text>
-                <text top="433" left="197" width="5" height="24" font="1"> </text>
-                <text top="433" left="231" width="9" height="24" font="1">  </text>
-                <text top="432" left="312" width="478" height="24" font="1">Legal and financial papers, correspondence, memorandum books, </text>
-                <text top="453" left="312" width="257" height="24" font="1">record books, and printed material. </text>
-                <text top="480" left="116" width="5" height="16" font="0"><b> </b></text>
-                <text top="474" left="312" width="5" height="24" font="1"> </text>
-                <text top="501" left="116" width="111" height="16" font="0"><b>Organization. </b></text>
-                <text top="495" left="312" width="315" height="24" font="1">Papers are arranged in chronological order. </text>
-                <text top="521" left="116" width="5" height="16" font="0"><b> </b></text>
-                <text top="515" left="312" width="5" height="24" font="1"> </text>
-                <text top="542" left="116" width="171" height="16" font="0"><b>Restrictions on access.</b></text>
-                <text top="536" left="288" width="5" height="24" font="1"> </text>
-                <text top="536" left="332" width="5" height="24" font="1"> </text>
-                <text top="536" left="312" width="116" height="24" font="1">No restrictions. </text>
-                <text top="563" left="116" width="5" height="16" font="0"><b> </b></text>
-                <text top="557" left="312" width="5" height="24" font="1"> </text>
-                <text top="584" left="116" width="152" height="16" font="0"><b>Related collections. </b></text>
-                <text top="577" left="312" width="35" height="24" font="1">N/A </text>
-                <text top="604" left="116" width="5" height="16" font="0"><b> </b></text>
-                <text top="598" left="312" width="5" height="24" font="1"> </text>
-                <text top="625" left="116" width="84" height="16" font="0"><b>Copyright.</b></text>
-                <text top="619" left="200" width="5" height="24" font="1"> </text>
-                <text top="619" left="231" width="5" height="24" font="1"> </text>
-                <text top="619" left="312" width="489" height="24" font="1">Physical rights are retained by the LSU Libraries.  Copyright of the </text>
-                <text top="640" left="312" width="477" height="24" font="1">original materials is retained by descendants of the creators of the </text>
-                <text top="660" left="312" width="356" height="24" font="1">materials in accordance with U.S. copyright law. </text>
-                <text top="687" left="116" width="5" height="16" font="0"><b> </b></text>
-                <text top="681" left="312" width="5" height="24" font="1"> </text>
-                <text top="708" left="116" width="67" height="16" font="0"><b>Citation.</b></text>
-                <text top="702" left="184" width="5" height="24" font="1"> </text>
-                <text top="702" left="231" width="5" height="24" font="1"> </text>
-                <text top="702" left="312" width="450" height="24" font="1">William Acy, Jr. Papers, Mss. 717, 722, Louisiana and Lower </text>
-                <text top="722" left="312" width="445" height="24" font="1">Mississippi Valley Collections, LSU Libraries, Baton Rouge, </text>
-                <text top="743" left="312" width="80" height="24" font="1">Louisiana.<b> </b></text>
-                <text top="770" left="116" width="5" height="16" font="0"><b> </b></text>
-                <text top="764" left="312" width="5" height="24" font="1"> </text>
-                <text top="791" left="116" width="117" height="16" font="0"><b>Stack location. </b></text>
-                <text top="785" left="234" width="9" height="24" font="1">  </text>
-                <text top="784" left="312" width="117" height="24" font="1">E:1, F:1, OS:A. </text>
-                <text top="805" left="108" width="5" height="24" font="1"> </text>
-                <text top="805" left="324" width="5" height="24" font="1"> </text>
-            </page>
+    <fontspec id="3" size="15" family="Times" color="#000000"/>
+<text top="58" left="135" width="238" height="16" font="1"><b>JESSE BANKSTON PAPERS </b></text>
+<text top="58" left="459" width="5" height="16" font="1"><b> </b></text>
+<text top="58" left="748" width="80" height="16" font="1"><b>Mss. 5078 </b></text>
+<text top="79" left="135" width="82" height="16" font="0">1924-2010 </text>
+<text top="79" left="459" width="367" height="16" font="1"><b>SPECIAL COLLECTIONS, LSU LIBRARIES </b></text>
+<text top="1117" left="414" width="95" height="16" font="0">Page 3 of 11 </text>
+<text top="112" left="135" width="5" height="16" font="0"> </text>
+<text top="133" left="135" width="100" height="16" font="1"><b>SUMMARY </b></text>
+<text top="154" left="135" width="5" height="16" font="1"><b> </b></text>
+<text top="174" left="135" width="40" height="16" font="1"><b>Size. </b></text>
+<text top="174" left="292" width="97" height="16" font="0">2.3 linear ft.  </text>
+<text top="195" left="135" width="5" height="16" font="1"><b> </b></text>
+<text top="195" left="292" width="5" height="16" font="1"><b> </b></text>
+<text top="216" left="135" width="95" height="16" font="1"><b>Geographic </b></text>
+<text top="236" left="135" width="77" height="16" font="1"><b>locations. </b></text>
+<text top="215" left="292" width="215" height="16" font="0">Louisiana, Washington, D.C. </text>
+<text top="257" left="135" width="5" height="16" font="1"><b> </b></text>
+<text top="257" left="292" width="5" height="16" font="1"><b> </b></text>
+<text top="278" left="135" width="123" height="16" font="1"><b>Inclusive dates. </b></text>
+<text top="278" left="292" width="87" height="16" font="0">1924-2010. </text>
+<text top="299" left="135" width="5" height="16" font="1"><b> </b></text>
+<text top="299" left="292" width="5" height="16" font="1"><b> </b></text>
+<text top="319" left="135" width="91" height="16" font="1"><b>Bulk dates. </b></text>
+<text top="319" left="292" width="87" height="16" font="0">1956-1992. </text>
+<text top="340" left="135" width="5" height="16" font="1"><b> </b></text>
+<text top="340" left="292" width="5" height="16" font="1"><b> </b></text>
+<text top="361" left="135" width="85" height="16" font="1"><b>Language. </b></text>
+<text top="360" left="292" width="60" height="16" font="0">English </text>
+<text top="381" left="135" width="5" height="16" font="1"><b> </b></text>
+<text top="381" left="292" width="5" height="16" font="1"><b> </b></text>
+<text top="402" left="135" width="85" height="16" font="1"><b>Summary. </b></text>
+<text top="402" left="292" width="506" height="16" font="3">Correspondence, political files, newspaper clippings, campaign material, </text>
+<text top="421" left="292" width="527" height="16" font="3">and photographs reflect Jesse H. Bankston’s involvement in Louisiana state </text>
+<text top="441" left="292" width="339" height="16" font="3">government and the Louisiana Democratic Party.</text>
+<text top="441" left="631" width="5" height="16" font="0"> </text>
+<text top="461" left="135" width="5" height="16" font="1"><b> </b></text>
+<text top="461" left="292" width="5" height="16" font="1"><b> </b></text>
+<text top="482" left="135" width="120" height="16" font="1"><b>Restrictions on </b></text>
+<text top="503" left="135" width="56" height="16" font="1"><b>access. </b></text>
+<text top="482" left="292" width="518" height="16" font="0">Original letters of Hubert H. Humphrey (Sept. 28, 1964), Jimmy Carter </text>
+<text top="503" left="292" width="460" height="16" font="0">(July 22, 1977), Bill Clinton (May 20, 1987) are restricted. Use </text>
+<text top="523" left="292" width="96" height="16" font="0">photocopies. </text>
+<text top="544" left="292" width="5" height="16" font="0"> </text>
+<text top="565" left="135" width="63" height="16" font="1"><b>Related </b></text>
+<text top="586" left="135" width="89" height="16" font="1"><b>collections. </b></text>
+<text top="565" left="292" width="473" height="16" font="0">Jesse Bankston and Larry Bankston Oral History Interview, Mss. </text>
+<text top="585" left="292" width="513" height="16" font="0">4700.1173.  Democratic State Central Committee of Louisiana Papers, </text>
+<text top="606" left="292" width="510" height="16" font="0">Mss. 3760, Louisiana and Lower Mississippi Valley Collections, LSU </text>
+<text top="627" left="292" width="502" height="16" font="0">Libraries, Baton Rouge, La. Louisiana and Lower Mississippi Valley </text>
+<text top="647" left="292" width="335" height="16" font="0">Collections, LSU Libraries, Baton Rouge, La. </text>
+<text top="668" left="135" width="5" height="16" font="1"><b> </b></text>
+<text top="668" left="292" width="5" height="16" font="1"><b> </b></text>
+<text top="689" left="135" width="88" height="16" font="1"><b>Copyright. </b></text>
+<text top="689" left="292" width="502" height="16" font="0">For those materials not in the public domain, copyright is retained by </text>
+<text top="710" left="292" width="519" height="16" font="0">the descendants of the creators in accordance with U.S. Copyright law.  </text>
+<text top="731" left="135" width="5" height="16" font="1"><b> </b></text>
+<text top="731" left="292" width="5" height="16" font="1"><b> </b></text>
+<text top="751" left="135" width="72" height="16" font="1"><b>Citation. </b></text>
+<text top="751" left="292" width="521" height="16" font="0">Jesse H. Bankston Papers, Mss. 5078, Louisiana and Lower Mississippi </text>
+<text top="772" left="292" width="392" height="16" font="0">Valley Collections, LSU Libraries, Baton Rouge, La.  </text>
+<text top="793" left="135" width="5" height="16" font="1"><b> </b></text>
+<text top="793" left="292" width="5" height="16" font="1"><b> </b></text>
+<text top="813" left="135" width="125" height="16" font="1"><b>Stack locations. </b></text>
+<text top="813" left="292" width="195" height="16" font="0">116:24-25, OS:B, Vault:1  </text>
+<text top="834" left="135" width="5" height="16" font="0"> </text>
+<text top="854" left="135" width="5" height="16" font="0"> </text>
+<text top="875" left="135" width="5" height="16" font="0"> </text>
+<text top="896" left="135" width="5" height="16" font="0"> </text>
+<text top="917" left="135" width="5" height="16" font="0"> </text>
+<text top="937" left="135" width="5" height="16" font="0"> </text>
+<text top="958" left="135" width="5" height="16" font="0"> </text>
+<text top="958" left="351" width="5" height="16" font="0"> </text>
+</page>
+
         ''')
         self.instance = Page(self.tree)
 

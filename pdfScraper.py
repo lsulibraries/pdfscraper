@@ -13,7 +13,7 @@ from ReadNSV import ReadNSV
 from Logger import Logger as L
 from terms_dict_set import get_term_set_dict
 from langs_and_abbr import get_langs_and_abbr
-
+from PdfScraperWikiPage import PdfScraperWikiPage as Page
 
 class FindingAidPDFtoEAD():
     def __init__(self, url, logger=None):
@@ -42,12 +42,19 @@ class FindingAidPDFtoEAD():
         self.log('opened file', 'm')
         return self.element_tree
 
+
+
+
     def run_conversion(self):
         # print etree.tostring(self.element_tree, pretty_print=True)    # dev only
         self.print_xml_to_file()                                    # dev only
         contents_of_inventory = self.grab_contents_of_inventory()
         self.c_o_i_ordered = sorted(contents_of_inventory, key=lambda item: int(item[1][0]))
         compiled_ead = self.get_ead()
+        # print etree.tostring(self.element_tree.xpath('/pdf2xml/page[@number=3]')[0], method='text', encoding='UTF-8')
+        summary = Page.get_table(self.element_tree.xpath('/pdf2xml/page[@number=3]')[0])
+
+        # print summary
         # self.print_ead_to_file(compiled_ead)
 
     def grab_contents_of_inventory(self):
@@ -408,9 +415,10 @@ class FindingAidPDFtoEAD():
         k = ET.SubElement(archdesc, 'controlaccess')
         k1 = ET.SubElement(k, 'head')
         k1.text = "Index Terms"
-        if self.get_index_terms():
-            for i in self.get_index_terms:
-                elem = copy this algorhythm from other similar call
+        # if self.get_index_terms():
+        #     for i in self.get_index_terms:
+        #         pass
+                # elem = copy this algorhythm from other similar call
 
         # for subject_term_item in Index_Terms:
         #    kx = ET.SubElement(k, {persname, corpname, etc as string, attrib={'encodinganalog': "610", 'source': default_stub}
@@ -428,7 +436,7 @@ class FindingAidPDFtoEAD():
 
         o = ET.SubElement(archdesc, 'dsc', attrib={'type': 'in-depth',})
         o1 = ET.SubElement(o, 'head')
-        o1.tex
+        # o1.text 
         # for i in Series list:
         #     add a o1, o1a, o1b in the format below
         # o1 = ET.SubElement(o, 'co1', attrib={'level': 'series'})

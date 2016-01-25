@@ -12,13 +12,14 @@ class PdfScraperWikiPage():
 
     def __init__(self, tree):
         self.tree = tree
+        # print etree.tostring(tree, method='text', encoding="UTF-8").strip()
         lines_gotten = self.get_lines()
         self.lines_by_left = lines_gotten[0]
         self.lines_by_top  = lines_gotten[1]
 
 
     def get_lines(self):
-        path = '//text'
+        path = './/text'
         lines = self.tree.xpath(path)
         lefts = {}
         tops  = {}
@@ -32,14 +33,23 @@ class PdfScraperWikiPage():
             if (left is not None) and (left not in lefts):
                 lefts[left] = []
             lefts[left].append(line)
+        # print lefts,tops
         return (lefts, tops)
 
-    def get_columnar_lines(self):
-        columnar_lines = {}
-        for top in self.lines_by_top:
-            if len(self.lines_by_top[top]) > 1:
-                columnar_lines[top] = self.lines_by_top[top]
-        return columnar_lines
+    def check_for_long_left_column_lines(self, left, right):
+        for line in self.lines_by_left[left]:
+            print type(line)
+            if line.get('left') + line.get('width') > right:
+                text = etree.tostring(line, method='text', encoding="UTF-8").strip()
+                common_terms = Set(['Size', 'Geographic locations', 'Inclusive dates', 'Bulk dates', 'Languages', 'Summary', 'Source', 'Related collection', 'Copyright', 'Citation'])
+
+                # for term in 
+    # def get_columnar_lines(self):
+    #     columnar_lines = {}
+    #     for top in self.lines_by_top:
+    #         if len(self.lines_by_top[top]) > 1:
+    #             columnar_lines[top] = self.lines_by_top[top]
+    #     return columnar_lines
 
     def get_column_lefts(self):
         first  = (None, 0)
@@ -47,12 +57,14 @@ class PdfScraperWikiPage():
 
         for key,items in self.lines_by_left.iteritems():
             length = len(items)
+            # print key, length
             # print 'pos {} has {} items'.format(key, length)
             if length > first[1]:
                 second = first
                 first = (key, length)
             elif length > second[1]:
                 second = (key, length)
+        # print (first, second)
         return (first, second)
 
     def get_col_cells(self, leftpos):
@@ -71,18 +83,39 @@ class PdfScraperWikiPage():
 
         text = ''
         for top in tops_list:
-            text_value = etree.tostring(by_tops[top], method='text').strip()
+            text_value = etree.tostring(by_tops[top], method='text', encoding="UTF-8").strip()
             text += text_value
             only_whitespace = re.match('^\s*$', text_value)
             if only_whitespace:
                 cells.append(text)
+                # print text
                 text = ''
         return cells
+
+    def checkForSummary(self, left_cells):
+        prune = False
+        i = 0
+        for cell in left_cells:
+            if 'summary' in cell.lower():
+                prune = True
+                break
+            i += 1
+        if prune == True:
+            left_cells = left_cells[i+1:]
+        return left_cells
+
+    def remove_empty_string_list_items(self, cluttered):
+        clean = []
+        for item in cluttered:
+            if item != '':
+                clean.append(item)
+        return clean
 
     @staticmethod
     def get_table(tree):
         instance = PdfScraperWikiPage(tree)
         cols = instance.get_column_lefts()
+
         one, two = cols
         if one[0] > two[0]:
             left = two
@@ -91,12 +124,29 @@ class PdfScraperWikiPage():
             left = one
             right = two
 
+        instance.check_for_long_left_column_lines(left[0], right[0])
+
         left_cells = instance.get_col_cells(left[0])
         right_cells = instance.get_col_cells(right[0])
+        
+        if len(left_cells) > len(right_cells):
+            left_cells = instance.checkForSummary(left_cells)
+
+        left_cells = instance.remove_empty_string_list_items(left_cells)
+        right_cells = instance.remove_empty_string_list_items(right_cells)
+
+        # print left_cells, right_cells
 
         table = {}
         i = 0
+        print left_cells
         for cell in left_cells:
-            table[cell.strip()] = right_cells[i].strip()
+            if i > len(right_cells) - 1:
+                table[cell.strip()] = ''
+            else:
+                table[cell.strip()] = right_cells[i].strip()
             i += 1
+        # for key, value in table.iteritems():
+        #     print '{} ------>>>>> {}'.format(key,value)
+        print '\n'
         return table
