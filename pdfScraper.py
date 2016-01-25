@@ -9,6 +9,7 @@ from terms_dict_set import get_term_set_dict
 import xml.etree.ElementTree as ET
 from Logger import Logger as L
 from ReadNSV import ReadNSV
+import os
 
 
 class FindingAidPDFtoEAD():
@@ -48,6 +49,8 @@ class FindingAidPDFtoEAD():
                 self.get_text_after_header(i)
             else:
                 self.get_text_after_header(i, c_o_i_ordered[pos+1])
+        compiled_ead = self.get_ead()
+        self.print_ead_to_file(compiled_ead)
 
     def grab_contents_of_inventory(self):
         contents = self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
@@ -293,7 +296,7 @@ class FindingAidPDFtoEAD():
         e = ET.SubElement(archdesc, 'prefercite', attrib={'encodinganalog': '524'})
         e1 = ET.SubElement(e, 'head')
         e1.text = "Preferred Citation"
-        e2 = ET.SubElement(e, 'p')   
+        e2 = ET.SubElement(e, 'p')
         e2.text = default_stub
 
         f = ET.SubElement(archdesc, 'bioghist', attrib={'encodinganalog': '545'})
@@ -443,9 +446,19 @@ class FindingAidPDFtoEAD():
 
     ''' Extra useful tidbits (for development) '''
     def print_xml_to_file(self):
-        file_name = 'cached_pdfs/{}.xml'.format(self.url[-8:-4])
-        with open(file_name, 'w') as f:
+        file_name = os.path.splitext(os.path.basename(self.url))[0]
+        path_file_name = 'cached_pdfs/{}.xml'.format(file_name)
+        with open(path_file_name, 'w') as f:
             f.write(etree.tostring(self.element_tree, pretty_print=True))
+
+    def print_ead_to_file(self, ead):
+        if 'exported_eads' not in os.listdir(os.getcwd()):
+            os.mkdir('{}/exported_eads'.format(os.getcwd()))
+        file_name = os.path.splitext(os.path.basename(self.url))[0]
+        path_file_name = 'exported_eads/{}.xml'.format(file_name)
+        with open(path_file_name, 'w') as f:
+            f.write(ET.tostring(ead, encoding="utf-8", method="xml"))
+
 
     #
     # def getDefListItem(self, label):
