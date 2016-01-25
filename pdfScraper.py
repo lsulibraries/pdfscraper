@@ -53,6 +53,7 @@ class FindingAidPDFtoEAD():
         compiled_ead = self.get_ead()
         # print etree.tostring(self.element_tree.xpath('/pdf2xml/page[@number=3]')[0], method='text', encoding='UTF-8')
         summary = Page.get_table(self.element_tree.xpath('/pdf2xml/page[@number=3]')[0])
+        # print(summary)
 
         # print summary
         # self.print_ead_to_file(compiled_ead)
@@ -435,8 +436,11 @@ class FindingAidPDFtoEAD():
         k1.text = "Index Terms"
 
         for i in self.convert_text_after_header_to_list('index'):
-            elem = ET.Element(pdfScaper.which_subject_heading_type(i), attrib={'source': this_thingie, 'encodinganalog': '600$a'})
-            elem.text = i
+            try:
+                elem = ET.Element(FindingAidPDFtoEAD.which_subject_heading_type(i)[0], attrib={'source': FindingAidPDFtoEAD.which_subject_heading_type(i)[1], 'encodinganalog': '600$a'})
+                elem.text = i
+            except:
+                pass
 
 
         l = ET.SubElement(archdesc, 'acqinfo')
@@ -497,11 +501,11 @@ class FindingAidPDFtoEAD():
     @staticmethod
     def which_subject_heading_type(text):
         term_dict_set = get_term_set_dict()
-        for subject_heading, values_set in term_dict_set.iteritems():
-            if text in values_set:
-                return subject_heading
-        else:
-            return None
+        for subject_heading, source_dict in term_dict_set.iteritems():
+            for source, item_set in source_dict.iteritems():
+                if text in item_set:
+                    return (subject_heading, source)
+        return None
 
     ''' Extra useful tidbits (for development) '''
     def print_xml_to_file(self):

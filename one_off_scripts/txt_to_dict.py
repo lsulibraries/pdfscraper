@@ -29,14 +29,15 @@ for term, source_dict in subject_term_sets.iteritems():
                 line = line.strip('\n\r').strip()
                 term_set.add(line)
 
-# show items in two sets
-dupe_set = []
-for term, source_dict in subject_term_sets.iteritems():
-    for source, term_set in source_dict.iteritems():
-        for uterm, usource_dict in subject_term_sets.iteritems():
-            for usource, uterm_set in usource_dict.iteritems():
-                if (term, source, term_set) != (uterm, usource, uterm_set):
-                    new_union = term_set.intersection(uterm_set)
-                    print term, source, '\t', uterm, usource,": ", new_union
+# # show items in two sets
+# dupe_set = []
+# for term, source_dict in subject_term_sets.iteritems():
+#     for source, term_set in source_dict.iteritems():
+#         for uterm, usource_dict in subject_term_sets.iteritems():
+#             for usource, uterm_set in usource_dict.iteritems():
+#                 if (term, source, term_set) != (uterm, usource, uterm_set):
+#                     new_union = term_set.intersection(uterm_set)
+#                     print term, source, '\t', uterm, usource,": ", new_union
 
-#print 'terms_sets_dict = {}'.format(subject_term_sets)
+with open('trash.txt', 'w') as f:
+    f.write('{}'.format(subject_term_sets))
