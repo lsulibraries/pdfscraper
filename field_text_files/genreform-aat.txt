@@ -157,7 +157,6 @@ Forms (documents)
 Formularies.
 Galley proofs.
 Gelatin dry plate negatives.
-Gelatin silver prints.
 Genealogical tables.
 Genealogies (histories)
 Genealogies.
@@ -312,7 +311,6 @@ Reports.
 Research (document genres)
 Research notes.
 Research.
-Resin-coated paper prints.
 Resin-coated paper.
 Resolutions (administrative records)
 Resumes.
@@ -337,7 +335,6 @@ Speeches (documents)
 Speeches.
 Speeches.
 Statistics.
-Stereographs.
 Stock certificates.
 Stocks certificates.
 Studio portraits.
