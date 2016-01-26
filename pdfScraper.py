@@ -340,10 +340,10 @@ class FindingAidPDFtoEAD():
         a2a = ET.SubElement(a2, 'extent',)
         a2a.text = self.convert_text_in_column_to_string('siz')
 
-        a3 = ET.SubElement(a, 'unitdate', attrib={'label': 'Dates:', 'type': 'inclusive', 'encodinganalog': '245$f', 'type': default_stub, })
+        a3 = ET.SubElement(a, 'unitdate', attrib={'label': 'Dates:', 'type': 'inclusive', 'encodinganalog': '245$f',  })
         a3.text = self.convert_text_in_column_to_string('inclusive')
 
-        a4 = ET.SubElement(a, 'unitdate', attrib={'label': 'Dates:', 'type': 'bulk', 'encodinganalog': default_stub, 'type': default_stub, })
+        a4 = ET.SubElement(a, 'unitdate', attrib={'label': 'Dates:', 'type': 'bulk', 'encodinganalog': default_stub,  })
         a4.text = self.convert_text_in_column_to_string('bulk')
 
         a5 = ET.SubElement(a, 'langmaterial')
