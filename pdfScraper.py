@@ -3,6 +3,7 @@
 import os
 import re
 import urllib2
+import traceback
 
 import scraperwiki
 # from lxml.builder import E
@@ -32,7 +33,7 @@ class FindingAidPDFtoEAD():
         self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
         self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
         self.element_tree = etree.fromstring(self.xmldata)
-        self.log('opened file', 'm')
+        self.log('opened file', 'i')
         return self.element_tree
 
         '''temporary 'read cached file from harddrive' monkeypatch'''
@@ -167,8 +168,8 @@ class FindingAidPDFtoEAD():
         else:
             for i in self.do_get_last_pages_if_last_header(beginning_page):
                 text_after_header.append(i.strip())
-        if len(text_after_header) > 1:
-            self.log('Got {} lines afer header {}'.format(len(text_after_header), header))
+        # if len(text_after_header) > 1:
+            # self.log('Got {} lines afer header {}'.format(len(text_after_header), header))
         return text_after_header
 
     def get_first_page_siblings_and_children(self, elem_of_header):
@@ -553,4 +554,4 @@ if __name__ == '__main__':
         try:
             A.run_conversion()
         except Exception as e:
-            print e
+            logger.add(traceback.print_stack(), 'e')
