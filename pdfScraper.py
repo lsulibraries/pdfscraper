@@ -3,6 +3,7 @@
 import os
 import re
 import urllib2
+import traceback
 
 import scraperwiki
 # from lxml.builder import E
@@ -22,6 +23,7 @@ class FindingAidPDFtoEAD():
         self.url = url
         self.logger = logger
         self.element_tree = self.read_url_return_etree(self.url)
+        # print self.element_tree
 
     def log(self, msg, sev='i'):
         self.logger.add('{}:   {} '.format(self.url, msg), sev)
@@ -64,7 +66,7 @@ class FindingAidPDFtoEAD():
         contents = self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
         pruned_elem_list = self.remove_non_text_elements(contents)
         if re.findall('[a-zA-Z]', etree.tostring(pruned_elem_list[0], method='text')) and re.findall('[0-9]', etree.tostring(pruned_elem_list[0], method='text')):
-            top_header_page_dict = self.collapse(contents)
+            top_header_page_dict = self.lower_case_and_dict_it(contents)
             inventory = []
             for top, header_page in top_header_page_dict.iteritems():
                 header, page = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', header_page)[0]
@@ -94,21 +96,12 @@ class FindingAidPDFtoEAD():
                 elements_with_text.append(item)
         return elements_with_text
 
-    def collapse(self, elem_list):
-        print 'elem_list:', elem_list
-        collapsed = {}
-        for elm in elem_list:
-            print 'elm:', elm
-            top = elm.getparent().get('top')
-            print 'top:', top
-            if top in collapsed:
-                existing_text = collapsed[top] + ' ' + etree.tostring(elm, method='text').strip().lower()
-                print 'existing_text:', existing_text
-            else:
-                collapsed[top] = '' + etree.tostring(elm, method='text').strip().lower()
-                print 'collapsed[top]:', collapsed[top]
-        print 'collapsed:', collapsed
-        return collapsed
+    def lower_case_and_dict_it(self, elem_list):
+        a_dict = {}
+        for elem in elem_list:
+            if elem.getparent().get('top') not in a_dict:
+                a_dict[elem.getparent().get('top')] = '{}'.format(etree.tostring(elem, method='text', encoding='utf-8').strip().lower())
+        return a_dict
 
     def join_disjointed_header_page(self, elem_list):
         num_of_elems = len(elem_list)
@@ -168,8 +161,6 @@ class FindingAidPDFtoEAD():
         else:
             for i in self.do_get_last_pages_if_last_header(beginning_page):
                 text_after_header.append(i.strip())
-        if len(text_after_header) > 1:
-            self.log('Got {} lines afer header {}'.format(len(text_after_header), header))
         return text_after_header
 
     def get_first_page_siblings_and_children(self, elem_of_header):
@@ -225,9 +216,6 @@ class FindingAidPDFtoEAD():
         ead = ET.Element('ead', attrib={'relatedencoding': "MARC21", 'type': "inventory", 'level': "collection", })
         ead.append(self.get_eadheader())
         ead.append(self.get_archdesc())
-        ''' some preface on all xmls like this:::::?
-            <?xml version="1.0" encoding="utf-8"?>
-            <!DOCTYPE ead PUBLIC "+//ISBN 1-931666-00-8//DTD ead.dtd (Encoded Archival Description (EAD) Version 2002)//EN" "../ead_dtd/ead.dtd">'''
         return ead
 
     def get_eadheader(self):
@@ -256,6 +244,7 @@ class FindingAidPDFtoEAD():
         el = ET.Element('titleproper')
         el.text = self.extract_title()
         el.append(self.get_num())
+        # print el.text
         return el
 
     def extract_title(self):
@@ -354,8 +343,6 @@ class FindingAidPDFtoEAD():
         a4.text = self.convert_text_in_column_to_string('bulk')
 
         a5 = ET.SubElement(a, 'langmaterial')
-
-        
         try:
             lang_list = self.what_language_used()
             for i in lang_list.split(','):
@@ -365,8 +352,9 @@ class FindingAidPDFtoEAD():
                 elem = ET.Element('language', attrib={'langcode': self.abbreviate_lang(i), })
                 elem.text = i
                 a5.append(elem)
-        except:
-            pass
+        except Exception as e:
+            self.log(e)
+            print e
 
         a6 = ET.SubElement(a, 'abstract', attrib={'label': "Summary", 'encodinganalog': "520$a", })
         a6.text = self.convert_text_in_column_to_string('sum')
@@ -383,6 +371,16 @@ class FindingAidPDFtoEAD():
         a9 = ET.SubElement(a, 'origination', attrib={'label': 'Creator: '})
         a9a = ET.SubElement(a9, 'persname', attrib={'encodinganalog': "100"})
         a9a.text = default_stub
+        originator = self.get_titleproper().text
+        if originator[0:15].lower() == 'a guide to the ':
+            originator =  originator[15:]
+        if originator[-6:] == 'PAPERS':
+            originator = originator[:-7]
+            a9a.text = originator
+        if originator[-5:] == 'DIARY':
+            originator = originator.split('DIARY')[0]
+            a9a.text = originator    
+
         a9b = ET.SubElement(a9, 'corpname', attrib={'encodinganalog': "110"})
         a9b.text = default_stub
 
@@ -506,7 +504,6 @@ class FindingAidPDFtoEAD():
             return lang_abbr_dict[language.lower()]
         return None
 
-
     @staticmethod
     def which_subject_heading_type(text):
         term_dict_set = get_term_set_dict()
@@ -531,15 +528,6 @@ class FindingAidPDFtoEAD():
         with open(path_file_name, 'w') as f:
             f.write(ET.tostring(ead, encoding="UTF-8", method="xml"))
 
-    #
-    # def getDefListItem(self, label):
-    #     address  = "/pdf2xml/page[@number=1]/text[contains(text(),'Compiled by')]/following-sibling::text[1]/text()"
-    #     nodes_list = self.element_tree.xpath(address)
-    #     if len(nodes_list) > 0:
-    #         return nodes_list[0].strip()
-    #     return ''
-    #
-
 
 if __name__ == '__main__':
     logger = L('log', 'd')
@@ -551,4 +539,5 @@ if __name__ == '__main__':
         try:
             A.run_conversion()
         except Exception as e:
+            logger.add(traceback.print_stack(), 'e')
             print e

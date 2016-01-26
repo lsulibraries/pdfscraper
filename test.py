@@ -43,92 +43,6 @@ class EadTest(ParametrizedTestCase):
         #should we have a more unique dictionary of expected terms that are unique to the pdf
         #it seems like this would fix our problem with the 4452.pdf
         #or should we just make a new dictionary with the expected terms for each unique pdf?
-    # def testGetPageNum(self):
-    #     terms = ["BIOGRAPHICAL/HISTORICAL NOTE",
-    #              "SCOPE AND CONTENT NOTE",
-    #              "LIST OF SERIES AND SUBSERIES",
-    #              "SERIES DESCRIPTIONS",
-    #              "INDEX TERMS",
-    #              "CONTAINER LIST",
-    #              # "CITE AS"
-    #              ]
-    #     self.list_of_proven_answers = {'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0826.pdf': {
-    #         terms[0]: 4,
-    #         terms[1]: 4,
-    #         terms[2]: 18,
-    #         terms[3]: 18,
-    #         terms[4]: 5,
-    #         terms[5]: 6, },
-    #         'http://www.lib.lsu.edu/sites/default/files/sc/findaid/4452.pdf': {
-    #         terms[0]: 4,
-    #         terms[1]: 6,
-    #         terms[2]: 7,
-    #         # Fails - uses non-standard header 'SERIES AND SUBSERIES 
-    #         # DESCRIPTONS'
-    #         terms[3]: 8,
-    #         terms[4]: 15,
-    #         terms[5]: 18, },
-    #         'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf': {
-    #         terms[0]: 4,
-    #         terms[1]: 5,
-    #         terms[2]: 6,
-    #         terms[3]: 7,
-    #         terms[4]: 10,
-    #         terms[5]: 11, },
-    #         'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf': {
-    #         terms[0]: 4,
-    #         terms[1]: 5,
-    #         terms[2]: 18,
-    #         terms[3]: 18,
-    #         terms[4]: 7,
-    #         terms[5]: 8, },
-    #     }
-
-    #     current_pdfs_proven_answers = self.list_of_proven_answers[self.url]
-    #     for term, page_num in current_pdfs_proven_answers.iteritems():
-    #         self.assertEquals(self.findaid.getpagenum(term)[0], page_num, '\n\nFor url :{}\nTerm: {}\nExpected Page #: {}\nActual Page #: {}\n'.format(
-    #             self.url, term, page_num, self.findaid.getpagenum(term)[0]))
-
-
-    def testGetRColData(self):
-        # size = self.findaid.getrcoldata('Size.')
-        pass
-
-    # def testGetDeflistItem(self):
-    #     labels = [
-    #         'Created by',
-    #         'Compiled by',
-    #         'Revised by',
-    #         'Encoded by',
-    #         'Processed by',
-    #         'Date Completed'
-    #     ]
-    #     expected_answers = {
-    #         'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0717.pdf':
-    #             [
-    #                 ('Compiled by', 'Luana Henderson')
-    #             ],
-    #         'http://www.lib.lsu.edu/sites/default/files/sc/findaid/0826.pdf':
-    #             [
-    #                 ('', '')
-    #             ],
-    #         'http://www.lib.lsu.edu/sites/default/files/sc/findaid/5078.pdf':
-    #             [
-    #                 ('Compiled by', 'Luana Henderson')
-    #             ],
-    #         'http://www.lib.lsu.edu/sites/default/files/sc/findaid/4452.pdf': []
-    #     }
-    #     tuple_list = expected_answers[self.url]
-    #     for our_tuple in tuple_list:
-
-    #         label, value = our_tuple
-    #         observed = self.findaid.getDefListItem(label)
-    #         self.assertEquals(observed, value, 'For url: {}\nUnexpected Value for: {}\nGot: {}\nExpected: {}\n\n'.format(
-    #             self.url, label, observed, value))
-
-
-    #         #I'm starting to wonder what to do when we encounter a non <p> tag, should we just pass?
-    #         #question: Do we need to populate expected text for every pdf?
 
     def testGetTextAfterHeader(self):
         sample_header_and_pages = {'http://www.lib.lsu.edu/sites/default/files/sc/findaid/4452.pdf': (
@@ -155,95 +69,18 @@ class EadTest(ParametrizedTestCase):
         self.assertEquals(observed_result[0][0:20], expected_text[0:20], 'For url: {}\nUnexpected Value for: {}\nGot: {}\nExpected: {}\n\n'.format(
             self.url, section, observed_result[0][0:10], expected_text[0:10]))
 
-    def testCollapser(self):
-        unit_0717 = '''<unit><text top="174" left="135" width="647" height="16" font="0"><a href="tmpqOHeUC.html#3">SUMMARY ........................................................................................................................ 3</a></text>
-                <text top="170" left="782" width="4" height="21" font="2"> </text>
-                <text top="195" left="135" width="647" height="16" font="0"><a href="tmpqOHeUC.html#4">BIOGRAPHICAL/HISTORICAL NOTE .......................................................................... 4</a></text>
-                <text top="191" left="782" width="4" height="21" font="2"> </text>
-                <text top="215" left="135" width="647" height="16" font="0"><a href="tmpqOHeUC.html#5">SCOPE AND CONTENT NOTE ....................................................................................... 5</a></text>
-                <text top="212" left="782" width="4" height="21" font="2"> </text>
-                <text top="236" left="135" width="647" height="16" font="0"><a href="tmpqOHeUC.html#6">LIST OF SERIES AND SUBSERIES ................................................................................ 6</a></text>
-                <text top="232" left="782" width="4" height="21" font="2"> </text>
-                <text top="257" left="135" width="647" height="16" font="0"><a href="tmpqOHeUC.html#7">SERIES DESCRIPTIONS .................................................................................................. 7</a></text>
-                <text top="253" left="782" width="4" height="21" font="2"> </text>
-                <text top="278" left="135" width="647" height="16" font="0"><a href="tmpqOHeUC.html#10">INDEX TERMS ................................................................................................................ 10</a></text>
-                <text top="274" left="782" width="4" height="21" font="2"> </text>
-                <text top="298" left="135" width="647" height="16" font="0"><a href="tmpqOHeUC.html#11">CONTAINER LIST .......................................................................................................... 11</a></text>
-                </unit>'''
-        unit = '''<unit>
-                <text top="112" left="108" width="251" height="16" font="0"><b>ACY (WILLIAM) JR. PAPERS </b></text>
-                <text top="106" left="360" width="5" height="24" font="1"> </text>
-                <text top="106" left="459" width="5" height="24" font="1"> </text>
-                <text top="112" left="707" width="108" height="16" font="0"><b>Mss. 717, 772 </b></text>
-                <text top="127" left="108" width="82" height="24" font="1">1844-1909 </text>
-                <text top="127" left="459" width="5" height="24" font="1"> </text>
-                <text top="127" left="563" width="252" height="24" font="1">LSU Libraries Special Collections </text>
-                <text top="1037" left="418" width="86" height="24" font="1">Page <b>2</b> of <b>9</b> </text>
-                <text top="1058" left="108" width="5" height="24" font="1"> </text>
-                <text top="190" left="108" width="248" height="16" font="0"><b>CONTENTS OF INVENTORY </b></text>
-                <text top="205" left="108" width="5" height="24" font="1"> </text>
-                <text top="225" left="108" width="5" height="24" font="1"> </text>
-                <text top="246" left="162" width="75" height="24" font="1"><a href="tmpZROglH.html#3">Summary </a></text>
-                <text top="246" left="270" width="5" height="24" font="1"><a href="tmpZROglH.html#3"> </a></text>
-                <text top="246" left="324" width="5" height="24" font="1"><a href="tmpZROglH.html#3"> </a></text>
-                <text top="246" left="378" width="5" height="24" font="1"><a href="tmpZROglH.html#3"> </a></text>
-                <text top="246" left="432" width="5" height="24" font="1"><a href="tmpZROglH.html#3"> </a></text>
-                <text top="246" left="486" width="5" height="24" font="1"><a href="tmpZROglH.html#3"> </a></text>
-                <text top="246" left="540" width="5" height="24" font="1"><a href="tmpZROglH.html#3"> </a></text>
-                <text top="246" left="594" width="5" height="24" font="1"><a href="tmpZROglH.html#3"> </a></text>
-                <text top="246" left="648" width="14" height="24" font="1"><a href="tmpZROglH.html#3">3</a> </text>
-                <text top="267" left="162" width="221" height="24" font="1"><a href="tmpZROglH.html#4">Biographical/Historical Note   </a></text>
-                <text top="267" left="432" width="5" height="24" font="1"><a href="tmpZROglH.html#4"> </a></text>
-                <text top="267" left="486" width="5" height="24" font="1"><a href="tmpZROglH.html#4"> </a></text>
-                <text top="267" left="540" width="5" height="24" font="1"><a href="tmpZROglH.html#4"> </a></text>
-                <text top="267" left="594" width="5" height="24" font="1"><a href="tmpZROglH.html#4"> </a></text>
-                <text top="267" left="648" width="28" height="24" font="1"><a href="tmpZROglH.html#4">4-5 </a></text>
-                <text top="288" left="162" width="180" height="24" font="1"><a href="tmpZROglH.html#5">Scope and Content Note </a></text>
-                <text top="288" left="378" width="5" height="24" font="1"><a href="tmpZROglH.html#5"> </a></text>
-                <text top="288" left="432" width="5" height="24" font="1"><a href="tmpZROglH.html#5"> </a></text>
-                <text top="288" left="486" width="5" height="24" font="1"><a href="tmpZROglH.html#5"> </a></text>
-                <text top="288" left="540" width="5" height="24" font="1"><a href="tmpZROglH.html#5"> </a></text>
-                <text top="288" left="594" width="5" height="24" font="1"><a href="tmpZROglH.html#5"> </a></text>
-                <text top="288" left="648" width="28" height="24" font="1"><a href="tmpZROglH.html#5">5-6 </a></text>
-                <text top="288" left="702" width="5" height="24" font="1"> </text>
-                <text top="308" left="162" width="113" height="24" font="1"><a href="tmpZROglH.html#7">Index Terms   </a></text>
-                <text top="308" left="324" width="59" height="24" font="1"><a href="tmpZROglH.html#7">          </a></text>
-                <text top="308" left="432" width="5" height="24" font="1"><a href="tmpZROglH.html#7"> </a></text>
-                <text top="308" left="486" width="5" height="24" font="1"><a href="tmpZROglH.html#7"> </a></text>
-                <text top="308" left="540" width="5" height="24" font="1"><a href="tmpZROglH.html#7"> </a></text>
-                <text top="308" left="594" width="5" height="24" font="1"><a href="tmpZROglH.html#7"> </a></text>
-                <text top="308" left="648" width="14" height="24" font="1"><a href="tmpZROglH.html#7">7 </a></text>
-                <text top="329" left="162" width="113" height="24" font="1"><a href="tmpZROglH.html#8">Container List  </a></text>
-                <text top="329" left="324" width="5" height="24" font="1"><a href="tmpZROglH.html#8"> </a></text>
-                <text top="329" left="378" width="5" height="24" font="1"><a href="tmpZROglH.html#8"> </a></text>
-                <text top="329" left="432" width="5" height="24" font="1"><a href="tmpZROglH.html#8"> </a></text>
-                <text top="329" left="486" width="5" height="24" font="1"><a href="tmpZROglH.html#8"> </a></text>
-                <text top="329" left="540" width="5" height="24" font="1"><a href="tmpZROglH.html#8"> </a></text>
-                <text top="329" left="594" width="5" height="24" font="1"><a href="tmpZROglH.html#8"> </a></text>
-                <text top="329" left="648" width="28" height="24" font="1"><a href="tmpZROglH.html#8">8-9 </a></text>
-            </unit>'''
-        tree = etree.fromstring(unit)
-        path = '//text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a'
-        elms = tree.xpath(path)
-        collapsed = self.findaid.collapse(elms)
-
-    def testCollapseRealPdfs(self):
-        contents = self.findaid.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
-
-    # Unless our list of subject  terms is going to change we don't need this.
-    #     #should take known Index Terms and add headers to terms.
-    # def testAssembleSubjectTermsDictionary(self):
 
 
-    # def testget_first_page_siblings_and_children(self):
-    #     fixture = '''<page>
-    #         <text><b>Scope and Content Note</b></text>
-    #         <text>The text of the note is here</text>
-    #     </page>'''
-    #     tree = etree.fromstring(fixture)
-    #     header = tree.xpath('//text[contains(text(), "Scope")]')
-    #     result = self.findaid.get_first_page_siblings_and_children(header)
-    #     self.assertEquals(result, "The text of The note is here", "Failed to get expected text; result was {}".format(str(result)))
+
+    def testget_first_page_siblings_and_children(self):
+        fixture = '''<page>
+            <text><b>Scope and Content Note</b></text>
+            <text>The text of the note is here</text>
+        </page>'''
+        tree = etree.fromstring(fixture)
+        header = tree.xpath('//text[contains(text(), "Scope")]')
+        result = self.findaid.get_first_page_siblings_and_children(header)
+        self.assertEquals(result, "The text of The note is here", "Failed to get expected text; result was {}".format(str(result)))
 
     def testGet_text_recursive(self):
         fixture = '''<page>
