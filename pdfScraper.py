@@ -315,11 +315,15 @@ class FindingAidPDFtoEAD():
         return el
 
     def get_addressline(self):
-        el = ET.Element('addressline')
-        el.text = 'Hill Memorial Library\nBaton Rouge, LA 70803-3300\nhttp://www.lib.lsu.edu/special'
+        el = ET.Element('address')
+        for line in ['Hill Memorial Library', 'Baton Rouge, LA 70803-3300', 'http://www.lib.lsu.edu/special']:
+            sub = ET.Element('addressline')
+            sub.text = line
+            el.append(sub)
         return el
 
     def get_date(self):
+
         el = ET.Element('date')
         el.text = self.extract_date()
         return el
