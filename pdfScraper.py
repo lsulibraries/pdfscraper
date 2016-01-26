@@ -28,21 +28,21 @@ class FindingAidPDFtoEAD():
 
     def read_url_return_etree(self, url):
         '''normal 'pull pdf from web and interpret' code'''
-        self.pdfdata = urllib2.urlopen(url).read()   # Necessary code for pulling pdf from web.
-        self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
-        self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
-        self.element_tree = etree.fromstring(self.xmldata)
-        self.log('opened file', 'm')
-        return self.element_tree
-
-        '''temporary 'read cached file from harddrive' monkeypatch'''
-        # with open('cached_pdfs/' + self.url[-8:], 'r') as f:
-        #     self.pdfdata = f.read()
-        #     self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
-        #     self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
-        #     self.element_tree = etree.fromstring(self.xmldata)
+        # self.pdfdata = urllib2.urlopen(url).read()   # Necessary code for pulling pdf from web.
+        # self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
+        # self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
+        # self.element_tree = etree.fromstring(self.xmldata)
         # self.log('opened file', 'm')
         # return self.element_tree
+
+        '''temporary 'read cached file from harddrive' monkeypatch'''
+        with open('cached_pdfs/' + self.url[-8:], 'r') as f:
+            self.pdfdata = f.read()
+            self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
+            self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
+            self.element_tree = etree.fromstring(self.xmldata)
+        self.log('opened file', 'm')
+        return self.element_tree
 
     def run_conversion(self):
         # print etree.tostring(self.element_tree, pretty_print=True)    # dev only
@@ -95,13 +95,19 @@ class FindingAidPDFtoEAD():
         return elements_with_text
 
     def collapse(self, elem_list):
+        print 'elem_list:', elem_list
         collapsed = {}
         for elm in elem_list:
+            print 'elm:', elm
             top = elm.getparent().get('top')
+            print 'top:', top
             if top in collapsed:
                 existing_text = collapsed[top] + ' ' + etree.tostring(elm, method='text').strip().lower()
+                print 'existing_text:', existing_text
             else:
                 collapsed[top] = '' + etree.tostring(elm, method='text').strip().lower()
+                print 'collapsed[top]:', collapsed[top]
+        print 'collapsed:', collapsed
         return collapsed
 
     def join_disjointed_header_page(self, elem_list):
@@ -139,14 +145,9 @@ class FindingAidPDFtoEAD():
         return 'Element not pulled from pdf'
 
     def convert_text_in_column_to_string(self, column_snippet):
-        if 'lang' in column_snippet.lower(): 
-            print column_snippet
         for i in self.summary_columns:
             if column_snippet.lower() in i.lower():
-                if 'lang' in column_snippet.lower(): 
-                    print column_snippet, 'found in', self.summary_columns
                 return self.summary_columns[i].decode('utf-8').strip('.')
-        # print column_snippet, 'not found in', self.summary_columns
         return 'Element not pulled from pdf'
 
     def get_text_after_header(self, inventory_item, following_inventory_item=None):
@@ -359,7 +360,7 @@ class FindingAidPDFtoEAD():
             lang_list = self.what_language_used()
             for i in lang_list.split(','):
                 if len(self.abbreviate_lang(i)) > 3:
-                    print 'lang not found, possible key: value mismatch in pdfscraperwikipage'
+                    self.log('lang not found, possible key: value mismatch in pdfscraperwikipage')
                     continue
                 elem = ET.Element('language', attrib={'langcode': self.abbreviate_lang(i), })
                 elem.text = i
@@ -497,14 +498,11 @@ class FindingAidPDFtoEAD():
         return archdesc
 
     def what_language_used(self):
-        print 'it ran'
         return self.convert_text_in_column_to_string('langua')
 
     def abbreviate_lang(self, language):
         lang_abbr_dict = get_langs_and_abbr()
-        print language.lower()
         if language.lower() in lang_abbr_dict:
-            print 'lang in'
             return lang_abbr_dict[language.lower()]
         return None
 
@@ -545,7 +543,7 @@ class FindingAidPDFtoEAD():
 
 if __name__ == '__main__':
     logger = L('log', 'd')
-    reader = ReadNSV('findaid_list.csv')
+    reader = ReadNSV('testList.nsv')
     for uid in reader.getLines():
         url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
         print url

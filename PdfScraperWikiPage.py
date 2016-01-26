@@ -39,9 +39,7 @@ class PdfScraperWikiPage():
         i = 0
         for line in lcells:
             length_in_words = len(line.split())
-            print length_in_words
             if length_in_words > 3:
-                print 'found long line {} at list position {}'.format(line, i)
                 common_terms = ['Size', 'Geographic locations', 'Inclusive dates', 'Bulk dates', 'Languages', 'Summary', 'Source', 'Related collection', 'Copyright', 'Citation']
                 head = line.split()
                 head = ' '.join(head[:2]) # first three words...
@@ -51,7 +49,6 @@ class PdfScraperWikiPage():
                     if term.lower() in head.lower():
                         
                         length = len(term.split()) 
-                        print type(length_in_words), type(i), type(length)
                         lcells[i] = ' '.join(line[: length])
                         rcells.insert(i, ' '.join(line[length:]))
 
@@ -147,7 +144,6 @@ class PdfScraperWikiPage():
 
         left_cells, right_cells = instance.check_for_long_left_column_lines(left[0], right[0], left_cells, right_cells)
 
-        print left_cells
         table = {}
         i = 0
 
