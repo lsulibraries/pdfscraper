@@ -42,24 +42,21 @@ class FindingAidPDFtoEAD():
         self.log('opened file', 'm')
         return self.element_tree
 
-
-
-
     def run_conversion(self):
         # print etree.tostring(self.element_tree, pretty_print=True)    # dev only
         self.print_xml_to_file()                                    # dev only
         contents_of_inventory = self.grab_contents_of_inventory()
         self.c_o_i_ordered = sorted(contents_of_inventory, key=lambda item: int(item[1][0]))
+        self.summary_columns = self.get_columns_after_summary()
         compiled_ead = self.get_ead()
-        self.columns_after_summary = self.get_columns_after_summary()
-        # print etree.tostring(self.element_tree.xpath('/pdf2xml/page[@number=3]')[0], method='text', encoding='UTF-8')
-        
+        self.print_ead_to_file(compiled_ead)
+
     def get_columns_after_summary(self):
-        summary_header_pages = [elem for elem in self.c_o_i_ordered if 'summ' in elem[0]]
+        summary_header_pages = [elem for elem in self.c_o_i_ordered if 'summ' in elem[0].lower()]
         header, (beginning_page, end_page) = summary_header_pages[0]
-        summary_columns = Page.get_table(self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(beginning_page, header.lower().strip()))[0])
-        print summary_columns
-        return summary_columns
+        summary_page_elem = self.element_tree.xpath('//page[@number="{}"]'.format(beginning_page))[0]
+        self.summary_columns = Page.get_table(summary_page_elem)
+        return self.summary_columns
 
     def grab_contents_of_inventory(self):
         contents = self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
@@ -140,9 +137,10 @@ class FindingAidPDFtoEAD():
         return 'Element not pulled from pdf'
 
     def convert_text_in_column_to_string(self, column_snippet):
-        for i in self.columns_after_summary.iteritems():
-            if column_snippet.lower() in i[0].lower():
-                return self.columns_after_summary[i]
+        for i in self.summary_columns:
+            if column_snippet.lower() in i.lower():
+                return self.summary_columns[i].decode('utf-8')
+        print column_snippet, 'not found in', self.summary_columns
         return 'Element not pulled from pdf'
 
     def get_text_after_header(self, inventory_item, following_inventory_item=None):
@@ -336,13 +334,13 @@ class FindingAidPDFtoEAD():
 
         a2 = ET.SubElement(a, 'physdesc', attrib={'label': 'Size', 'encodinganalog': '300$a', })
         a2a = ET.SubElement(a2, 'extent',)
-        a2a.text = self.convert_text_in_column_to_string('size')
+        a2a.text = self.convert_text_in_column_to_string('siz')
 
         a3 = ET.SubElement(a, 'unitdate', attrib={'label': 'Dates:', 'type': 'inclusive', 'encodinganalog': '245$f', 'type': default_stub, })
-        a3.text = self.convert_text_in_column_to_string('dates inclusive')
+        a3.text = self.convert_text_in_column_to_string('inclusive')
 
         a4 = ET.SubElement(a, 'unitdate', attrib={'label': 'Dates:', 'type': 'bulk', 'encodinganalog': default_stub, 'type': default_stub, })
-        a4.text = self.convert_text_in_column_to_string('dates bulk')
+        a4.text = self.convert_text_in_column_to_string('bulk')
 
         a5 = ET.SubElement(a, 'langmaterial')
         try:
@@ -354,7 +352,7 @@ class FindingAidPDFtoEAD():
             pass
 
         a6 = ET.SubElement(a, 'abstract', attrib={'label': "Summary", 'encodinganalog': "520$a", })
-        a6.text = self.convert_text_in_column_to_string('summary')
+        a6.text = self.convert_text_in_column_to_string('sum')
 
         a7 = ET.SubElement(a, 'repository', attrib={'label': 'Repository', 'encodinganalog': '825$a'})
         a7a = ET.SubElement(a7, 'corpname')
@@ -363,7 +361,7 @@ class FindingAidPDFtoEAD():
         a7b.text = "Louisiana and Lower Mississippi Valley Collection"
 
         a8 = ET.SubElement(a, 'physloc')
-        a8.text = self.convert_text_in_column_to_string('stack location')
+        a8.text = self.convert_text_in_column_to_string('stack')
 
         a9 = ET.SubElement(a, 'origination', attrib={'label': 'Creator: '})
         a9a = ET.SubElement(a9, 'persname', attrib={'encodinganalog': "100"})
@@ -381,13 +379,13 @@ class FindingAidPDFtoEAD():
         b1 = ET.SubElement(b, 'head')
         b1.text = "Access Restrictions"
         b2 = ET.SubElement(b, 'p')
-        b2.text = self.convert_text_in_column_to_string('access restrictions or restrictions on access or something')
+        b2.text = self.convert_text_in_column_to_string('restriction')
 
         c = ET.SubElement(archdesc, 'relatedmaterial', attrib={'encodinganalog': '544 1'})
         c1 = ET.SubElement(c, 'head')
         c1.text = "Related Collections"
         c2 = ET.SubElement(c, 'p')
-        c2.text = self.convert_text_in_column_to_string('related collections')
+        c2.text = self.convert_text_in_column_to_string('related')
 
         d = ET.SubElement(archdesc, 'userestrict', attrib={'encodinganalog': '540'})
         d1 = ET.SubElement(d, 'head')
@@ -399,7 +397,7 @@ class FindingAidPDFtoEAD():
         e1 = ET.SubElement(e, 'head')
         e1.text = "Preferred Citation"
         e2 = ET.SubElement(e, 'p')
-        e2.text = self.convert_text_in_column_to_string('citation')
+        e2.text = self.convert_text_in_column_to_string('citat')
 
         f = ET.SubElement(archdesc, 'bioghist', attrib={'encodinganalog': '545'})
         f1 = ET.SubElement(f, 'head')
@@ -411,7 +409,7 @@ class FindingAidPDFtoEAD():
         g1 = ET.SubElement(f, 'head')
         g1.text = "Scope and Contents of the Collection"
         g2 = ET.SubElement(g, 'p')
-        g2.text = self.convert_text_after_header_to_string('scope')
+        g2.text = self.convert_text_after_header_to_string('scop')
 
         h = ET.SubElement(archdesc, 'relatedmaterial')
         i = ET.SubElement(archdesc, 'separatedmaterial')

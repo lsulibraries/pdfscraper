@@ -12,7 +12,6 @@ class PdfScraperWikiPage():
 
     def __init__(self, tree):
         self.tree = tree
-        # print etree.tostring(tree, method='text', encoding="UTF-8").strip()
         lines_gotten = self.get_lines()
         self.lines_by_left = lines_gotten[0]
         self.lines_by_top  = lines_gotten[1]
@@ -33,17 +32,14 @@ class PdfScraperWikiPage():
             if (left is not None) and (left not in lefts):
                 lefts[left] = []
             lefts[left].append(line)
-        # print lefts,tops
         return (lefts, tops)
 
     def check_for_long_left_column_lines(self, left, right):
         for line in self.lines_by_left[left]:
             leftpos = line.get('left')
             width   = line.get('width')
-            print left, width, right
             if leftpos + width > right:
                 text = etree.tostring(line, method='text', encoding="UTF-8").strip()
-                print 'pound long line ' + text
                 common_terms = ['Size', 'Geographic locations', 'Inclusive dates', 'Bulk dates', 'Languages', 'Summary', 'Source', 'Related collection', 'Copyright', 'Citation']
                 head = text.split()
                 head = head[:2].join(' ') # first three words...
@@ -75,22 +71,17 @@ class PdfScraperWikiPage():
 
         for key,items in self.lines_by_left.iteritems():
             length = len(items)
-            # print key, length
-            # print 'pos {} has {} items'.format(key, length)
             if length > first[1]:
                 second = first
                 first = (key, length)
             elif length > second[1]:
                 second = (key, length)
-        # print (first, second)
         return (first, second)
 
     def get_col_cells(self, leftpos):
         tops_list = []
         by_tops   = {}
         cells = []
-        # print leftpos
-        # print self.lines_by_left[leftpos]
 
         for line in self.lines_by_left[leftpos]:
             top = line.get('top')
@@ -106,7 +97,6 @@ class PdfScraperWikiPage():
             only_whitespace = re.match('^\s*$', text_value)
             if only_whitespace:
                 cells.append(text)
-                # print text
                 text = ''
         return cells
 
@@ -145,7 +135,6 @@ class PdfScraperWikiPage():
         instance.check_for_long_left_column_lines(left[0], right[0])
 
         left_cells = instance.get_col_cells(left[0])
-        # print left_cells
         right_cells = instance.get_col_cells(right[0])
         
         if len(left_cells) > len(right_cells):
@@ -153,8 +142,6 @@ class PdfScraperWikiPage():
 
         left_cells = instance.remove_empty_string_list_items(left_cells)
         right_cells = instance.remove_empty_string_list_items(right_cells)
-
-        print left_cells
 
         table = {}
         i = 0
@@ -166,6 +153,5 @@ class PdfScraperWikiPage():
                 table[cell.strip()] = right_cells[i].strip()
             i += 1
         for key, value in table.iteritems():
-            print '{} ------>>>>> {}'.format(key,value)
-        print '\n'
+            pass
         return table
