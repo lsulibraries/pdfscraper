@@ -137,10 +137,14 @@ class FindingAidPDFtoEAD():
         return 'Element not pulled from pdf'
 
     def convert_text_in_column_to_string(self, column_snippet):
+        if 'lang' in column_snippet.lower(): 
+            print column_snippet
         for i in self.summary_columns:
             if column_snippet.lower() in i.lower():
-                return self.summary_columns[i].decode('utf-8')
-        print column_snippet, 'not found in', self.summary_columns
+                if 'lang' in column_snippet.lower(): 
+                    print column_snippet, 'found in', self.summary_columns
+                return self.summary_columns[i].decode('utf-8').strip('.')
+        # print column_snippet, 'not found in', self.summary_columns
         return 'Element not pulled from pdf'
 
     def get_text_after_header(self, inventory_item, following_inventory_item=None):
@@ -343,8 +347,14 @@ class FindingAidPDFtoEAD():
         a4.text = self.convert_text_in_column_to_string('bulk')
 
         a5 = ET.SubElement(a, 'langmaterial')
+
+        
         try:
-            for i in self.what_language_used():
+            lang_list = self.what_language_used()
+            for i in lang_list.split(','):
+                if len(self.abbreviate_lang(i)) > 3:
+                    print 'lang not found, possible key: value mismatch in pdfscraperwikipage'
+                    continue
                 elem = ET.Element('language', attrib={'langcode': self.abbreviate_lang(i), })
                 elem.text = i
                 a5.append(elem)
@@ -480,13 +490,16 @@ class FindingAidPDFtoEAD():
         ''' Should include <origination>, <unitid>, and <unittitle>...<origination> may have to be added later since we do not include creator names on our summary pages but <unittitle> and <unitid> should come from the title page. <unittitle> is the collection title portion of <titleproper>. <unitid> is the Mss. number. EAD documents differentiate between the collection title and the title of the finding aid. This was difficult to convey in the tag document since our finding only have title for the collection, not the finding aid itself. '''
         return archdesc
 
-    def what_language_used():
+    def what_language_used(self):
+        print 'it ran'
         return self.convert_text_in_column_to_string('langua')
 
-    def abbreviate_lang(language):
-        lang_abbr_dict = self.get_langs_and_abbr()
-        if lang_abbr_dict[language]:
-            return lang_abbr_dict[language]
+    def abbreviate_lang(self, language):
+        lang_abbr_dict = get_langs_and_abbr()
+        print language.lower()
+        if language.lower() in lang_abbr_dict:
+            print 'lang in'
+            return lang_abbr_dict[language.lower()]
         return None
 
 
