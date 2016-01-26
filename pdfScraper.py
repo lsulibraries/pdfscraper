@@ -99,10 +99,10 @@ class FindingAidPDFtoEAD():
         collapsed = {}
         for elm in elem_list:
             top = elm.getparent().get('top')
-            if top in collapsed:
-                existing_text = collapsed[top] + ' ' + etree.tostring(elm, method='text').strip().lower()
-            else:
-                collapsed[top] = '' + etree.tostring(elm, method='text').strip().lower()
+            # if top in collapsed:
+            #     existing_text = collapsed[top] + ' ' + etree.tostring(elm, method='text').strip().lower()
+            # else:
+            collapsed[top] = ' ' + etree.tostring(elm, method='text').strip().lower()
         return collapsed
 
     def join_disjointed_header_page(self, elem_list):
