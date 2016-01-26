@@ -23,27 +23,28 @@ class FindingAidPDFtoEAD():
         self.url = url
         self.logger = logger
         self.element_tree = self.read_url_return_etree(self.url)
+        # print self.element_tree
 
     def log(self, msg, sev='i'):
         self.logger.add('{}:   {} '.format(self.url, msg), sev)
 
     def read_url_return_etree(self, url):
-        '''normal 'pull pdf from web and interpret' code'''
-        self.pdfdata = urllib2.urlopen(url).read()   # Necessary code for pulling pdf from web.
-        self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
-        self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
-        self.element_tree = etree.fromstring(self.xmldata)
-        self.log('opened file', 'i')
-        return self.element_tree
+        # '''normal 'pull pdf from web and interpret' code'''
+        # self.pdfdata = urllib2.urlopen(url).read()   # Necessary code for pulling pdf from web.
+        # self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
+        # self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
+        # self.element_tree = etree.fromstring(self.xmldata)
+        # self.log('opened file', 'i')
+        # return self.element_tree
 
         '''temporary 'read cached file from harddrive' monkeypatch'''
-        # with open('cached_pdfs/' + self.url[-8:], 'r') as f:
-        #     self.pdfdata = f.read()
-        #     self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
-        #     self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
-        #     self.element_tree = etree.fromstring(self.xmldata)
-        # self.log('opened file', 'm')
-        # return self.element_tree
+        with open('cached_pdfs/' + self.url[-8:], 'r') as f:
+            self.pdfdata = f.read()
+            self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
+            self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
+            self.element_tree = etree.fromstring(self.xmldata)
+        self.log('opened file', 'm')
+        return self.element_tree
 
     def run_conversion(self):
         # print etree.tostring(self.element_tree, pretty_print=True)    # dev only
@@ -140,12 +141,12 @@ class FindingAidPDFtoEAD():
         return 'Element not pulled from pdf'
 
     def convert_text_in_column_to_string(self, column_snippet):
-        if 'lang' in column_snippet.lower(): 
-            print column_snippet
+        # if 'lang' in column_snippet.lower(): 
+        #     print column_snippet
         for i in self.summary_columns:
             if column_snippet.lower() in i.lower():
-                if 'lang' in column_snippet.lower(): 
-                    print column_snippet, 'found in', self.summary_columns
+                # if 'lang' in column_snippet.lower(): 
+                #     print column_snippet, 'found in', self.summary_columns
                 return self.summary_columns[i].decode('utf-8').strip('.')
         # print column_snippet, 'not found in', self.summary_columns
         return 'Element not pulled from pdf'
@@ -256,6 +257,7 @@ class FindingAidPDFtoEAD():
         el = ET.Element('titleproper')
         el.text = self.extract_title()
         el.append(self.get_num())
+        # print el.text
         return el
 
     def extract_title(self):
@@ -360,7 +362,7 @@ class FindingAidPDFtoEAD():
             lang_list = self.what_language_used()
             for i in lang_list.split(','):
                 if len(self.abbreviate_lang(i)) > 3:
-                    print 'lang not found, possible key: value mismatch in pdfscraperwikipage'
+                    # print 'lang not found, possible key: value mismatch in pdfscraperwikipage'
                     continue
                 elem = ET.Element('language', attrib={'langcode': self.abbreviate_lang(i), })
                 elem.text = i
@@ -380,9 +382,23 @@ class FindingAidPDFtoEAD():
         a8 = ET.SubElement(a, 'physloc')
         a8.text = self.convert_text_in_column_to_string('stack')
 
+
+
         a9 = ET.SubElement(a, 'origination', attrib={'label': 'Creator: '})
         a9a = ET.SubElement(a9, 'persname', attrib={'encodinganalog': "100"})
-        a9a.text = default_stub
+
+        originator = self.get_titleproper()
+        if originator.text[0:15] == 'A GUIDE TO THE ':
+            sans_GUIDE =  originator.text.split('A GUIDE TO THE ')[1]
+            if sans_GUIDE[-6:-1] == 'PAPER':
+               nater = sans_GUIDE.split('PAPERS')[0]
+               a9a.text = nater
+            elif sans_GUIDE[-6:-1] == ' DIAR':
+                nater = sans_GUIDE.split('DIARY')[0]
+                a9a.text = nater
+        else:
+            a9a.text = default_stub
+        
         a9b = ET.SubElement(a9, 'corpname', attrib={'encodinganalog': "110"})
         a9b.text = default_stub
 
@@ -498,14 +514,14 @@ class FindingAidPDFtoEAD():
         return archdesc
 
     def what_language_used(self):
-        print 'it ran'
+        # print 'it ran'
         return self.convert_text_in_column_to_string('langua')
 
     def abbreviate_lang(self, language):
         lang_abbr_dict = get_langs_and_abbr()
-        print language.lower()
+        # print language.lower()
         if language.lower() in lang_abbr_dict:
-            print 'lang in'
+            # print 'lang in'
             return lang_abbr_dict[language.lower()]
         return None
 
@@ -546,7 +562,7 @@ class FindingAidPDFtoEAD():
 
 if __name__ == '__main__':
     logger = L('log', 'd')
-    reader = ReadNSV('findaid_list.csv')
+    reader = ReadNSV('testList.nsv')
     for uid in reader.getLines():
         url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
         print url
@@ -555,3 +571,4 @@ if __name__ == '__main__':
             A.run_conversion()
         except Exception as e:
             logger.add(traceback.print_stack(), 'e')
+            print e
