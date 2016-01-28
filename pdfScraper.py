@@ -38,7 +38,7 @@ class FindingAidPDFtoEAD():
         # return self.element_tree
 
         '''temporary 'read cached file from harddrive' monkeypatch'''
-        with open('cached_pdfs/' + self.url[-8:], 'r') as f:
+        with open('cached_pdfs/' + self.url.split('/')[-1], 'r') as f:
             self.pdfdata = f.read()
             self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
             self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
@@ -145,9 +145,12 @@ class FindingAidPDFtoEAD():
 
     def get_text_after_header(self, inventory_item, following_inventory_item=None):
         header, (beginning_page, end_page) = inventory_item
+        following_header, (following_beginning_page, following_end_page) = following_inventory_item
         elem_of_header = self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(beginning_page, header.lower().strip()))
         text_after_header = []
         for i in self.get_first_page_siblings_and_children(elem_of_header):
+            if following_header in i:
+                print 'found following header'
             text_after_header.append(i.strip())
         if following_inventory_item:
             following_header, (following_beginning_page, following_end_page) = following_inventory_item
@@ -209,9 +212,6 @@ class FindingAidPDFtoEAD():
     def get_text_recursive(self, element):
         return etree.tostring(element, method='text', encoding="UTF-8").strip()
 
-    # def log_if_missing(self, element, xpath_result_len, message=''):
-    #     self.log('xpath failed to find title', 'm')
-
     def get_ead(self):
         ead = ET.Element('ead', attrib={'relatedencoding': "MARC21", 'type': "inventory", 'level': "collection", })
         ead.append(self.get_eadheader())
@@ -262,10 +262,8 @@ class FindingAidPDFtoEAD():
 
     def extract_mss(self):
         titlelines = self.element_tree.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
-
         # figuring out what the top value of the last line of the title is
         titlelineend = titlelines[-1].getparent().get('top')
-
         # num - assume it is between 12 and 25 units below the last line of title
         #    (a better way might have been to take next text node)
         numlinenumberA = str(int(titlelineend) + 12)  # 347
@@ -347,14 +345,14 @@ class FindingAidPDFtoEAD():
             lang_list = self.what_language_used()
             for i in lang_list.split(','):
                 if len(self.abbreviate_lang(i)) > 3:
-                    self.log('lang not found, possible key: value mismatch in pdfscraperwikipage')
+                    self.log('lang not found, possible key value mismatch: language: {}'.format(i))
                     continue
                 elem = ET.Element('language', attrib={'langcode': self.abbreviate_lang(i), })
                 elem.text = i
                 a5.append(elem)
         except Exception as e:
             self.log(e)
-            print e
+            print e, '\nlanguage / self.abbreviate_lang(lang) mismatch in a5 element of archdesc()'
 
         a6 = ET.SubElement(a, 'abstract', attrib={'label': "Summary", 'encodinganalog': "520$a", })
         a6.text = self.convert_text_in_column_to_string('sum')
@@ -436,7 +434,7 @@ class FindingAidPDFtoEAD():
 
         i2 = ET.SubElement(i, 'p')
         i2.text = default_stub
-        j = ET.SubElement(archdesc, 'otherfindaid')  # optional
+        j = ET.SubElement(archdesc, 'otherfindaid')
 
         k = ET.SubElement(archdesc, 'controlaccess')
         k1 = ET.SubElement(k, 'head')
@@ -448,7 +446,6 @@ class FindingAidPDFtoEAD():
                 elem.text = i
             except:
                 pass
-
 
         l = ET.SubElement(archdesc, 'acqinfo')
         l1 = ET.SubElement(l, 'head')
@@ -494,6 +491,9 @@ class FindingAidPDFtoEAD():
 
         ''' Should include <origination>, <unitid>, and <unittitle>...<origination> may have to be added later since we do not include creator names on our summary pages but <unittitle> and <unitid> should come from the title page. <unittitle> is the collection title portion of <titleproper>. <unitid> is the Mss. number. EAD documents differentiate between the collection title and the title of the finding aid. This was difficult to convey in the tag document since our finding only have title for the collection, not the finding aid itself. '''
         return archdesc
+
+    def terms_in_index():
+        pass
 
     def what_language_used(self):
         return self.convert_text_in_column_to_string('langua')
