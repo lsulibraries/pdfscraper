@@ -439,13 +439,15 @@ class FindingAidPDFtoEAD():
         k = ET.SubElement(archdesc, 'controlaccess')
         k1 = ET.SubElement(k, 'head')
         k1.text = "Index Terms"
-
         for i in self.convert_text_after_header_to_list('index'):
             try:
                 elem = ET.Element(FindingAidPDFtoEAD.which_subject_heading_type(i)[0], attrib={'source': FindingAidPDFtoEAD.which_subject_heading_type(i)[1], 'encodinganalog': '600$a'})
                 elem.text = i
-            except:
-                pass
+                k1.append(elem)
+            except Exception:
+                self.log(e)
+                self.log('{} might should have a source tag -- but no matching source found'.format(i))
+
 
         l = ET.SubElement(archdesc, 'acqinfo')
         l1 = ET.SubElement(l, 'head')
