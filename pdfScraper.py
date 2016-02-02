@@ -140,7 +140,7 @@ class FindingAidPDFtoEAD():
     def convert_text_in_column_to_string(self, column_snippet):
         for i in self.summary_columns:
             if column_snippet.lower() in i.lower():
-                return self.summary_columns[i].decode('utf-8').strip('.')
+                return self.summary_columns[i].decode('utf-8')
         return 'Element not pulled from pdf'
 
     def get_text_after_header(self, inventory_item, following_inventory_item=None):
@@ -242,9 +242,7 @@ class FindingAidPDFtoEAD():
 
     def get_titleproper(self):
         el = ET.Element('titleproper')
-        el.text = self.extract_title()
-        el.append(self.get_num())
-        # print el.text
+        el.text = "A GUIDE TO THE {}".format(self.extract_title()).title()
         return el
 
     def extract_title(self):
@@ -253,7 +251,7 @@ class FindingAidPDFtoEAD():
         titlelines = self.element_tree.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
         for el in titlelines:
             wholetitle.append(el.text.strip())
-        return 'A GUIDE TO THE ' + ' '.join(wholetitle)
+        return ' '.join(wholetitle).title()
 
     def get_num(self):
         el = ET.Element('num', attrib={'type': 'Manuscript'})
@@ -382,11 +380,11 @@ class FindingAidPDFtoEAD():
         a9b = ET.SubElement(a9, 'corpname', attrib={'encodinganalog': "110"})
         a9b.text = default_stub
 
-        a10 = ET.SubElement(a, 'unitid', attrib={'countrycode': "US", 'encodinganalog': "099", 'label': "Identification: ", 'repositorycode': default_stub, })
-        a10.text = default_stub
+        a10 = ET.SubElement(a, 'unitid', attrib={'countrycode': "US", 'encodinganalog': "099", 'label': "Identification: ", 'repositorycode': 'lu', })
+        a10.text = self.extract_mss()
 
         a11 = ET.SubElement(a, 'unittitle', attrib={'encodinganalog': "245$a", 'label': "Title: "})
-        a11.text = default_stub
+        a11.text = self.extract_title()
 
         b = ET.SubElement(archdesc, 'accessrestrict', attrib={'encodinganalog': '506'})
         b1 = ET.SubElement(b, 'head')
@@ -440,13 +438,19 @@ class FindingAidPDFtoEAD():
         k1 = ET.SubElement(k, 'head')
         k1.text = "Index Terms"
         for i in self.convert_text_after_header_to_list('index'):
-            try:
-                elem = ET.Element(FindingAidPDFtoEAD.which_subject_heading_type(i)[0], attrib={'source': FindingAidPDFtoEAD.which_subject_heading_type(i)[1], 'encodinganalog': '600$a'})
-                elem.text = i
-                k.append(elem)
-            except Exception:
-                self.log(e)
-                self.log('{} might should have a source tag -- but no matching source found'.format(i))
+            if i != 'Element not pulled from pdf':
+                try:
+                    elem = ET.Element(FindingAidPDFtoEAD.which_subject_heading_type(i)[0], attrib={'source': FindingAidPDFtoEAD.which_subject_heading_type(i)[1], 'encodinganalog': '600$a'})
+                    elem.text = i
+                    k.append(elem)
+                except Exception:
+                    if len(i) > 4:
+                        elem = ET.Element('subject', attrib={'source': 'local', 'encodinganalog': '650'})
+                        elem.text = i
+                        k.append(elem)
+                    else:
+                        self.log('{} might should have a source tag -- but no matching source found'.format(i))
+                    self.log(e)
 
 
         l = ET.SubElement(archdesc, 'acqinfo')
@@ -491,11 +495,7 @@ class FindingAidPDFtoEAD():
         r2 = ET.SubElement(r, 'p')
         r2.text = default_stub
 
-        ''' Should include <origination>, <unitid>, and <unittitle>...<origination> may have to be added later since we do not include creator names on our summary pages but <unittitle> and <unitid> should come from the title page. <unittitle> is the collection title portion of <titleproper>. <unitid> is the Mss. number. EAD documents differentiate between the collection title and the title of the finding aid. This was difficult to convey in the tag document since our finding only have title for the collection, not the finding aid itself. '''
         return archdesc
-
-    def terms_in_index():
-        pass
 
     def what_language_used(self):
         return self.convert_text_in_column_to_string('langua')
