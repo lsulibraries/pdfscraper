@@ -30,21 +30,21 @@ class FindingAidPDFtoEAD():
 
     def read_url_return_etree(self, url):
         '''normal 'pull pdf from web and interpret' code'''
-        # self.pdfdata = urllib2.urlopen(url).read()   # Necessary code for pulling pdf from web.
-        # self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
-        # self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
-        # self.element_tree = etree.fromstring(self.xmldata)
-        # self.log('opened file', 'm')
-        # return self.element_tree
-
-        '''temporary 'read cached file from harddrive' monkeypatch'''
-        with open('cached_pdfs/' + self.url.split('/')[-1], 'r') as f:
-            self.pdfdata = f.read()
-            self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
-            self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
-            self.element_tree = etree.fromstring(self.xmldata)
+        self.pdfdata = urllib2.urlopen(url).read()   # Necessary code for pulling pdf from web.
+        self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
+        self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
+        self.element_tree = etree.fromstring(self.xmldata)
         self.log('opened file', 'm')
         return self.element_tree
+
+        # '''temporary 'read cached file from harddrive' monkeypatch'''
+        # with open('cached_pdfs/' + self.url.split('/')[-1], 'r') as f:
+        #     self.pdfdata = f.read()
+        #     self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
+        #     self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
+        #     self.element_tree = etree.fromstring(self.xmldata)
+        # self.log('opened file', 'm')
+        # return self.element_tree
 
     def run_conversion(self):
         # print etree.tostring(self.element_tree, pretty_print=True)    # dev only
@@ -443,7 +443,7 @@ class FindingAidPDFtoEAD():
             try:
                 elem = ET.Element(FindingAidPDFtoEAD.which_subject_heading_type(i)[0], attrib={'source': FindingAidPDFtoEAD.which_subject_heading_type(i)[1], 'encodinganalog': '600$a'})
                 elem.text = i
-                k1.append(elem)
+                k.append(elem)
             except Exception:
                 self.log(e)
                 self.log('{} might should have a source tag -- but no matching source found'.format(i))
@@ -533,7 +533,7 @@ class FindingAidPDFtoEAD():
 
 if __name__ == '__main__':
     logger = L('log', 'd')
-    reader = ReadNSV('testList.nsv')
+    reader = ReadNSV('findaid_list.csv')
     for uid in reader.getLines():
         url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
         print url
