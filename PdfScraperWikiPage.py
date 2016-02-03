@@ -60,7 +60,6 @@ class PdfScraperWikiPage():
             i += 1
         return (lcells, rcells)
                 # for term in 
-    # def get_columnar_lines(self):
     #     columnar_lines = {}
     #     for top in self.lines_by_top:
     #         if len(self.lines_by_top[top]) > 1:
@@ -95,7 +94,7 @@ class PdfScraperWikiPage():
         text = ''
         for top in tops_list:
             text_value = etree.tostring(by_tops[top], method='text', encoding="UTF-8").strip()
-            text += text_value
+            text += ' {}'.format(text_value)
             only_whitespace = re.match('^\s*$', text_value)
             if only_whitespace:
                 cells.append(text)
@@ -136,6 +135,7 @@ class PdfScraperWikiPage():
 
         left_cells = instance.get_col_cells(left[0])
         right_cells = instance.get_col_cells(right[0])
+
         
         if len(left_cells) > len(right_cells):
             left_cells = instance.checkForSummary(left_cells)

@@ -59,8 +59,7 @@ class FindingAidPDFtoEAD():
         summary_header_pages = [elem for elem in self.c_o_i_ordered if 'summ' in elem[0].lower()]
         header, (beginning_page, end_page) = summary_header_pages[0]
         summary_page_elem = self.element_tree.xpath('//page[@number="{}"]'.format(beginning_page))[0]
-        self.summary_columns = Page.get_table(summary_page_elem)
-        return self.summary_columns
+        return Page.get_table(summary_page_elem)
 
     def grab_contents_of_inventory(self):
         contents = self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
