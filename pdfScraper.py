@@ -29,22 +29,22 @@ class FindingAidPDFtoEAD():
         self.logger.add('{}:   {} '.format(self.url, msg), sev)
 
     def read_url_return_etree(self, url):
-        # '''normal 'pull pdf from web and interpret' code'''
-        # self.pdfdata = urllib2.urlopen(url).read()   # Necessary code for pulling pdf from web.
-        # self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
-        # self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
-        # self.element_tree = etree.fromstring(self.xmldata)
-        # self.log('opened file', 'm')
-        # return self.element_tree
-
-        '''temporary 'read cached file from harddrive' monkeypatch'''
-        with open('cached_pdfs/' + self.url.split('/')[-1], 'r') as f:
-            self.pdfdata = f.read()
-            self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
-            self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
-            self.element_tree = etree.fromstring(self.xmldata)
-        self.log('opened file', 'm')
+        '''normal 'pull pdf from web and interpret' code'''
+        self.pdfdata = urllib2.urlopen(url).read()   # Necessary code for pulling pdf from web.
+        self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
+        self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
+        self.element_tree = etree.fromstring(self.xmldata)
+        self.log('opened file', 'i')
         return self.element_tree
+
+        # '''temporary 'read cached file from harddrive' monkeypatch'''
+        # with open('cached_pdfs/' + self.url.split('/')[-1], 'r') as f:
+        #     self.pdfdata = f.read()
+        #     self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
+        #     self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
+        #     self.element_tree = etree.fromstring(self.xmldata)
+        # self.log('opened file', 'i')
+        # return self.element_tree
 
     def run_conversion(self):
         # print etree.tostring(self.element_tree, pretty_print=True)    # dev only
@@ -439,10 +439,11 @@ class FindingAidPDFtoEAD():
         for i in self.convert_text_after_header_to_list('index'):
             if i != 'Element not pulled from pdf':
                 try:
-                    elem = ET.Element(FindingAidPDFtoEAD.which_subject_heading_type(i)[0], attrib={'source': FindingAidPDFtoEAD.which_subject_heading_type(i)[1], 'encodinganalog': '600$a'})
+                    (subject_heading, MARCencoding, source) = FindingAidPDFtoEAD.which_subject_heading_type(i)
+                    elem = ET.Element(subject_heading, attrib={'source': source, 'encodinganalog': MARCencoding})
                     elem.text = i
                     k.append(elem)
-                except Exception:
+                except Exception as e:
                     if len(i) > 4:
                         elem = ET.Element('subject', attrib={'source': 'local', 'encodinganalog': '650'})
                         elem.text = i
@@ -501,10 +502,10 @@ class FindingAidPDFtoEAD():
     @staticmethod
     def which_subject_heading_type(text):
         term_dict_set = get_term_set_dict()
-        for subject_heading, source_dict in term_dict_set.iteritems():
+        for (subject_heading, MARCencoding), source_dict in term_dict_set.iteritems():
             for source, item_set in source_dict.iteritems():
                 if text in item_set:
-                    return (subject_heading, source)
+                    return (subject_heading, MARCencoding, source)
         return None
 
     ''' Extra useful tidbits (for development) '''
@@ -525,8 +526,8 @@ class FindingAidPDFtoEAD():
 
 if __name__ == '__main__':
     logger = L('log', 'd')
-    reader = ReadNSV('testList.nsv')
-    # reader = ReadNSV('findaid_list.csv')
+    # reader = ReadNSV('testList.nsv')
+    reader = ReadNSV('findaid_list.csv')
     for uid in reader.getLines():
         url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
         print url
