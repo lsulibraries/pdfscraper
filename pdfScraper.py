@@ -148,6 +148,8 @@ class FindingAidPDFtoEAD():
         elem_of_header = self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(beginning_page, header.lower().strip()))
         text_after_header = []
         for i in self.get_first_page_siblings_and_children(elem_of_header):
+            if i.lower().strip() == following_header.lower().strip():
+                break
             text_after_header.append(i.strip())
         if following_inventory_item:
             following_header, (following_beginning_page, following_end_page) = following_inventory_item
