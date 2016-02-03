@@ -29,26 +29,26 @@ class FindingAidPDFtoEAD():
         self.logger.add('{}:   {} '.format(self.url, msg), sev)
 
     def read_url_return_etree(self, url):
-        '''normal 'pull pdf from web and interpret' code'''
-        self.pdfdata = urllib2.urlopen(url).read()   # Necessary code for pulling pdf from web.
-        self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
-        self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
-        self.element_tree = etree.fromstring(self.xmldata)
-        self.log('opened file', 'm')
-        return self.element_tree
-
-        # '''temporary 'read cached file from harddrive' monkeypatch'''
-        # with open('cached_pdfs/' + self.url.split('/')[-1], 'r') as f:
-        #     self.pdfdata = f.read()
-        #     self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
-        #     self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
-        #     self.element_tree = etree.fromstring(self.xmldata)
+        # '''normal 'pull pdf from web and interpret' code'''
+        # self.pdfdata = urllib2.urlopen(url).read()   # Necessary code for pulling pdf from web.
+        # self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
+        # self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
+        # self.element_tree = etree.fromstring(self.xmldata)
         # self.log('opened file', 'm')
         # return self.element_tree
 
+        '''temporary 'read cached file from harddrive' monkeypatch'''
+        with open('cached_pdfs/' + self.url.split('/')[-1], 'r') as f:
+            self.pdfdata = f.read()
+            self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
+            self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
+            self.element_tree = etree.fromstring(self.xmldata)
+        self.log('opened file', 'm')
+        return self.element_tree
+
     def run_conversion(self):
         # print etree.tostring(self.element_tree, pretty_print=True)    # dev only
-        self.print_xml_to_file()                                    # dev only
+        # self.print_xml_to_file()                                    # dev only
         contents_of_inventory = self.grab_contents_of_inventory()
         self.c_o_i_ordered = sorted(contents_of_inventory, key=lambda item: int(item[1][0]))
         self.summary_columns = self.get_columns_after_summary()
@@ -149,15 +149,14 @@ class FindingAidPDFtoEAD():
         elem_of_header = self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(beginning_page, header.lower().strip()))
         text_after_header = []
         for i in self.get_first_page_siblings_and_children(elem_of_header):
-            if following_header in i:
-                print 'found following header'
             text_after_header.append(i.strip())
         if following_inventory_item:
             following_header, (following_beginning_page, following_end_page) = following_inventory_item
             if following_beginning_page - beginning_page > 1:
                 for page in xrange(beginning_page+1, following_beginning_page):
-                    self.get_middle_page_siblings_and_childrent(page)
-                    text_after_header.append(i.strip())
+                    text = self.get_middle_page_siblings_and_childrent(page)
+                    for i in text:
+                        text_after_header.append(i.strip())
             if self.get_last_page_siblings_and_children(following_header, following_beginning_page):
                 for i in self.get_last_page_siblings_and_children(following_header, following_beginning_page):
                     text_after_header.append(i.strip())
@@ -350,7 +349,6 @@ class FindingAidPDFtoEAD():
                 a5.append(elem)
         except Exception as e:
             self.log(e)
-            print e, '\nlanguage / self.abbreviate_lang(lang) mismatch in a5 element of archdesc()'
 
         a6 = ET.SubElement(a, 'abstract', attrib={'label': "Summary", 'encodinganalog': "520$a", })
         a6.text = self.convert_text_in_column_to_string('sum')
@@ -464,24 +462,17 @@ class FindingAidPDFtoEAD():
 
         o = ET.SubElement(archdesc, 'dsc', attrib={'type': 'in-depth',})
         o1 = ET.SubElement(o, 'head')
-        # o1.text 
-
-        # for i in Series list:
-        #     add a o1, o1a, o1b in the format below
-        # o1 = ET.SubElement(o, 'co1', attrib={'level': 'series'})
-        # o1a = ET.SubElement(o1, 'unitid')
-        # o1a.text = Name of the Series
-        # o1b = ET.SubElement(o1, 'p')
-        # o1b.text = Text below that header
+        o1 = ET.SubElement(o, 'co1', attrib={'level': 'series'})
+        o1a = ET.SubElement(o1, 'unitid')
+        o1a.text = default_stub
 
         p = ET.SubElement(archdesc, 'arrangement', attrib={'encodinganalog': '351$a'})
         p1 = ET.SubElement(p, 'head')
         p1.text = 'Related Material'
-        # for paragraph in Scope and Content:
-        #     px = ET.SubElement(p, 'p')
-        #     px.text = text of paragraph
-        p2 = ET.SubElement(p, 'p')
+        p2 = ET.SubElement(p1, 'p')
         p2.text = self.convert_text_after_header_to_string('series')
+        p3 = ET.SubElement(p1, 'p')
+        p3.text = self.convert_text_after_header_to_string('desc')
 
         q = ET.SubElement(archdesc, 'appraisal', attrib={'encodinganalog': "583"})
         q1 = ET.SubElement(q, 'head')
@@ -533,7 +524,8 @@ class FindingAidPDFtoEAD():
 
 if __name__ == '__main__':
     logger = L('log', 'd')
-    reader = ReadNSV('findaid_list.csv')
+    reader = ReadNSV('testList.nsv')
+    # reader = ReadNSV('findaid_list.csv')
     for uid in reader.getLines():
         url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
         print url
