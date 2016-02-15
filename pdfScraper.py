@@ -23,7 +23,6 @@ class FindingAidPDFtoEAD():
         self.url = url
         self.logger = logger
         self.element_tree = self.read_url_return_etree(self.url)
-        # print self.element_tree
 
     def log(self, msg, sev='i'):
         self.logger.add('{}:   {} '.format(self.url, msg), sev)
@@ -210,7 +209,7 @@ class FindingAidPDFtoEAD():
         return max(list_of_all_page_nums)
 
     def get_text_recursive(self, element):
-        return etree.tostring(element, method='text', encoding="UTF-8").strip()
+        return etree.tostring(element, encoding="utf-8", method='text', ).strip()
 
     def get_ead(self):
         ead = ET.Element('ead', attrib={'relatedencoding': "MARC21", 'type': "inventory", 'level': "collection", })
@@ -436,7 +435,7 @@ class FindingAidPDFtoEAD():
         k = ET.SubElement(archdesc, 'controlaccess')
         k1 = ET.SubElement(k, 'head')
         k1.text = "Index Terms"
-        for i in self.convert_text_after_header_to_list('index'):
+        for i in self.convert_text_after_header_to_list('index'):       
             if i != 'Element not pulled from pdf':
                 try:
                     (subject_heading, MARCencoding, source) = FindingAidPDFtoEAD.which_subject_heading_type(i)
@@ -445,8 +444,8 @@ class FindingAidPDFtoEAD():
                     k.append(elem)
                 except Exception as e:
                     if len(i) > 4:
-                        elem = ET.Element('subject', attrib={'source': 'local', 'encodinganalog': '650'})
-                        elem.text = i
+                        elem = ET.Element('subject', attrib={'source': 'local', 'encodinganalog': '650'}, )
+                        elem.text = unicode(i, encoding='utf-8')
                         k.append(elem)
                     else:
                         self.log('{} might should have a source tag -- but no matching source found'.format(i))
