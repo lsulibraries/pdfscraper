@@ -56,41 +56,46 @@ class FindingAidPDFtoEAD():
 
     def get_columns_after_summary(self):
         summary_header_pages = [elem for elem in self.c_o_i_ordered if 'summ' in elem[0].lower()]
-        header, (beginning_page, end_page) = summary_header_pages[0]
-        summary_page_elem = self.element_tree.xpath('//page[@number="{}"]'.format(beginning_page))[0]
-        return Page.get_table(summary_page_elem)
+        if summary_header_pages:
+            header, (beginning_page, end_page) = summary_header_pages[0]
+            summary_page_elem = self.element_tree.xpath('//page[@number="{}"]'.format(beginning_page))[0]
+            return Page.get_table(summary_page_elem)
+        return None
 
     def grab_contents_of_inventory(self):
         contents = self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
         pruned_elem_list = self.remove_non_text_elements(contents)
-        if re.findall('[a-zA-Z]', etree.tostring(pruned_elem_list[0], method='text')) and re.findall('[0-9]', etree.tostring(pruned_elem_list[0], method='text')):
-            top_header_page_dict = self.lower_case_and_dict_it(contents)
-            inventory = []
-            for top, header_page in top_header_page_dict.iteritems():
-                header, page = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', header_page)[0]
-                pages_tuple = self.split_on_char('-', page)
-                temp_page_start, temp_page_end = pages_tuple
-                temp_page_start, temp_page_end = int(temp_page_start), int(temp_page_end)
-                pages_tuple = (temp_page_start, temp_page_end)
-                inventory.append((header, pages_tuple))
-        else:
-            pruned_elem_list = self.join_disjointed_header_page(pruned_elem_list)
-            inventory = []
-            for elem in pruned_elem_list:
-                if re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', elem):
-                    header, page = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', elem)[0]
-                    # Here need to be a way of parsing 4452.pdf Appendices
-                    pages_tuple = self.split_on_char('-', page)
-                    temp_page_start, temp_page_end = pages_tuple
-                    temp_page_start, temp_page_end = int(temp_page_start), int(temp_page_end)
-                    pages_tuple = (temp_page_start, temp_page_end)
-                    inventory.append((header, pages_tuple))
+        inventory = []
+        if pruned_elem_list:
+            if re.findall('[a-zA-Z]', etree.tostring(pruned_elem_list[0], encoding='utf-8', method='text')) and re.findall('[0-9]', etree.tostring(pruned_elem_list[0], encoding='utf-8', method='text')):
+                top_header_page_dict = self.lower_case_and_dict_it(contents)
+                inventory = []
+                for top, header_page in top_header_page_dict.iteritems():
+                    if re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', header_page):
+                        header, page = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', header_page)[0]
+                        pages_tuple = self.split_on_char('-', page)
+                        temp_page_start, temp_page_end = pages_tuple
+                        if temp_page_start.isdigit() and temp_page_end.isdigit():
+                            pages_tuple = (int(temp_page_start), int(temp_page_end))
+                            inventory.append((header, pages_tuple))
+            else:
+                pruned_elem_list = self.join_disjointed_header_page(pruned_elem_list)
+                inventory = []
+                for elem in pruned_elem_list:
+                    if re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', elem):
+                        header, page = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', elem)[0]
+                        # Here need to be a way of parsing 4452.pdf Appendices
+                        pages_tuple = self.split_on_char('-', page)
+                        temp_page_start, temp_page_end = pages_tuple
+                        temp_page_start, temp_page_end = int(temp_page_start), int(temp_page_end)
+                        pages_tuple = (temp_page_start, temp_page_end)
+                        inventory.append((header, pages_tuple))
         return inventory
 
     def remove_non_text_elements(self, elem_list):
         elements_with_text = []
         for pos, item in enumerate(elem_list):
-            if re.findall('([A-Za-z0-9]+)', etree.tostring(item, method='text')):
+            if re.findall('([A-Za-z0-9]+)', etree.tostring(item, encoding='utf-8', method='text')):
                 elements_with_text.append(item)
         return elements_with_text
 
@@ -106,7 +111,7 @@ class FindingAidPDFtoEAD():
         joined_elem_list = []
         for i in xrange(num_of_elems/2):
             header, page = elem_list[2*i], elem_list[(2*i)+1]
-            head_page_str = "{} {}".format(etree.tostring(header, method='text'), etree.tostring(page, method='text'))
+            head_page_str = "{} {}".format(etree.tostring(header, encoding='utf-8', method='text'), etree.tostring(page, encoding='utf-8', method='text'))
             joined_elem_list.append(head_page_str)
         return joined_elem_list
 
@@ -136,14 +141,17 @@ class FindingAidPDFtoEAD():
         return 'Element not pulled from pdf'
 
     def convert_text_in_column_to_string(self, column_snippet):
-        for i in self.summary_columns:
-            if column_snippet.lower() in i.lower():
-                return self.summary_columns[i].decode('utf-8')
+        if self.summary_columns:
+            for i in self.summary_columns:
+                if column_snippet.lower() in i.lower():
+                    return self.summary_columns[i].decode('utf-8')
         return 'Element not pulled from pdf'
 
     def get_text_after_header(self, inventory_item, following_inventory_item=None):
         header, (beginning_page, end_page) = inventory_item
-        following_header, (following_beginning_page, following_end_page) = following_inventory_item
+        following_header = ''
+        if following_inventory_item:
+            following_header, (following_beginning_page, following_end_page) = following_inventory_item
         elem_of_header = self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(beginning_page, header.lower().strip()))
         text_after_header = []
         for i in self.get_first_page_siblings_and_children(elem_of_header):
@@ -162,7 +170,12 @@ class FindingAidPDFtoEAD():
                     text_after_header.append(i.strip())
         else:
             for i in self.do_get_last_pages_if_last_header(beginning_page):
-                text_after_header.append(i.strip())
+                if isinstance(i, list):
+                    for string in i:
+                        # print string
+                        text_after_header.append(string.strip())
+                elif isinstance(i, str):
+                    text_after_header.append(i.strip())
         return text_after_header
 
     def get_first_page_siblings_and_children(self, elem_of_header):
@@ -188,11 +201,12 @@ class FindingAidPDFtoEAD():
     def get_last_page_siblings_and_children(self, end_header, end_page):
         header_xpath = self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(end_page, end_header.lower().strip()))
         list_of_sibling_children_text = []
-        elems_preceding = header_xpath[0].getparent().itersiblings(preceding=True)
-        for sibling in elems_preceding:
-            sibling_str = self.get_text_recursive(sibling)
-            if sibling_str and len(sibling_str) > 0:
-                list_of_sibling_children_text.append(sibling_str)
+        if header_xpath:
+            elems_preceding = header_xpath[0].getparent().itersiblings(preceding=True)
+            for sibling in elems_preceding:
+                sibling_str = self.get_text_recursive(sibling)
+                if sibling_str and len(sibling_str) > 0:
+                    list_of_sibling_children_text.append(sibling_str)
         list_of_sibling_children_text = list_of_sibling_children_text.reverse()
         return list_of_sibling_children_text
 
@@ -241,7 +255,8 @@ class FindingAidPDFtoEAD():
 
     def get_titleproper(self):
         el = ET.Element('titleproper')
-        el.text = "A GUIDE TO THE {}".format(self.extract_title()).title()
+        temp_title = self.extract_title()
+        el.text = u"A GUIDE TO THE {}".format(unicode(temp_title)).title()
         return el
 
     def extract_title(self):
@@ -250,7 +265,7 @@ class FindingAidPDFtoEAD():
         titlelines = self.element_tree.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
         for el in titlelines:
             wholetitle.append(el.text.strip())
-        return ' '.join(wholetitle).title()
+        return ' '.join(wholetitle)
 
     def get_num(self):
         el = ET.Element('num', attrib={'type': 'Manuscript'})
@@ -260,14 +275,17 @@ class FindingAidPDFtoEAD():
     def extract_mss(self):
         titlelines = self.element_tree.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
         # figuring out what the top value of the last line of the title is
-        titlelineend = titlelines[-1].getparent().get('top')
-        # num - assume it is between 12 and 25 units below the last line of title
-        #    (a better way might have been to take next text node)
-        numlinenumberA = str(int(titlelineend) + 12)  # 347
-        numlinenumberB = str(int(titlelineend) + 25)  # 360
-        xpath_address = '//page[@number="1"]/text[@top>=' + numlinenumberA + ' and @top<=' + numlinenumberB + ']'
-        mss_elem = self.element_tree.xpath(xpath_address)[0]
-        return mss_elem.text
+        if titlelines:
+            titlelineend = titlelines[-1].getparent().get('top')
+            # num - assume it is between 12 and 25 units below the last line of title
+            #    (a better way might have been to take next text node)
+            numlinenumberA = str(int(titlelineend) + 12)  # 347
+            numlinenumberB = str(int(titlelineend) + 25)  # 360
+            xpath_address = '//page[@number="1"]/text[@top>=' + numlinenumberA + ' and @top<=' + numlinenumberB + ']'
+            if self.element_tree.xpath(xpath_address):
+                mss_elem = self.element_tree.xpath(xpath_address)[0]
+                return mss_elem.text
+        return None
 
     def get_subtitle(self):
         el = ET.Element('subtitle')
@@ -316,7 +334,9 @@ class FindingAidPDFtoEAD():
         return el
 
     def extract_date(self):
-        return self.element_tree.xpath('//page[@number="1"]/text[@width>"20"]')[-1].text.strip()
+        if self.element_tree.xpath('//page[@number="1"]/text[@width>"20"]')[-1].text:
+            return self.element_tree.xpath('//page[@number="1"]/text[@width>"20"]')[-1].text.strip()
+        return None
 
     def get_archdesc(self):
         default_stub = "Element not pulled from pdf"
@@ -520,7 +540,7 @@ class FindingAidPDFtoEAD():
         file_name = os.path.splitext(os.path.basename(self.url))[0]
         path_file_name = 'exported_eads/{}.xml'.format(file_name)
         with open(path_file_name, 'w') as f:
-            f.write(ET.tostring(ead, encoding="UTF-8", method="xml"))
+            f.write(ET.tostring(ead, encoding="utf-8", method="xml"))
 
 
 if __name__ == '__main__':
@@ -536,3 +556,7 @@ if __name__ == '__main__':
         except Exception as e:
             logger.add(traceback.print_stack(), 'e')
             print e
+    # A = FindingAidPDFtoEAD('http://lib.lsu.edu/sites/default/files/sc/findaid/2345.pdf', logger)
+    # A.run_conversion()
+
+
