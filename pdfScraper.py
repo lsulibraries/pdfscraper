@@ -6,7 +6,6 @@ import urllib2
 import traceback
 
 import scraperwiki
-# from lxml.builder import E
 from lxml import etree
 import xml.etree.ElementTree as ET
 
@@ -84,7 +83,6 @@ class FindingAidPDFtoEAD():
                 for elem in pruned_elem_list:
                     if re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', elem):
                         header, page = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', elem)[0]
-                        # Here need to be a way of parsing 4452.pdf Appendices
                         pages_tuple = self.split_on_char('-', page)
                         temp_page_start, temp_page_end = pages_tuple
                         temp_page_start, temp_page_end = int(temp_page_start), int(temp_page_end)
