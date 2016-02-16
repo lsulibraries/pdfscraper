@@ -402,7 +402,7 @@ class FindingAidPDFtoEAD():
         a10.text = self.extract_mss()
 
         a11 = ET.SubElement(a, 'unittitle', attrib={'encodinganalog': "245$a", 'label': "Title: "})
-        a11.text = self.extract_title()
+        a11.text = self.extract_title().title()
 
         b = ET.SubElement(archdesc, 'accessrestrict', attrib={'encodinganalog': '506'})
         b1 = ET.SubElement(b, 'head')
@@ -430,7 +430,7 @@ class FindingAidPDFtoEAD():
 
         f = ET.SubElement(archdesc, 'bioghist', attrib={'encodinganalog': '545'})
         f1 = ET.SubElement(f, 'head')
-        f1.text = "BIOGRAPHICAL/HISTORICAL NOTE"
+        f1.text = "BIOGRAPHICAL/HISTORICAL NOTE".title()
         f2 = ET.SubElement(f, 'p')
         f2.text = self.convert_text_after_header_to_string('biog')
 
@@ -470,7 +470,6 @@ class FindingAidPDFtoEAD():
                     else:
                         self.log('{} might should have a source tag -- but no matching source found'.format(i))
                     self.log(e)
-
 
         l = ET.SubElement(archdesc, 'acqinfo')
         l1 = ET.SubElement(l, 'head')
@@ -546,7 +545,7 @@ class FindingAidPDFtoEAD():
 if __name__ == '__main__':
     logger = L('log', 'd')
     # reader = ReadNSV('testList.nsv')
-    reader = ReadNSV('findaid_list.csv')
+    reader = ReadNSV('todo.csv')
     for uid in reader.getLines():
         url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
         print url
@@ -556,7 +555,7 @@ if __name__ == '__main__':
         except Exception as e:
             logger.add(traceback.print_stack(), 'e')
             print e
-    # A = FindingAidPDFtoEAD('http://lib.lsu.edu/sites/default/files/sc/findaid/2345.pdf', logger)
+    # A = FindingAidPDFtoEAD('http://lib.lsu.edu/sites/default/files/sc/findaid/2840.pdf', logger)
     # A.run_conversion()
 
 
