@@ -5,6 +5,7 @@ from Logger import Logger
 import os
 import time
 
+
 class TestLoggerMethods(unittest.TestCase):
 
     def setUp(self):
@@ -29,12 +30,8 @@ class TestLoggerMethods(unittest.TestCase):
         self.assertEquals(contents, '{} [INFO] hello\n{} [INFO] hello\n'.format(date1, date2))
 
     def test_add_with_severity(self):
-        sev = 'm'
         localLogger = Logger(self.path, 'm')
-
         localLogger.add('hello')
-        date1 = time.strftime("%H:%M:%S")
-
         localLogger.add('hello', 'm')
         date2 = time.strftime("%H:%M:%S")
         contents = self.getlogContents()

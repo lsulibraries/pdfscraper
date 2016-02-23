@@ -2,8 +2,8 @@
 
 import time
 
-class Logger():
 
+class Logger():
     severity_map = {
             'd': (1, 'DEBUG'),
             'i': (2, 'INFO'),

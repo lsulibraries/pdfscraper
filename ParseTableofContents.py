@@ -3,28 +3,27 @@
 from lxml import etree
 import re
 
-class PdfScraperWikiPage():
 
+class ParseTableofContents():
     tables = []
-    paras  = []
+    paras = []
     chunks = []
-    lines_by_top   = {}
-    lines_by_left  = {}
+    lines_by_top = {}
+    lines_by_left = {}
 
     def __init__(self, tree):
         self.tree = tree
         lines_gotten = self.get_lines()
         self.lines_by_left = lines_gotten[0]
-        self.lines_by_top  = lines_gotten[1]
-
+        self.lines_by_top = lines_gotten[1]
 
     def get_lines(self):
         path = './/text'
         lines = self.tree.xpath(path)
         lefts = {}
-        tops  = {}
+        tops = {}
         for line in lines:
-            top  = line.get('top')
+            top = line.get('top')
             left = line.get('left')
             if (top is not None) and (top not in tops):
                 tops[top] = []
@@ -35,7 +34,6 @@ class PdfScraperWikiPage():
             lefts[left].append(line)
         return (lefts, tops)
 
-
     def check_for_long_left_column_lines(self, left, right, lcells, rcells):
         i = 0
         for line in lcells:
@@ -43,13 +41,11 @@ class PdfScraperWikiPage():
             if length_in_words > 3:
                 common_terms = ['Size', 'Geographic locations', 'Inclusive dates', 'Bulk dates', 'Languages', 'Summary', 'Source', 'Related collection', 'Copyright', 'Citation']
                 head = line.split()
-                head = ' '.join(head[:2]) # first three words...
+                head = ' '.join(head[:2])  # first three words...
                 for term in common_terms:
                     first_word_of_term = term.split()[0]
-                    
                     if term.lower() in head.lower():
-                        
-                        length = len(term.split()) 
+                        length = len(term.split())
                         lcells[i] = ' '.join(line[: length])
                         rcells.insert(i, ' '.join(line[length:]))
 
@@ -59,18 +55,12 @@ class PdfScraperWikiPage():
 
             i += 1
         return (lcells, rcells)
-                # for term in 
-    #     columnar_lines = {}
-    #     for top in self.lines_by_top:
-    #         if len(self.lines_by_top[top]) > 1:
-    #             columnar_lines[top] = self.lines_by_top[top]
-    #     return columnar_lines
 
     def get_column_lefts(self):
-        first  = (None, 0)
+        first = (None, 0)
         second = (None, 0)
 
-        for key,items in self.lines_by_left.iteritems():
+        for key, items in self.lines_by_left.iteritems():
             length = len(items)
             if length > first[1]:
                 second = first
@@ -81,7 +71,7 @@ class PdfScraperWikiPage():
 
     def get_col_cells(self, leftpos):
         tops_list = []
-        by_tops   = {}
+        by_tops = {}
         cells = []
 
         for line in self.lines_by_left[leftpos]:
@@ -109,7 +99,7 @@ class PdfScraperWikiPage():
                 prune = True
                 break
             i += 1
-        if prune == True:
+        if prune:
             left_cells = left_cells[i+1:]
         return left_cells
 
@@ -122,7 +112,7 @@ class PdfScraperWikiPage():
 
     @staticmethod
     def get_table(tree):
-        instance = PdfScraperWikiPage(tree)
+        instance = ParseTableofContents(tree)
         cols = instance.get_column_lefts()
 
         one, two = cols
@@ -136,7 +126,6 @@ class PdfScraperWikiPage():
         left_cells = instance.get_col_cells(left[0])
         right_cells = instance.get_col_cells(right[0])
 
-        
         if len(left_cells) > len(right_cells):
             left_cells = instance.checkForSummary(left_cells)
 

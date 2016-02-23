@@ -9,11 +9,11 @@ import scraperwiki
 from lxml import etree
 import xml.etree.ElementTree as ET
 
-from ReadNSV import ReadNSV
 from Logger import Logger as L
 from terms_dict_set import get_term_set_dict
 from langs_and_abbr import get_langs_and_abbr
-from PdfScraperWikiPage import PdfScraperWikiPage as Page
+from ParseTableofContents import ParseTableofContents as ParseTOC
+
 
 class FindingAidPDFtoEAD():
     def __init__(self, url, logger=None):
@@ -55,10 +55,14 @@ class FindingAidPDFtoEAD():
 
     def get_columns_after_summary(self):
         summary_header_pages = [elem for elem in self.c_o_i_ordered if 'summ' in elem[0].lower()]
+        print('shp:', summary_header_pages)
         if summary_header_pages:
             header, (beginning_page, end_page) = summary_header_pages[0]
+            print('h, bp, ep', header, beginning_page, end_page)
             summary_page_elem = self.element_tree.xpath('//page[@number="{}"]'.format(beginning_page))[0]
-            return Page.get_table(summary_page_elem)
+            print(summary_page_elem.text)
+            print(ParseTOC.get_table(summary_page_elem))
+            return ParseTOC.get_table(summary_page_elem)
         return None
 
     def grab_contents_of_inventory(self):
@@ -349,10 +353,10 @@ class FindingAidPDFtoEAD():
         a2a = ET.SubElement(a2, 'extent',)
         a2a.text = self.convert_text_in_column_to_string('siz')
 
-        a3 = ET.SubElement(a, 'unitdate', attrib={'label': 'Dates:', 'type': 'inclusive', 'encodinganalog': '245$f',  })
+        a3 = ET.SubElement(a, 'unitdate', attrib={'label': 'Dates:', 'type': 'inclusive', 'encodinganalog': '245$f'})
         a3.text = self.convert_text_in_column_to_string('inclusive')
 
-        a4 = ET.SubElement(a, 'unitdate', attrib={'label': 'Dates:', 'type': 'bulk', 'encodinganalog': default_stub,  })
+        a4 = ET.SubElement(a, 'unitdate', attrib={'label': 'Dates:', 'type': 'bulk', 'encodinganalog': default_stub})
         a4.text = self.convert_text_in_column_to_string('bulk')
 
         a5 = ET.SubElement(a, 'langmaterial')
@@ -385,13 +389,13 @@ class FindingAidPDFtoEAD():
         a9a.text = default_stub
         originator = self.get_titleproper().text
         if originator[0:15].lower() == 'a guide to the ':
-            originator =  originator[15:]
+            originator = originator[15:]
         if originator[-6:] == 'PAPERS':
             originator = originator[:-7]
             a9a.text = originator
         if originator[-5:] == 'DIARY':
             originator = originator.split('DIARY')[0]
-            a9a.text = originator    
+            a9a.text = originator
 
         a9b = ET.SubElement(a9, 'corpname', attrib={'encodinganalog': "110"})
         a9b.text = default_stub
@@ -453,7 +457,7 @@ class FindingAidPDFtoEAD():
         k = ET.SubElement(archdesc, 'controlaccess')
         k1 = ET.SubElement(k, 'head')
         k1.text = "Index Terms"
-        for i in self.convert_text_after_header_to_list('index'):       
+        for i in self.convert_text_after_header_to_list('index'):
             if i != 'Element not pulled from pdf':
                 try:
                     (subject_heading, MARCencoding, source) = FindingAidPDFtoEAD.which_subject_heading_type(i)
@@ -478,7 +482,7 @@ class FindingAidPDFtoEAD():
         m = ET.SubElement(archdesc, 'appraisal')
         n = ET.SubElement(archdesc, 'accruals')
 
-        o = ET.SubElement(archdesc, 'dsc', attrib={'type': 'in-depth',})
+        o = ET.SubElement(archdesc, 'dsc', attrib={'type': 'in-depth'})
         o1 = ET.SubElement(o, 'head')
         o1 = ET.SubElement(o, 'co1', attrib={'level': 'series'})
         o1a = ET.SubElement(o1, 'unitid')
@@ -542,18 +546,17 @@ class FindingAidPDFtoEAD():
 
 if __name__ == '__main__':
     logger = L('log', 'd')
-    # reader = ReadNSV('testList.nsv')
-    reader = ReadNSV('todo.csv')
-    for uid in reader.getLines():
-        url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
-        print url
-        A = FindingAidPDFtoEAD(url, logger)
-        try:
-            A.run_conversion()
-        except Exception as e:
-            logger.add(traceback.print_stack(), 'e')
-            print e
+    filename = 'testList.csv'
+    # reader = ReadNSV('todo.csv')
+    with open(filename, 'r') as f:
+        for uid in f.readlines():
+            url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid.strip())
+            print url
+            try:
+                # A = FindingAidPDFtoEAD(url, logger).run_conversion()
+                FindingAidPDFtoEAD(url, logger).run_conversion()
+            except Exception as e:
+                logger.add(traceback.print_stack(), 'e')
+                print e
     # A = FindingAidPDFtoEAD('http://lib.lsu.edu/sites/default/files/sc/findaid/2840.pdf', logger)
     # A.run_conversion()
-
-
