@@ -4,3 +4,6 @@ dbg.xml
 .vagrant/*
 *.xml
 log
+EadProject.zip
+EadProject/*
+todo.csv
