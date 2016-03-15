@@ -46,7 +46,7 @@ class FindingAidPDFtoEAD():
 
     def run_conversion(self):
         # print etree.tostring(self.element_tree, pretty_print=True)    # dev only
-        # self.print_xml_to_file()                                    # dev only
+        self.print_xml_to_file()                                    # dev only
         contents_of_inventory = self.grab_contents_of_inventory()
         self.c_o_i_ordered = sorted(contents_of_inventory, key=lambda item: int(item[1][0]))
         self.summary_columns = self.get_columns_after_summary()
@@ -55,13 +55,9 @@ class FindingAidPDFtoEAD():
 
     def get_columns_after_summary(self):
         summary_header_pages = [elem for elem in self.c_o_i_ordered if 'summ' in elem[0].lower()]
-        print('shp:', summary_header_pages)
         if summary_header_pages:
             header, (beginning_page, end_page) = summary_header_pages[0]
-            print('h, bp, ep', header, beginning_page, end_page)
             summary_page_elem = self.element_tree.xpath('//page[@number="{}"]'.format(beginning_page))[0]
-            print(summary_page_elem.text)
-            print(ParseTOC.get_table(summary_page_elem))
             return ParseTOC.get_table(summary_page_elem)
         return None
 
@@ -147,7 +143,7 @@ class FindingAidPDFtoEAD():
                     return self.get_text_after_header(i)
                 else:
                     return self.get_text_after_header(i, self.c_o_i_ordered[pos+1])
-        return 'Element not pulled from pdf'
+        return None
 
     def convert_text_in_column_to_string(self, column_snippet):
         if self.summary_columns:
@@ -370,14 +366,14 @@ class FindingAidPDFtoEAD():
             lang_list = self.what_language_used()
             for i in lang_list.split(','):
                 if len(self.abbreviate_lang(i)) > 3:
-                    self.log('lang not found, possible key value mismatch: language: {}'.format(i))
+                    self.log('{} lang not found, possible key value mismatch'.format(i))
                     continue
                 elem = ET.Element('language', attrib={'langcode': self.abbreviate_lang(i), })
                 elem.text = i
                 a5.append(elem)
         except Exception as e:
-            print(e)
-            self.log(e)
+            print(lang_list)
+            self.log('could not find language code.')
 
         a6 = ET.SubElement(a, 'abstract', attrib={'label': "Summary", 'encodinganalog': "520$a", })
         a6.text = self.convert_text_in_column_to_string('sum')
@@ -464,8 +460,8 @@ class FindingAidPDFtoEAD():
         k = ET.SubElement(archdesc, 'controlaccess')
         k1 = ET.SubElement(k, 'head')
         k1.text = "Index Terms"
-        for i in self.convert_text_after_header_to_list('index'):
-            if i != 'Element not pulled from pdf':
+        if self.convert_text_after_header_to_list('index'):
+            for i in self.convert_text_after_header_to_list('index'):
                 try:
                     (subject_heading, MARCencoding, source) = FindingAidPDFtoEAD.which_subject_heading_type(i)
                     elem = ET.Element(subject_heading, attrib={'source': source, 'encodinganalog': MARCencoding})
@@ -478,7 +474,7 @@ class FindingAidPDFtoEAD():
                         k.append(elem)
                     else:
                         self.log('{} might should have a source tag -- but no matching source found'.format(i))
-                    self.log(e)
+
 
         l = ET.SubElement(archdesc, 'acqinfo')
         l1 = ET.SubElement(l, 'head')
@@ -538,9 +534,9 @@ class FindingAidPDFtoEAD():
     ''' Extra useful tidbits (for development) '''
     def print_xml_to_file(self):
         file_name = os.path.splitext(os.path.basename(self.url))[0]
-        if 'cached_pdfs' not in os.listdir(os.getcwd()):
-            os.mkdir('cached_pdfs')
-        path_file_name = 'cached_pdfs/{}.xml'.format(file_name)
+        if 'starting_xmls' not in os.listdir(os.getcwd()):
+            os.mkdir('starting_xmls')
+        path_file_name = 'starting_xmls/{}.xml'.format(file_name)
         with open(path_file_name, 'w') as f:
             f.write(etree.tostring(self.element_tree, pretty_print=True))
 
@@ -555,7 +551,7 @@ class FindingAidPDFtoEAD():
 
 if __name__ == '__main__':
     logger = L('log', 'd')
-    filename = 'testList.csv'
+    filename = 'findaid_list.csv'
     # reader = ReadNSV('todo.csv')
     with open(filename, 'r') as f:
         for uid in f.readlines():
@@ -565,4 +561,4 @@ if __name__ == '__main__':
                 FindingAidPDFtoEAD(url, logger).run_conversion()
             except Exception as e:
                 logger.add(traceback.print_stack(), 'e')
-                print e
+                # print e
