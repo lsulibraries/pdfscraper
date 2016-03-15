@@ -27,22 +27,22 @@ class FindingAidPDFtoEAD():
         self.logger.add('{}:   {} '.format(self.url, msg), sev)
 
     def read_url_return_etree(self, url):
-        '''normal 'pull pdf from web and interpret' code'''
-        self.pdfdata = urllib2.urlopen(url).read()   # Necessary code for pulling pdf from web.
-        self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
-        self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
-        self.element_tree = etree.fromstring(self.xmldata)
-        self.log('opened file', 'i')
-        return self.element_tree
-
-        # '''temporary 'read cached file from harddrive' monkeypatch'''
-        # with open('cached_pdfs/' + self.url.split('/')[-1], 'r') as f:
-        #     self.pdfdata = f.read()
-        #     self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
-        #     self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
-        #     self.element_tree = etree.fromstring(self.xmldata)
+        # '''normal 'pull pdf from web and interpret' code'''
+        # self.pdfdata = urllib2.urlopen(url).read()   # Necessary code for pulling pdf from web.
+        # self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
+        # self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
+        # self.element_tree = etree.fromstring(self.xmldata)
         # self.log('opened file', 'i')
         # return self.element_tree
+
+        '''temporary 'read cached file from harddrive' monkeypatch'''
+        with open('cached_pdfs/' + self.url.split('/')[-1], 'r') as f:
+            self.pdfdata = f.read()
+            self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
+            self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
+            self.element_tree = etree.fromstring(self.xmldata)
+        self.log('opened file', 'i')
+        return self.element_tree
 
     def run_conversion(self):
         # print etree.tostring(self.element_tree, pretty_print=True)    # dev only
@@ -66,7 +66,14 @@ class FindingAidPDFtoEAD():
         return None
 
     def grab_contents_of_inventory(self):
-        contents = self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
+        contents_elem = self.element_tree.xpath('//page/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format('contents of inventory'))[0]
+        contents = []
+        for i in contents_elem.getparent().itersiblings():
+            for child in i.iterchildren():
+                contents.append(child)
+        # the following overrides the above 4 lines, because it's known to work for 3/5 of collections.  Above 4 should work for some of the 2/5.
+        if self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a'):
+            contents = self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
         pruned_elem_list = self.remove_non_text_elements(contents)
         inventory = []
         if pruned_elem_list:
@@ -174,7 +181,6 @@ class FindingAidPDFtoEAD():
             for i in self.do_get_last_pages_if_last_header(beginning_page):
                 if isinstance(i, list):
                     for string in i:
-                        # print string
                         text_after_header.append(string.strip())
                 elif isinstance(i, str):
                     text_after_header.append(i.strip())
@@ -370,6 +376,7 @@ class FindingAidPDFtoEAD():
                 elem.text = i
                 a5.append(elem)
         except Exception as e:
+            print(e)
             self.log(e)
 
         a6 = ET.SubElement(a, 'abstract', attrib={'label': "Summary", 'encodinganalog': "520$a", })
@@ -531,6 +538,8 @@ class FindingAidPDFtoEAD():
     ''' Extra useful tidbits (for development) '''
     def print_xml_to_file(self):
         file_name = os.path.splitext(os.path.basename(self.url))[0]
+        if 'cached_pdfs' not in os.listdir(os.getcwd()):
+            os.mkdir('cached_pdfs')
         path_file_name = 'cached_pdfs/{}.xml'.format(file_name)
         with open(path_file_name, 'w') as f:
             f.write(etree.tostring(self.element_tree, pretty_print=True))
@@ -553,10 +562,7 @@ if __name__ == '__main__':
             url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid.strip())
             print url
             try:
-                # A = FindingAidPDFtoEAD(url, logger).run_conversion()
                 FindingAidPDFtoEAD(url, logger).run_conversion()
             except Exception as e:
                 logger.add(traceback.print_stack(), 'e')
                 print e
-    # A = FindingAidPDFtoEAD('http://lib.lsu.edu/sites/default/files/sc/findaid/2840.pdf', logger)
-    # A.run_conversion()
