@@ -7,6 +7,7 @@ import traceback
 
 import scraperwiki
 from lxml import etree
+<<<<<<< HEAD
 import xml.etree.ElementTree as ET
 
 from Logger import Logger as L
