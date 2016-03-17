@@ -1,6 +1,38 @@
 1402
-2795.inv
 4471
-4952
 verticalfilebiographicalindex
 verticalfilesubjectindex
+0859
+
+
+# malformed xml
+2795.inv
+4952
+
+# empty pdf
+1389.inv
+
+# only container list
+2410
+3695
+4456
+4555
+4558
+4562
+4630
+4631
+4642
+
+
+# split over several pdfs
+4730
+4730_index_list
+4730_interview_list_with_topics
+4730_tape_list
+4476    
+4476episode
+4476script
+
+# coi not found
+2522
+4698

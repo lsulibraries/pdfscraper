@@ -3,6 +3,10 @@
 import os
 import urllib2
 
+# our_list = 'findaid_list.csv'
+# our_list = 'temporarily_unavailalble.csv'
+our_list = 'problem_pdf.csv'
+
 
 def pull_pdf_and_write_to_disk(uid):
     if 'cached_pdfs' not in os.listdir(os.getcwd()):
@@ -13,12 +17,15 @@ def pull_pdf_and_write_to_disk(uid):
     with open(filename, 'w') as f:
         f.write(response)
 
-
-with open('findaid_list.csv', 'r') as file:
+with open(our_list, 'r') as file:
     for uid in file.readlines():
         uid = uid.strip()
         print(uid)
-        if '{}.pdf'.format(uid) in os.listdir('{}/cached_pdfs'.format(os.getcwd())):
+        if '{}.pdf'.format(uid) in '{}/cached_pdfs'.format(os.getcwd()):
+            print('item there')
             pass
         else:
-            pull_pdf_and_write_to_disk(uid)
+            try:
+                pull_pdf_and_write_to_disk(uid)
+            except urllib2.HTTPError:
+                print('pdf not available at url')
