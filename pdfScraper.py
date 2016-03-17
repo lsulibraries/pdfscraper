@@ -62,6 +62,10 @@ class FindingAidPDFtoEAD():
         return None
 
     def grab_contents_of_inventory(self):
+        if self.element_tree.xpath('//outline'):
+            outline_elem = self.element_tree.xpath('//outline')
+            return [(elem.text, (int(elem.get('page')), int(elem.get('page')))) for elem in outline_elem[0].iterchildren() if elem.tag == 'item']
+
         contents_elem = self.element_tree.xpath('//page/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format('contents of inventory'))[0]
         contents = []
         for i in contents_elem.getparent().itersiblings():
@@ -372,7 +376,6 @@ class FindingAidPDFtoEAD():
                 elem.text = i
                 a5.append(elem)
         except Exception as e:
-            print(lang_list)
             self.log('could not find language code.')
 
         a6 = ET.SubElement(a, 'abstract', attrib={'label': "Summary", 'encodinganalog': "520$a", })
@@ -552,13 +555,13 @@ class FindingAidPDFtoEAD():
 if __name__ == '__main__':
     logger = L('log', 'd')
     filename = 'findaid_list.csv'
-    # reader = ReadNSV('todo.csv')
     with open(filename, 'r') as f:
         for uid in f.readlines():
             url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid.strip())
             print url
-            try:
-                FindingAidPDFtoEAD(url, logger).run_conversion()
-            except Exception as e:
-                logger.add(traceback.print_stack(), 'e')
+            FindingAidPDFtoEAD(url, logger).run_conversion()
+            # try:
+            #     FindingAidPDFtoEAD(url, logger).run_conversion()
+            # except Exception as e:
+            #     logger.add(traceback.print_stack(), 'e')
                 # print e
