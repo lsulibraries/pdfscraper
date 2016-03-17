@@ -48,6 +48,8 @@ class FindingAidPDFtoEAD():
         # print etree.tostring(self.element_tree, pretty_print=True)    # dev only
         self.print_xml_to_file()                                    # dev only
         contents_of_inventory = self.grab_contents_of_inventory()
+        if len(contents_of_inventory) < 5:
+            print('###########################', len(contents_of_inventory))
         self.c_o_i_ordered = sorted(contents_of_inventory, key=lambda item: int(item[1][0]))
         self.summary_columns = self.get_columns_after_summary()
         compiled_ead = self.get_ead()
@@ -63,10 +65,14 @@ class FindingAidPDFtoEAD():
 
     def grab_contents_of_inventory(self):
         if self.element_tree.xpath('//outline'):
-            outline_elem = self.element_tree.xpath('//outline')
-            return [(elem.text, (int(elem.get('page')), int(elem.get('page')))) for elem in outline_elem[0].iterchildren() if elem.tag == 'item']
+            return [(elem.text.encode('ascii', 'ignore'), (int(elem.get('page')), int(elem.get('page')))) for elem in self.element_tree.xpath('//outline')[0].iter() if elem.tag == 'item']
 
-        contents_elem = self.element_tree.xpath('//page/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format('contents of inventory'))[0]
+        if not self.element_tree.xpath('//page/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format('contents of inventory')):
+            self.log('no contents of inventory found')
+            return []
+        else:
+            contents_elem = self.element_tree.xpath('//page/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format('contents of inventory'))[0]
+
         contents = []
         for i in contents_elem.getparent().itersiblings():
             for child in i.iterchildren():
@@ -74,6 +80,7 @@ class FindingAidPDFtoEAD():
         # the following overrides the above 4 lines, because it's known to work for 3/5 of collections.  Above 4 should work for some of the 2/5.
         if self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a'):
             contents = self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
+
         pruned_elem_list = self.remove_non_text_elements(contents)
         inventory = []
         if pruned_elem_list:
@@ -96,6 +103,8 @@ class FindingAidPDFtoEAD():
                         header, page = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', elem)[0]
                         pages_tuple = self.split_on_char('-', page)
                         temp_page_start, temp_page_end = pages_tuple
+                        if not temp_page_end:
+                            temp_page_end = temp_page_start
                         temp_page_start, temp_page_end = int(temp_page_start), int(temp_page_end)
                         pages_tuple = (temp_page_start, temp_page_end)
                         inventory.append((header, pages_tuple))
@@ -158,6 +167,7 @@ class FindingAidPDFtoEAD():
 
     def get_text_after_header(self, inventory_item, following_inventory_item=None):
         header, (beginning_page, end_page) = inventory_item
+        beginning_page, end_page = int(beginning_page), int(end_page)
         following_header = ''
         if following_inventory_item:
             following_header, (following_beginning_page, following_end_page) = following_inventory_item
@@ -169,6 +179,7 @@ class FindingAidPDFtoEAD():
             text_after_header.append(i.strip())
         if following_inventory_item:
             following_header, (following_beginning_page, following_end_page) = following_inventory_item
+            following_beginning_page, following_end_page = int(following_beginning_page), int(following_end_page)
             if following_beginning_page - beginning_page > 1:
                 for page in xrange(beginning_page+1, following_beginning_page):
                     text = self.get_middle_page_siblings_and_childrent(page)
@@ -219,6 +230,7 @@ class FindingAidPDFtoEAD():
         return list_of_sibling_children_text
 
     def do_get_last_pages_if_last_header(self, beginning_page):
+        beginning_page = int(beginning_page)
         temp_text_list = []
         count = 0
         while (self.get_pdf_length() - beginning_page) - count > 0:
@@ -554,11 +566,16 @@ class FindingAidPDFtoEAD():
 
 if __name__ == '__main__':
     logger = L('log', 'd')
+    # uid = '3563'
+    # url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
+    # FindingAidPDFtoEAD(url, logger).run_conversion()
+
     filename = 'findaid_list.csv'
     with open(filename, 'r') as f:
         for uid in f.readlines():
-            url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid.strip())
-            print url
+            uid = uid.strip()
+            url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
+            print uid
             FindingAidPDFtoEAD(url, logger).run_conversion()
             # try:
             #     FindingAidPDFtoEAD(url, logger).run_conversion()
