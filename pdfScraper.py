@@ -65,7 +65,7 @@ class FindingAidPDFtoEAD():
 
     def grab_contents_of_inventory(self):
         if self.element_tree.xpath('//outline'):
-            return [(element.text.encode('ascii', 'ignore'), (element.get('page'), element.get('page'))) for element in self.element_tree.xpath('//outline')[0].iter() if element.tag == 'item']
+            return [(elem.text.encode('ascii', 'ignore'), (int(elem.get('page')), int(elem.get('page')))) for elem in self.element_tree.xpath('//outline')[0].iter() if elem.tag == 'item']
 
         if not self.element_tree.xpath('//page/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format('contents of inventory')):
             self.log('no contents of inventory found')
