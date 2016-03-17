@@ -24,7 +24,8 @@ class FindingAidPDFtoEAD():
         self.element_tree = self.read_url_return_etree(self.url)
 
     def log(self, msg, sev='i'):
-        self.logger.add('{}:   {} '.format(self.url, msg), sev)
+        uid = self.url.split('/')[-1]
+        self.logger.add('{}:   {} '.format(uid, msg), sev)
 
     def read_url_return_etree(self, url):
         # '''normal 'pull pdf from web and interpret' code'''
@@ -46,10 +47,8 @@ class FindingAidPDFtoEAD():
 
     def run_conversion(self):
         # print etree.tostring(self.element_tree, pretty_print=True)    # dev only
-        self.print_xml_to_file()                                    # dev only
+        # self.print_xml_to_file()                                    # dev only
         contents_of_inventory = self.grab_contents_of_inventory()
-        if len(contents_of_inventory) < 5:
-            print('###########################', len(contents_of_inventory))
         self.c_o_i_ordered = sorted(contents_of_inventory, key=lambda item: int(item[1][0]))
         self.summary_columns = self.get_columns_after_summary()
         compiled_ead = self.get_ead()
@@ -66,49 +65,6 @@ class FindingAidPDFtoEAD():
     def grab_contents_of_inventory(self):
         if self.element_tree.xpath('//outline'):
             return [(elem.text.encode('ascii', 'ignore'), (int(elem.get('page')), int(elem.get('page')))) for elem in self.element_tree.xpath('//outline')[0].iter() if elem.tag == 'item']
-
-        if not self.element_tree.xpath('//page/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format('contents of inventory')):
-            self.log('no contents of inventory found')
-            return []
-        else:
-            contents_elem = self.element_tree.xpath('//page/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format('contents of inventory'))[0]
-
-        contents = []
-        for i in contents_elem.getparent().itersiblings():
-            for child in i.iterchildren():
-                contents.append(child)
-        # the following overrides the above 4 lines, because it's known to work for 3/5 of collections.  Above 4 should work for some of the 2/5.
-        if self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a'):
-            contents = self.element_tree.xpath('//page/text[b[contains(text(), "CONTENTS OF INVENTORY")]]/following-sibling::text/a')
-
-        pruned_elem_list = self.remove_non_text_elements(contents)
-        inventory = []
-        if pruned_elem_list:
-            if re.findall('[a-zA-Z]', etree.tostring(pruned_elem_list[0], encoding='utf-8', method='text')) and re.findall('[0-9]', etree.tostring(pruned_elem_list[0], encoding='utf-8', method='text')):
-                top_header_page_dict = self.lower_case_and_dict_it(contents)
-                inventory = []
-                for top, header_page in top_header_page_dict.iteritems():
-                    if re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', header_page):
-                        header, page = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', header_page)[0]
-                        pages_tuple = self.split_on_char('-', page)
-                        temp_page_start, temp_page_end = pages_tuple
-                        if temp_page_start.isdigit() and temp_page_end.isdigit():
-                            pages_tuple = (int(temp_page_start), int(temp_page_end))
-                            inventory.append((header, pages_tuple))
-            else:
-                pruned_elem_list = self.join_disjointed_header_page(pruned_elem_list)
-                inventory = []
-                for elem in pruned_elem_list:
-                    if re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', elem):
-                        header, page = re.findall('([A-Z\s\/a-z]+)[\s\.]+([0-9\-]+)', elem)[0]
-                        pages_tuple = self.split_on_char('-', page)
-                        temp_page_start, temp_page_end = pages_tuple
-                        if not temp_page_end:
-                            temp_page_end = temp_page_start
-                        temp_page_start, temp_page_end = int(temp_page_start), int(temp_page_end)
-                        pages_tuple = (temp_page_start, temp_page_end)
-                        inventory.append((header, pages_tuple))
-        return inventory
 
     def remove_non_text_elements(self, elem_list):
         elements_with_text = []
