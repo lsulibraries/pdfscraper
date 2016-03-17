@@ -5,5 +5,6 @@ dbg.xml
 *.xml
 log
 EadProject.zip
-EadProject/*
+EadProject/
 todo.csv
+cached_pdfs/
