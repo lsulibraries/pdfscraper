@@ -458,17 +458,19 @@ class FindingAidPDFtoEAD():
 
         o = ET.SubElement(archdesc, 'dsc', attrib={'type': 'in-depth'})
         o1 = ET.SubElement(o, 'head')
-        o1 = ET.SubElement(o, 'co1', attrib={'level': 'series'})
-        o1a = ET.SubElement(o1, 'unitid')
-        o1a.text = default_stub
+        o1 = ET.SubElement(o, 'c01', attrib={'level': 'series'})
+        o2 = ET.SubElement(o1, 'did')
+        o3 = ET.SubElement(o1, 'scopecontent')
+        o4 = ET.SubElement(o3, 'p')
+        o4.text = self.convert_text_after_header_to_string('series')
+        o2a = ET.SubElement(o2, 'unitid')
+        o2a.text = default_stub
 
         p = ET.SubElement(archdesc, 'arrangement', attrib={'encodinganalog': '351$a'})
         p1 = ET.SubElement(p, 'head')
         p1.text = 'Related Material'
         p2 = ET.SubElement(p1, 'p')
-        p2.text = self.convert_text_after_header_to_string('series')
-        p3 = ET.SubElement(p1, 'p')
-        p3.text = self.convert_text_after_header_to_string('desc')
+        p2.text = self.convert_text_after_header_to_string('desc')
 
         q = ET.SubElement(archdesc, 'appraisal', attrib={'encodinganalog': "583"})
         q1 = ET.SubElement(q, 'head')
