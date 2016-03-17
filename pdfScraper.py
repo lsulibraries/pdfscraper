@@ -10,15 +10,46 @@ from lxml import etree
 import xml.etree.ElementTree as ET
 
 from Logger import Logger as L
-from terms_dict_set import get_term_set_dict
+from terms_dict_set import terms_dict_set
 from langs_and_abbr import get_langs_and_abbr
 from ParseTableofContents import ParseTableofContents as ParseTOC
 
+
+def print_ead_to_file(uid, ead):
+    if 'exported_eads' not in os.listdir(os.getcwd()):
+        os.mkdir('{}/exported_eads'.format(os.getcwd()))
+    path_file_name = 'exported_eads/{}.xml'.format(uid)
+    with open(path_file_name, 'w') as f:
+        f.write(ET.tostring(ead, encoding="utf-8", method="xml"))
+
+
+def print_xml_to_file(uid, xml):
+    if 'starting_xmls' not in os.listdir(os.getcwd()):
+        os.mkdir('starting_xmls')
+    path_file_name = 'starting_xmls/{}.xml'.format(uid)
+    with open(path_file_name, 'w') as f:
+        f.write(etree.tostring(xml, pretty_print=True))
+
+
+def which_subject_heading_type(text):
+    for (subject_heading, MARCencoding), source_dict in terms_dict_set.iteritems():
+        for source, item_set in source_dict.iteritems():
+            if text in item_set:
+                return (subject_heading, MARCencoding, source)
+    return None
+
+
+def abbreviate_lang(language):
+    lang_abbr_dict = get_langs_and_abbr()
+    if language.lower() in lang_abbr_dict:
+        return lang_abbr_dict[language.lower()]
+    return None
 
 class FindingAidPDFtoEAD():
     def __init__(self, url, logger=None):
         if logger is None:
             logger = L('log'.format(url))
+        self.uid = os.path.splitext(os.path.basename(url))[0]
         self.url = url
         self.logger = logger
         self.element_tree = self.read_url_return_etree(self.url)
@@ -37,7 +68,9 @@ class FindingAidPDFtoEAD():
         # return self.element_tree
 
         '''temporary 'read cached file from harddrive' monkeypatch'''
-        with open('cached_pdfs/' + self.url.split('/')[-1], 'r') as f:
+        if 'cached_pdfs' not in os.listdir(os.getcwd()):
+            print('you may not have the pdfs in the cached_pdfs directory')
+        with open('cached_pdfs/{}.pdf'.format(self.uid), 'r') as f:
             self.pdfdata = f.read()
             self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
             self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
@@ -47,12 +80,12 @@ class FindingAidPDFtoEAD():
 
     def run_conversion(self):
         # print etree.tostring(self.element_tree, pretty_print=True)    # dev only
-        self.print_xml_to_file()                                    # dev only
+        print_xml_to_file(self.uid, self.element_tree)                                     # dev only
         contents_of_inventory = self.grab_contents_of_inventory()
         self.c_o_i_ordered = sorted(contents_of_inventory, key=lambda item: int(item[1][0]))
         self.summary_columns = self.get_columns_after_summary()
         compiled_ead = self.get_ead()
-        self.print_ead_to_file(compiled_ead)
+        print_ead_to_file(self.uid, compiled_ead)
 
     def get_columns_after_summary(self):
         summary_header_pages = [elem for elem in self.c_o_i_ordered if 'summ' in elem[0].lower()]
@@ -66,35 +99,35 @@ class FindingAidPDFtoEAD():
         if self.element_tree.xpath('//outline'):
             return [(elem.text.encode('ascii', 'ignore'), (int(elem.get('page')), int(elem.get('page')))) for elem in self.element_tree.xpath('//outline')[0].iter() if elem.tag == 'item']
 
-    def remove_non_text_elements(self, elem_list):
-        elements_with_text = []
-        for pos, item in enumerate(elem_list):
-            if re.findall('([A-Za-z0-9]+)', etree.tostring(item, encoding='utf-8', method='text')):
-                elements_with_text.append(item)
-        return elements_with_text
+    # def remove_non_text_elements(self, elem_list):
+    #     elements_with_text = []
+    #     for pos, item in enumerate(elem_list):
+    #         if re.findall('([A-Za-z0-9]+)', etree.tostring(item, encoding='utf-8', method='text')):
+    #             elements_with_text.append(item)
+    #     return elements_with_text
 
-    def lower_case_and_dict_it(self, elem_list):
-        a_dict = {}
-        for elem in elem_list:
-            if elem.getparent().get('top') not in a_dict:
-                a_dict[elem.getparent().get('top')] = '{}'.format(etree.tostring(elem, method='text', encoding='utf-8').strip().lower())
-        return a_dict
+    # def lower_case_and_dict_it(self, elem_list):
+    #     a_dict = {}
+    #     for elem in elem_list:
+    #         if elem.getparent().get('top') not in a_dict:
+    #             a_dict[elem.getparent().get('top')] = '{}'.format(etree.tostring(elem, method='text', encoding='utf-8').strip().lower())
+    #     return a_dict
 
-    def join_disjointed_header_page(self, elem_list):
-        num_of_elems = len(elem_list)
-        joined_elem_list = []
-        for i in xrange(num_of_elems/2):
-            header, page = elem_list[2*i], elem_list[(2*i)+1]
-            head_page_str = "{} {}".format(etree.tostring(header, encoding='utf-8', method='text'), etree.tostring(page, encoding='utf-8', method='text'))
-            joined_elem_list.append(head_page_str)
-        return joined_elem_list
+    # def join_disjointed_header_page(self, elem_list):
+    #     num_of_elems = len(elem_list)
+    #     joined_elem_list = []
+    #     for i in xrange(num_of_elems/2):
+    #         header, page = elem_list[2*i], elem_list[(2*i)+1]
+    #         head_page_str = "{} {}".format(etree.tostring(header, encoding='utf-8', method='text'), etree.tostring(page, encoding='utf-8', method='text'))
+    #         joined_elem_list.append(head_page_str)
+    #     return joined_elem_list
 
-    def split_on_char(self, char, text):
-        if char in text:
-            start, end = text.split(char)
-        else:
-            start, end = text, text
-        return (start, end)
+    # def split_on_char(self, char, text):
+    #     if char in text:
+    #         start, end = text.split(char)
+    #     else:
+    #         start, end = text, text
+    #     return (start, end)
 
     def convert_text_after_header_to_string(self, header_snippet):
         for pos, i in enumerate(self.c_o_i_ordered):
@@ -434,7 +467,7 @@ class FindingAidPDFtoEAD():
         if self.convert_text_after_header_to_list('index'):
             for i in self.convert_text_after_header_to_list('index'):
                 try:
-                    (subject_heading, MARCencoding, source) = FindingAidPDFtoEAD.which_subject_heading_type(i)
+                    (subject_heading, MARCencoding, source) = which_subject_heading_type(i)
                     elem = ET.Element(subject_heading, attrib={'source': source, 'encodinganalog': MARCencoding})
                     elem.text = i
                     k.append(elem)
@@ -488,38 +521,6 @@ class FindingAidPDFtoEAD():
 
     def what_language_used(self):
         return self.convert_text_in_column_to_string('langua')
-
-    def abbreviate_lang(self, language):
-        lang_abbr_dict = get_langs_and_abbr()
-        if language.lower() in lang_abbr_dict:
-            return lang_abbr_dict[language.lower()]
-        return None
-
-    @staticmethod
-    def which_subject_heading_type(text):
-        term_dict_set = get_term_set_dict()
-        for (subject_heading, MARCencoding), source_dict in term_dict_set.iteritems():
-            for source, item_set in source_dict.iteritems():
-                if text in item_set:
-                    return (subject_heading, MARCencoding, source)
-        return None
-
-    ''' Extra useful tidbits (for development) '''
-    def print_xml_to_file(self):
-        file_name = os.path.splitext(os.path.basename(self.url))[0]
-        if 'starting_xmls' not in os.listdir(os.getcwd()):
-            os.mkdir('starting_xmls')
-        path_file_name = 'starting_xmls/{}.xml'.format(file_name)
-        with open(path_file_name, 'w') as f:
-            f.write(etree.tostring(self.element_tree, pretty_print=True))
-
-    def print_ead_to_file(self, ead):
-        if 'exported_eads' not in os.listdir(os.getcwd()):
-            os.mkdir('{}/exported_eads'.format(os.getcwd()))
-        file_name = os.path.splitext(os.path.basename(self.url))[0]
-        path_file_name = 'exported_eads/{}.xml'.format(file_name)
-        with open(path_file_name, 'w') as f:
-            f.write(ET.tostring(ead, encoding="utf-8", method="xml"))
 
 
 if __name__ == '__main__':
