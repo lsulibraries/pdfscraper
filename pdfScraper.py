@@ -47,7 +47,7 @@ class FindingAidPDFtoEAD():
 
     def run_conversion(self):
         # print etree.tostring(self.element_tree, pretty_print=True)    # dev only
-        # self.print_xml_to_file()                                    # dev only
+        self.print_xml_to_file()                                    # dev only
         contents_of_inventory = self.grab_contents_of_inventory()
         self.c_o_i_ordered = sorted(contents_of_inventory, key=lambda item: int(item[1][0]))
         self.summary_columns = self.get_columns_after_summary()
@@ -439,12 +439,12 @@ class FindingAidPDFtoEAD():
                     elem.text = i
                     k.append(elem)
                 except Exception as e:
-                    if len(i) > 4:
+                    if len(i) > 4 and re.search('[a-zA-Z]', i):
                         elem = ET.Element('subject', attrib={'source': 'local', 'encodinganalog': '650'}, )
                         elem.text = unicode(i, encoding='utf-8')
                         k.append(elem)
                     else:
-                        self.log('{} might should have a source tag -- but no matching source found'.format(i))
+                        self.log('{} doesnt seem like an acceptable source to this script'.format(i))
 
 
         l = ET.SubElement(archdesc, 'acqinfo')
@@ -522,19 +522,19 @@ class FindingAidPDFtoEAD():
 
 if __name__ == '__main__':
     logger = L('log', 'd')
-    # uid = '3563'
-    # url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
-    # FindingAidPDFtoEAD(url, logger).run_conversion()
+    uid = '0005m'
+    url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
+    FindingAidPDFtoEAD(url, logger).run_conversion()
 
     filename = 'findaid_list.csv'
-    with open(filename, 'r') as f:
-        for uid in f.readlines():
-            uid = uid.strip()
-            url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
-            print uid
-            FindingAidPDFtoEAD(url, logger).run_conversion()
-            # try:
-            #     FindingAidPDFtoEAD(url, logger).run_conversion()
-            # except Exception as e:
-            #     logger.add(traceback.print_stack(), 'e')
-                # print e
+    # with open(filename, 'r') as f:
+    #     for uid in f.readlines():
+    #         uid = uid.strip()
+    #         url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
+    #         print uid
+    #         # FindingAidPDFtoEAD(url, logger).run_conversion()
+    #         try:
+    #             FindingAidPDFtoEAD(url, logger).run_conversion()
+    #         except Exception as e:
+    #             logger.add(traceback.print_stack(), 'e')
+    #             print e

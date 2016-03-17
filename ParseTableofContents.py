@@ -5,17 +5,17 @@ import re
 
 
 class ParseTableofContents():
-    tables = []
-    paras = []
-    chunks = []
-    lines_by_top = {}
-    lines_by_left = {}
-
     def __init__(self, tree):
         self.tree = tree
         lines_gotten = self.get_lines()
         self.lines_by_left = lines_gotten[0]
         self.lines_by_top = lines_gotten[1]
+
+    tables = []
+    paras = []
+    chunks = []
+    lines_by_top = {}
+    lines_by_left = {}
 
     def get_lines(self):
         path = './/text'
@@ -32,6 +32,7 @@ class ParseTableofContents():
             if (left is not None) and (left not in lefts):
                 lefts[left] = []
             lefts[left].append(line)
+            print(len(lefts), len(tops))
         return (lefts, tops)
 
     def check_for_long_left_column_lines(self, left, right, lcells, rcells):
