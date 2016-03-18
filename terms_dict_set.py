@@ -293,7 +293,23 @@ terms_dict_set = {
             'Military passes.', 'Bookkeeping records.', 'Obituaries.', 'Plats (maps)', 'Audits.', 'Death records.',
             'Offprints.', 'Yearbooks.', 'Love letters.', 'Bumper stickers.', 'Probate accounts.'
             ]),
-        'local': set(['Judicial opinions--Louisiana.', 'Cameras.', 'Landscape photography--Louisiana--Jefferson Parish.', 'Campaign literature--United States.', 'Tripods.', 'Campaign literature--Louisiana.', 'Slave bills of sale--Louisiana--Baton Rouge.', 'Slave bills of sale--Louisiana--West Feliciana Parish.', 'Kodak camera.', 'Money--Confederate States of America.', 'Slave bills of sale.', 'Slave bills of sale--North Carolina.', 'Death notices--Louisiana--Baton Rouge.', 'Religious articles.', 'Antenuptial contracts.', 'Portraits, Group--Louisiana.', 'Slave bills of sale--Louisiana.', 'Outdoor photography.', 'Slave bills of sale--Mississippi.', 'Legal opinions--Louisiana.', "Anthropologists' writings, American--Louisiana.", 'Death notices--Louisiana.', 'Slave bills of sale--Mississippi--Natchez.', 'Postcards--Wyoming.', 'Postcards--Mississippi.', 'Land grants--Louisiana--Ouachita Parish.', 'Slave bills of sale--Arkansas.', 'Slave records.', 'Paper money--Mississippi.', 'Abstracts of title--Louisiana--Saint Tammany Parish.', 'Slave records--Mississippi.', 'Trick photography.', 'Slaves--Louisiana--East Baton Rouge Parish.', 'Slave records--Louisiana.', 'Baccalaureate addresses.', 'Slave bills of sale--South Carolina.', 'Death notices--France--Paris.', 'Postcards--Louisiana.']),
+        'local': set([
+            'Judicial opinions--Louisiana.', 'Cameras.',
+            'Landscape photography--Louisiana--Jefferson Parish.', 'Campaign literature--United States.',
+            'Tripods.', 'Campaign literature--Louisiana.', 'Slave bills of sale--Louisiana--Baton Rouge.',
+            'Slave bills of sale--Louisiana--West Feliciana Parish.', 'Kodak camera.',
+            'Money--Confederate States of America.', 'Slave bills of sale.', 'Slave bills of sale--North Carolina.',
+            'Death notices--Louisiana--Baton Rouge.', 'Religious articles.', 'Antenuptial contracts.',
+            'Portraits, Group--Louisiana.', 'Slave bills of sale--Louisiana.', 'Outdoor photography.',
+            'Slave bills of sale--Mississippi.', 'Legal opinions--Louisiana.',
+            "Anthropologists' writings, American--Louisiana.", 'Death notices--Louisiana.',
+            'Slave bills of sale--Mississippi--Natchez.', 'Postcards--Wyoming.', 'Postcards--Mississippi.',
+            'Land grants--Louisiana--Ouachita Parish.', 'Slave bills of sale--Arkansas.', 'Slave records.',
+            'Paper money--Mississippi.', 'Abstracts of title--Louisiana--Saint Tammany Parish.',
+            'Slave records--Mississippi.', 'Trick photography.', 'Slaves--Louisiana--East Baton Rouge Parish.',
+            'Slave records--Louisiana.', 'Baccalaureate addresses.', 'Slave bills of sale--South Carolina.',
+            'Death notices--France--Paris.', 'Postcards--Louisiana.'
+            ]),
         'lcsh': set([
             'Census records.'
             ]),
