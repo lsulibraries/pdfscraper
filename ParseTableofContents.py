@@ -32,7 +32,6 @@ class ParseTableofContents():
             if (left is not None) and (left not in lefts):
                 lefts[left] = []
             lefts[left].append(line)
-            print(len(lefts), len(tops))
         return (lefts, tops)
 
     def check_for_long_left_column_lines(self, left, right, lcells, rcells):

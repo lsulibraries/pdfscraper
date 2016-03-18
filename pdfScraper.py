@@ -45,6 +45,7 @@ def abbreviate_lang(language):
         return lang_abbr_dict[language.lower()]
     return None
 
+
 class FindingAidPDFtoEAD():
     def __init__(self, url, logger=None):
         if logger is None:
@@ -66,7 +67,6 @@ class FindingAidPDFtoEAD():
         # self.element_tree = etree.fromstring(self.xmldata)
         # self.log('opened file', 'i')
         # return self.element_tree
-
         '''temporary 'read cached file from harddrive' monkeypatch'''
         if 'cached_pdfs' not in os.listdir(os.getcwd()):
             print('you may not have the pdfs in the cached_pdfs directory')
@@ -97,7 +97,11 @@ class FindingAidPDFtoEAD():
 
     def grab_contents_of_inventory(self):
         if self.element_tree.xpath('//outline'):
-            return [(elem.text.encode('ascii', 'ignore'), (int(elem.get('page')), int(elem.get('page')))) for elem in self.element_tree.xpath('//outline')[0].iter() if elem.tag == 'item']
+            return [
+                (elem.text.encode('ascii', 'ignore'), (int(elem.get('page')), int(elem.get('page'))))
+                for elem in self.element_tree.xpath('//outline')[0].iter()
+                if elem.tag == 'item'
+                ]
 
     # def remove_non_text_elements(self, elem_list):
     #     elements_with_text = []
@@ -132,19 +136,19 @@ class FindingAidPDFtoEAD():
     def convert_text_after_header_to_string(self, header_snippet):
         for pos, i in enumerate(self.c_o_i_ordered):
             if header_snippet.lower() in i[0].lower():
-                if pos == len(self.c_o_i_ordered)-1:
+                if pos == len(self.c_o_i_ordered) - 1:
                     return ' '.join(self.get_text_after_header(i)).decode("utf8")
                 else:
-                    return ' '.join(self.get_text_after_header(i, self.c_o_i_ordered[pos+1])).decode("utf8")
+                    return ' '.join(self.get_text_after_header(i, self.c_o_i_ordered[pos + 1])).decode("utf8")
         return 'Element not pulled from pdf'
 
     def convert_text_after_header_to_list(self, header_snippet):
         for pos, i in enumerate(self.c_o_i_ordered):
             if header_snippet.lower() in i[0].lower():
-                if pos == len(self.c_o_i_ordered)-1:
+                if pos == len(self.c_o_i_ordered) - 1:
                     return self.get_text_after_header(i)
                 else:
-                    return self.get_text_after_header(i, self.c_o_i_ordered[pos+1])
+                    return self.get_text_after_header(i, self.c_o_i_ordered[pos + 1])
         return None
 
     def convert_text_in_column_to_string(self, column_snippet):
@@ -160,7 +164,11 @@ class FindingAidPDFtoEAD():
         following_header = ''
         if following_inventory_item:
             following_header, (following_beginning_page, following_end_page) = following_inventory_item
-        elem_of_header = self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(beginning_page, header.lower().strip()))
+        elem_of_header = self.element_tree.xpath(
+            '//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(
+                beginning_page, header.lower().strip()
+                )
+            )
         text_after_header = []
         for i in self.get_first_page_siblings_and_children(elem_of_header):
             if i.lower().strip() == following_header.lower().strip():
@@ -170,7 +178,7 @@ class FindingAidPDFtoEAD():
             following_header, (following_beginning_page, following_end_page) = following_inventory_item
             following_beginning_page, following_end_page = int(following_beginning_page), int(following_end_page)
             if following_beginning_page - beginning_page > 1:
-                for page in xrange(beginning_page+1, following_beginning_page):
+                for page in xrange(beginning_page + 1, following_beginning_page):
                     text = self.get_middle_page_siblings_and_childrent(page)
                     for i in text:
                         text_after_header.append(i.strip())
@@ -192,7 +200,7 @@ class FindingAidPDFtoEAD():
             return list_of_sibling_children_text
         elems_following = elem_of_header[0].getparent().itersiblings()
         for sibling in elems_following:
-            sibling_str = self.get_text_recursive(sibling)
+            sibling_str = etree.tostring(sibling, encoding="utf-8", method='text', ).strip()
             if sibling_str and len(sibling_str) > 0:
                 list_of_sibling_children_text.append(sibling_str)
         return list_of_sibling_children_text
@@ -201,18 +209,22 @@ class FindingAidPDFtoEAD():
         list_of_sibling_children_text = []
         elems_following = self.element_tree.xpath('//page[@number="{}"]/text'.format(page))
         for sibling in elems_following:
-            sibling_str = self.get_text_recursive(sibling)
+            sibling_str = etree.tostring(sibling, encoding="utf-8", method='text', ).strip()
             if sibling_str and len(sibling_str) > 0:
                 list_of_sibling_children_text.append(sibling_str)
         return list_of_sibling_children_text
 
     def get_last_page_siblings_and_children(self, end_header, end_page):
-        header_xpath = self.element_tree.xpath('//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(end_page, end_header.lower().strip()))
+        header_xpath = self.element_tree.xpath(
+            '''//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'''.format(
+                end_page, end_header.lower().strip()
+                )
+            )
         list_of_sibling_children_text = []
         if header_xpath:
             elems_preceding = header_xpath[0].getparent().itersiblings(preceding=True)
             for sibling in elems_preceding:
-                sibling_str = self.get_text_recursive(sibling)
+                sibling_str = etree.tostring(sibling, encoding="utf-8", method='text', ).strip()
                 if sibling_str and len(sibling_str) > 0:
                     list_of_sibling_children_text.append(sibling_str)
         list_of_sibling_children_text = list_of_sibling_children_text.reverse()
@@ -230,9 +242,6 @@ class FindingAidPDFtoEAD():
     def get_pdf_length(self):
         list_of_all_page_nums = [int(i) for i in self.element_tree.xpath('//page/@number')]
         return max(list_of_all_page_nums)
-
-    def get_text_recursive(self, element):
-        return etree.tostring(element, encoding="utf-8", method='text', ).strip()
 
     def get_ead(self):
         ead = ET.Element('ead', attrib={'relatedencoding': "MARC21", 'type': "inventory", 'level': "collection", })
@@ -271,8 +280,8 @@ class FindingAidPDFtoEAD():
     def extract_title(self):
         # titleproper - needs to account for multiple lines in some docs
         wholetitle = []
-        titlelines = self.element_tree.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
-        for el in titlelines:
+        title_elem = self.element_tree.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
+        for el in title_elem:
             wholetitle.append(el.text.strip())
         return ' '.join(wholetitle)
 
@@ -282,10 +291,10 @@ class FindingAidPDFtoEAD():
         return el
 
     def extract_mss(self):
-        titlelines = self.element_tree.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
+        title_elem = self.element_tree.xpath('//page[@number="1"]/text[@top>="200" and @width>"10"]/b')
         # figuring out what the top value of the last line of the title is
-        if titlelines:
-            titlelineend = titlelines[-1].getparent().get('top')
+        if title_elem:
+            titlelineend = title_elem[-1].getparent().get('top')
             # num - assume it is between 12 and 25 units below the last line of title
             #    (a better way might have been to take next text node)
             numlinenumberA = str(int(titlelineend) + 12)  # 347
@@ -310,9 +319,10 @@ class FindingAidPDFtoEAD():
         return el
 
     def extract_author(self):
-        try:
-            pdfauthor = self.element_tree.xpath('//page[@number="1"]/text[text()[normalize-space(.)="Compiled by"]]')[0].getnext().text.strip()
-        except:
+        author_elem = self.element_tree.xpath('//page[@number="1"]/text[text()[normalize-space(.)="Compiled by"]]')
+        if author_elem:
+            pdfauthor = author_elem[0].getnext().text.strip()
+        else:
             pdfauthor = 'Special Collections Staff'
         return pdfauthor
 
@@ -343,14 +353,16 @@ class FindingAidPDFtoEAD():
         return el
 
     def extract_date(self):
-        if self.element_tree.xpath('//page[@number="1"]/text[@width>"20"]')[-1].text:
-            return self.element_tree.xpath('//page[@number="1"]/text[@width>"20"]')[-1].text.strip()
+        date_elem = self.element_tree.xpath('//page[@number="1"]/text[@width>"20"]')[-1]
+        if date_elem.text:
+            return date_elem.text.strip()
         return None
 
     def get_archdesc(self):
         default_stub = "Element not pulled from pdf"
 
-        archdesc = ET.Element('archdesc', attrib={'level': "collection", 'relatedencoding': 'MARC21', 'type': "inventory"})
+        archdesc = ET.Element(
+            'archdesc', attrib={'level': "collection", 'relatedencoding': 'MARC21', 'type': "inventory"})
 
         a = ET.SubElement(archdesc, 'did')
         a1 = ET.SubElement(a, 'head')
@@ -368,16 +380,16 @@ class FindingAidPDFtoEAD():
 
         a5 = ET.SubElement(a, 'langmaterial')
         try:
-            lang_list = self.what_language_used()
+            lang_list = self.convert_text_in_column_to_string('langua')
             for i in lang_list.split(','):
-                if len(self.abbreviate_lang(i)) > 3:
+                if len(abbreviate_lang(i)) > 3:
                     self.log('{} lang not found, possible key value mismatch'.format(i))
                     continue
-                elem = ET.Element('language', attrib={'langcode': self.abbreviate_lang(i), })
+                elem = ET.Element('language', attrib={'langcode': abbreviate_lang(i), })
                 elem.text = i
                 a5.append(elem)
         except Exception as e:
-            self.log('could not find language code.')
+            self.log('could not find language code.', e)
 
         a6 = ET.SubElement(a, 'abstract', attrib={'label': "Summary", 'encodinganalog': "520$a", })
         a6.text = self.convert_text_in_column_to_string('sum')
@@ -407,7 +419,8 @@ class FindingAidPDFtoEAD():
         a9b = ET.SubElement(a9, 'corpname', attrib={'encodinganalog': "110"})
         a9b.text = default_stub
 
-        a10 = ET.SubElement(a, 'unitid', attrib={'countrycode': "US", 'encodinganalog': "099", 'label': "Identification: ", 'repositorycode': 'lu', })
+        a10 = ET.SubElement(
+            a, 'unitid', attrib={'countrycode': "US", 'encodinganalog': "099", 'label': "Identification: ", 'repositorycode': 'lu', })
         a10.text = self.extract_mss()
 
         a11 = ET.SubElement(a, 'unittitle', attrib={'encodinganalog': "245$a", 'label': "Title: "})
@@ -479,7 +492,6 @@ class FindingAidPDFtoEAD():
                     else:
                         self.log('{} doesnt seem like an acceptable source to this script'.format(i))
 
-
         l = ET.SubElement(archdesc, 'acqinfo')
         l1 = ET.SubElement(l, 'head')
         l1.text = 'Acquisition Information'
@@ -519,25 +531,22 @@ class FindingAidPDFtoEAD():
 
         return archdesc
 
-    def what_language_used(self):
-        return self.convert_text_in_column_to_string('langua')
-
 
 if __name__ == '__main__':
     logger = L('log', 'd')
-    uid = '0005m'
-    url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
-    FindingAidPDFtoEAD(url, logger).run_conversion()
+    # uid = '0005m'
+    # url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
+    # FindingAidPDFtoEAD(url, logger).run_conversion()
 
     filename = 'findaid_list.csv'
-    # with open(filename, 'r') as f:
-    #     for uid in f.readlines():
-    #         uid = uid.strip()
-    #         url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
-    #         print uid
-    #         # FindingAidPDFtoEAD(url, logger).run_conversion()
-    #         try:
-    #             FindingAidPDFtoEAD(url, logger).run_conversion()
-    #         except Exception as e:
-    #             logger.add(traceback.print_stack(), 'e')
-    #             print e
+    with open(filename, 'r') as f:
+        for uid in f.readlines():
+            uid = uid.strip()
+            url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
+            print uid
+            try:
+                FindingAidPDFtoEAD(url, logger).run_conversion()
+            except Exception as e:
+                pass
+                # logger.add(traceback.print_stack(), 'e')
+                # print e
