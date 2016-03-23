@@ -2,14 +2,13 @@
 
 import os
 import re
-import urllib2
-import traceback
+# import urllib2
+import logging
 
 import scraperwiki
 from lxml import etree
 import xml.etree.ElementTree as ET
 
-from Logger import Logger as L
 from terms_dict_set import terms_dict_set
 from langs_and_abbr import get_langs_and_abbr
 from ParseTableofContents import ParseTableofContents as ParseTOC
@@ -47,17 +46,13 @@ def abbreviate_lang(language):
 
 
 class FindingAidPDFtoEAD():
-    def __init__(self, url, logger=None):
-        if logger is None:
-            logger = L('log'.format(url))
+    def __init__(self, url):
         self.uid = os.path.splitext(os.path.basename(url))[0]
         self.url = url
-        self.logger = logger
+        logging.basicConfig(filename='log', level=logging.INFO)
+        logging.info('{} Started'.format(self.uid))
         self.element_tree = self.read_url_return_etree(self.url)
-
-    def log(self, msg, sev='i'):
-        uid = self.url.split('/')[-1]
-        self.logger.add('{}:   {} '.format(uid, msg), sev)
+        logging.info('{} Ended'.format(self.uid))
 
     def read_url_return_etree(self, url):
         # '''normal 'pull pdf from web and interpret' code'''
@@ -65,8 +60,9 @@ class FindingAidPDFtoEAD():
         # self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
         # self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
         # self.element_tree = etree.fromstring(self.xmldata)
-        # self.log('opened file', 'i')
+        # logging.info('opened file')
         # return self.element_tree
+
         '''temporary 'read cached file from harddrive' monkeypatch'''
         if 'cached_pdfs' not in os.listdir(os.getcwd()):
             print('you may not have the pdfs in the cached_pdfs directory')
@@ -75,7 +71,7 @@ class FindingAidPDFtoEAD():
             self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
             self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
             self.element_tree = etree.fromstring(self.xmldata)
-        self.log('opened file', 'i')
+        logging.info('opened file')
         return self.element_tree
 
     def run_conversion(self):
@@ -102,36 +98,6 @@ class FindingAidPDFtoEAD():
                 for elem in self.element_tree.xpath('//outline')[0].iter()
                 if elem.tag == 'item'
                 ]
-
-    # def remove_non_text_elements(self, elem_list):
-    #     elements_with_text = []
-    #     for pos, item in enumerate(elem_list):
-    #         if re.findall('([A-Za-z0-9]+)', etree.tostring(item, encoding='utf-8', method='text')):
-    #             elements_with_text.append(item)
-    #     return elements_with_text
-
-    # def lower_case_and_dict_it(self, elem_list):
-    #     a_dict = {}
-    #     for elem in elem_list:
-    #         if elem.getparent().get('top') not in a_dict:
-    #             a_dict[elem.getparent().get('top')] = '{}'.format(etree.tostring(elem, method='text', encoding='utf-8').strip().lower())
-    #     return a_dict
-
-    # def join_disjointed_header_page(self, elem_list):
-    #     num_of_elems = len(elem_list)
-    #     joined_elem_list = []
-    #     for i in xrange(num_of_elems/2):
-    #         header, page = elem_list[2*i], elem_list[(2*i)+1]
-    #         head_page_str = "{} {}".format(etree.tostring(header, encoding='utf-8', method='text'), etree.tostring(page, encoding='utf-8', method='text'))
-    #         joined_elem_list.append(head_page_str)
-    #     return joined_elem_list
-
-    # def split_on_char(self, char, text):
-    #     if char in text:
-    #         start, end = text.split(char)
-    #     else:
-    #         start, end = text, text
-    #     return (start, end)
 
     def convert_text_after_header_to_string(self, header_snippet):
         for pos, i in enumerate(self.c_o_i_ordered):
@@ -382,14 +348,18 @@ class FindingAidPDFtoEAD():
         try:
             lang_list = self.convert_text_in_column_to_string('langua')
             for i in lang_list.split(','):
-                if len(abbreviate_lang(i)) > 3:
-                    self.log('{} lang not found, possible key value mismatch'.format(i))
+                i = i.strip().replace('.', '').replace(',', '')
+                if i and abbreviate_lang(i):
+                    print('----------{}'.format(abbreviate_lang(i).encode("utf8")))
+                    elem = ET.Element('language', attrib={'langcode': abbreviate_lang(i), })
+                    elem.text = i
+                    a5.append(elem)
+                else:
+                    logging.info('{} lang not found, possible key value mismatch'.format(i))
                     continue
-                elem = ET.Element('language', attrib={'langcode': abbreviate_lang(i), })
-                elem.text = i
-                a5.append(elem)
         except Exception as e:
-            self.log('could not find language code.', e)
+            print(e)
+            logging.info('could not find language code.')
 
         a6 = ET.SubElement(a, 'abstract', attrib={'label': "Summary", 'encodinganalog': "520$a", })
         a6.text = self.convert_text_in_column_to_string('sum')
@@ -490,7 +460,7 @@ class FindingAidPDFtoEAD():
                         elem.text = unicode(i, encoding='utf-8')
                         k.append(elem)
                     else:
-                        self.log('{} doesnt seem like an acceptable source to this script'.format(i))
+                        logging.info('{} doesnt seem like an acceptable source to this script'.format(i))
 
         l = ET.SubElement(archdesc, 'acqinfo')
         l1 = ET.SubElement(l, 'head')
@@ -531,12 +501,41 @@ class FindingAidPDFtoEAD():
 
         return archdesc
 
+    # def remove_non_text_elements(self, elem_list):
+    #     elements_with_text = []
+    #     for pos, item in enumerate(elem_list):
+    #         if re.findall('([A-Za-z0-9]+)', etree.tostring(item, encoding='utf-8', method='text')):
+    #             elements_with_text.append(item)
+    #     return elements_with_text
+
+    # def lower_case_and_dict_it(self, elem_list):
+    #     a_dict = {}
+    #     for elem in elem_list:
+    #         if elem.getparent().get('top') not in a_dict:
+    #             a_dict[elem.getparent().get('top')] = '{}'.format(etree.tostring(elem, method='text', encoding='utf-8').strip().lower())
+    #     return a_dict
+
+    # def join_disjointed_header_page(self, elem_list):
+    #     num_of_elems = len(elem_list)
+    #     joined_elem_list = []
+    #     for i in xrange(num_of_elems/2):
+    #         header, page = elem_list[2*i], elem_list[(2*i)+1]
+    #         head_page_str = "{} {}".format(etree.tostring(header, encoding='utf-8', method='text'), etree.tostring(page, encoding='utf-8', method='text'))
+    #         joined_elem_list.append(head_page_str)
+    #     return joined_elem_list
+
+    # def split_on_char(self, char, text):
+    #     if char in text:
+    #         start, end = text.split(char)
+    #     else:
+    #         start, end = text, text
+    #     return (start, end)
+
 
 if __name__ == '__main__':
-    logger = L('log', 'd')
     # uid = '0005m'
     # url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
-    # FindingAidPDFtoEAD(url, logger).run_conversion()
+    # FindingAidPDFtoEAD(url).run_conversion()
 
     filename = 'findaid_list.csv'
     with open(filename, 'r') as f:
@@ -545,8 +544,7 @@ if __name__ == '__main__':
             url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
             print uid
             try:
-                FindingAidPDFtoEAD(url, logger).run_conversion()
+                FindingAidPDFtoEAD(url).run_conversion()
             except Exception as e:
                 pass
-                # logger.add(traceback.print_stack(), 'e')
                 # print e
