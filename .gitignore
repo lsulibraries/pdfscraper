@@ -1,10 +1,8 @@
 env/*
 *.pyc
-dbg.xml
 .vagrant/*
 *.xml
 log
 EadProject.zip
 EadProject/
-todo.csv
-cached_pdfs/*
+cached_pdfs/

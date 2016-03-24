@@ -509,7 +509,7 @@ if __name__ == '__main__':
     # url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
     # FindingAidPDFtoEAD(url).run_conversion()
 
-    filename = 'findaid_list.csv'
+    filename = 'findaid_list.txt'
     with open(filename, 'r') as f:
         for uid in f.readlines():
             uid = uid.strip()

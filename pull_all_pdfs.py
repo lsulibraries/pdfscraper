@@ -3,9 +3,9 @@
 import os
 import urllib2
 
-# our_list = 'findaid_list.csv'
-# our_list = 'temporarily_unavailalble.csv'
-our_list = 'problem_pdf.csv'
+# our_list = 'findaid_list.txt'
+# our_list = 'temporarily_unavailalble.txt'
+our_list = 'problem_pdf.txt'
 
 
 def pull_pdf_and_write_to_disk(uid):
