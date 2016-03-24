@@ -11,6 +11,7 @@ import xml.etree.ElementTree as ET
 
 from terms_dict_set import terms_dict_set
 from langs_and_abbr import get_langs_and_abbr
+from no_outline_pdfs import no_outline_pdfs_COI
 from ParseTableofContents import ParseTableofContents as ParseTOC
 
 
@@ -73,8 +74,11 @@ class FindingAidPDFtoEAD():
 
     def run_conversion(self):
         # print etree.tostring(self.element_tree, pretty_print=True)    # dev only
-        print_xml_to_file(self.uid, self.element_tree)                                     # dev only
-        contents_of_inventory = self.grab_contents_of_inventory()
+        print_xml_to_file(self.uid, self.element_tree)
+        if self.grab_contents_of_inventory():                                 # dev only
+            contents_of_inventory = self.grab_contents_of_inventory()
+        else:
+            contents_of_inventory = no_outline_pdfs_COI[self.uid]
         self.c_o_i_ordered = sorted(contents_of_inventory, key=lambda item: int(item[1][0]))
         self.summary_columns = self.get_columns_after_summary()
         compiled_ead = self.get_ead()
@@ -86,6 +90,7 @@ class FindingAidPDFtoEAD():
             header, (beginning_page, end_page) = summary_header_pages[0]
             summary_page_elem = self.element_tree.xpath('//page[@number="{}"]'.format(beginning_page))[0]
             return ParseTOC.get_table(summary_page_elem)
+            print(summary_page_elem)
         return None
 
     def grab_contents_of_inventory(self):
@@ -343,17 +348,20 @@ class FindingAidPDFtoEAD():
 
         a5 = ET.SubElement(a, 'langmaterial')
         lang_list = self.convert_text_in_column_to_string('langua')
-        for i in lang_list.split(','):
-            i = i.strip().replace('.', '').replace(',', '')
-            if i:
-                if abbreviate_lang(i):
-                    elem = ET.Element('language', attrib={'langcode': abbreviate_lang(i), })
-                    elem.text = i
-                    a5.append(elem)
+        if not lang_list:
+            logging.info('no lang list found')
+        else:
+            for i in lang_list.split(','):
+                i = i.strip().replace('.', '').replace(',', '')
+                if i:
+                    if abbreviate_lang(i):
+                        elem = ET.Element('language', attrib={'langcode': abbreviate_lang(i), })
+                        elem.text = i
+                        a5.append(elem)
+                    else:
+                        logging.info('{} lang not found, possible key value mismatch'.format(i.encode('ascii', 'ignore')))
                 else:
-                    logging.info('{} lang not found, possible key value mismatch'.format(i))
-            else:
-                logging.info('no language column found in contents of inventory')
+                    logging.info('no language column found in contents of inventory')
 
         a6 = ET.SubElement(a, 'abstract', attrib={'label': "Summary", 'encodinganalog': "520$a", })
         a6.text = self.convert_text_in_column_to_string('sum')
@@ -538,8 +546,9 @@ if __name__ == '__main__':
             uid = uid.strip()
             url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
             print uid
-            try:
-                FindingAidPDFtoEAD(url).run_conversion()
-            except Exception as e:
-                pass
+            FindingAidPDFtoEAD(url).run_conversion()
+            # try:
+            #     FindingAidPDFtoEAD(url).run_conversion()
+            # except Exception as e:
+            #     pass
                 # print e
