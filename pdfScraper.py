@@ -315,7 +315,6 @@ class FindingAidPDFtoEAD():
         return el
 
     def get_date(self):
-
         el = ET.Element('date')
         el.text = self.extract_date()
         return el
@@ -504,36 +503,6 @@ class FindingAidPDFtoEAD():
 
         return archdesc
 
-    # def remove_non_text_elements(self, elem_list):
-    #     elements_with_text = []
-    #     for pos, item in enumerate(elem_list):
-    #         if re.findall('([A-Za-z0-9]+)', etree.tostring(item, encoding='utf-8', method='text')):
-    #             elements_with_text.append(item)
-    #     return elements_with_text
-
-    # def lower_case_and_dict_it(self, elem_list):
-    #     a_dict = {}
-    #     for elem in elem_list:
-    #         if elem.getparent().get('top') not in a_dict:
-    #             a_dict[elem.getparent().get('top')] = '{}'.format(etree.tostring(elem, method='text', encoding='utf-8').strip().lower())
-    #     return a_dict
-
-    # def join_disjointed_header_page(self, elem_list):
-    #     num_of_elems = len(elem_list)
-    #     joined_elem_list = []
-    #     for i in xrange(num_of_elems/2):
-    #         header, page = elem_list[2*i], elem_list[(2*i)+1]
-    #         head_page_str = "{} {}".format(etree.tostring(header, encoding='utf-8', method='text'), etree.tostring(page, encoding='utf-8', method='text'))
-    #         joined_elem_list.append(head_page_str)
-    #     return joined_elem_list
-
-    # def split_on_char(self, char, text):
-    #     if char in text:
-    #         start, end = text.split(char)
-    #     else:
-    #         start, end = text, text
-    #     return (start, end)
-
 
 if __name__ == '__main__':
     # uid = '0005m'
@@ -551,4 +520,4 @@ if __name__ == '__main__':
             #     FindingAidPDFtoEAD(url).run_conversion()
             # except Exception as e:
             #     pass
-                # print e
+            #     print e
