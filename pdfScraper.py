@@ -50,9 +50,8 @@ class FindingAidPDFtoEAD():
         self.uid = os.path.splitext(os.path.basename(url))[0]
         self.url = url
         logging.basicConfig(filename='log', level=logging.INFO)
-        logging.info('{} Started'.format(self.uid))
+        logging.info('{}'.format(self.uid))
         self.element_tree = self.read_url_return_etree(self.url)
-        logging.info('{} Ended'.format(self.uid))
 
     def read_url_return_etree(self, url):
         # '''normal 'pull pdf from web and interpret' code'''
@@ -60,7 +59,6 @@ class FindingAidPDFtoEAD():
         # self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
         # self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
         # self.element_tree = etree.fromstring(self.xmldata)
-        # logging.info('opened file')
         # return self.element_tree
 
         '''temporary 'read cached file from harddrive' monkeypatch'''
@@ -71,7 +69,6 @@ class FindingAidPDFtoEAD():
             self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
             self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
             self.element_tree = etree.fromstring(self.xmldata)
-        logging.info('opened file')
         return self.element_tree
 
     def run_conversion(self):
@@ -106,7 +103,7 @@ class FindingAidPDFtoEAD():
                     return ' '.join(self.get_text_after_header(i)).decode("utf8")
                 else:
                     return ' '.join(self.get_text_after_header(i, self.c_o_i_ordered[pos + 1])).decode("utf8")
-        return 'Element not pulled from pdf'
+        return None
 
     def convert_text_after_header_to_list(self, header_snippet):
         for pos, i in enumerate(self.c_o_i_ordered):
@@ -122,7 +119,7 @@ class FindingAidPDFtoEAD():
             for i in self.summary_columns:
                 if column_snippet.lower() in i.lower():
                     return self.summary_columns[i].decode('utf-8')
-        return 'Element not pulled from pdf'
+        return None
 
     def get_text_after_header(self, inventory_item, following_inventory_item=None):
         header, (beginning_page, end_page) = inventory_item
@@ -345,21 +342,18 @@ class FindingAidPDFtoEAD():
         a4.text = self.convert_text_in_column_to_string('bulk')
 
         a5 = ET.SubElement(a, 'langmaterial')
-        try:
-            lang_list = self.convert_text_in_column_to_string('langua')
-            for i in lang_list.split(','):
-                i = i.strip().replace('.', '').replace(',', '')
-                if i and abbreviate_lang(i):
-                    print('----------{}'.format(abbreviate_lang(i).encode("utf8")))
+        lang_list = self.convert_text_in_column_to_string('langua')
+        for i in lang_list.split(','):
+            i = i.strip().replace('.', '').replace(',', '')
+            if i:
+                if abbreviate_lang(i):
                     elem = ET.Element('language', attrib={'langcode': abbreviate_lang(i), })
                     elem.text = i
                     a5.append(elem)
                 else:
                     logging.info('{} lang not found, possible key value mismatch'.format(i))
-                    continue
-        except Exception as e:
-            print(e)
-            logging.info('could not find language code.')
+            else:
+                logging.info('no language column found in contents of inventory')
 
         a6 = ET.SubElement(a, 'abstract', attrib={'label': "Summary", 'encodinganalog': "520$a", })
         a6.text = self.convert_text_in_column_to_string('sum')
@@ -460,7 +454,8 @@ class FindingAidPDFtoEAD():
                         elem.text = unicode(i, encoding='utf-8')
                         k.append(elem)
                     else:
-                        logging.info('{} doesnt seem like an acceptable source to this script'.format(i))
+                        pass
+                        # logging.info('{} doesnt seem like an acceptable source to this script'.format(i))
 
         l = ET.SubElement(archdesc, 'acqinfo')
         l1 = ET.SubElement(l, 'head')
@@ -485,7 +480,7 @@ class FindingAidPDFtoEAD():
         p1 = ET.SubElement(p, 'head')
         p1.text = 'Related Material'
         p2 = ET.SubElement(p1, 'p')
-        p2.text = self.convert_text_after_header_to_string('desc')
+        p2.text = self.convert_text_in_column_to_string('related')
 
         q = ET.SubElement(archdesc, 'appraisal', attrib={'encodinganalog': "583"})
         q1 = ET.SubElement(q, 'head')
