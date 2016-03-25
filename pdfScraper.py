@@ -6,8 +6,7 @@ import re
 import logging
 
 import scraperwiki
-from lxml import etree
-import xml.etree.ElementTree as ET
+import lxml.etree as ET
 
 from terms_dict_set import terms_dict_set
 from langs_and_abbr import get_langs_and_abbr
@@ -28,7 +27,7 @@ def print_xml_to_file(uid, xml):
         os.mkdir('starting_xmls')
     path_file_name = 'starting_xmls/{}.xml'.format(uid)
     with open(path_file_name, 'w') as f:
-        f.write(etree.tostring(xml, pretty_print=True))
+        f.write(ET.tostring(xml, pretty_print=True))
 
 
 def which_subject_heading_type(text):
@@ -59,7 +58,7 @@ class FindingAidPDFtoEAD():
         # self.pdfdata = urllib2.urlopen(url).read()   # Necessary code for pulling pdf from web.
         # self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
         # self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
-        # self.element_tree = etree.fromstring(self.xmldata)
+        # self.element_tree = ET.fromstring(self.xmldata)
         # return self.element_tree
 
         '''temporary 'read cached file from harddrive' monkeypatch'''
@@ -69,11 +68,11 @@ class FindingAidPDFtoEAD():
             self.pdfdata = f.read()
             self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
             self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
-            self.element_tree = etree.fromstring(self.xmldata)
+            self.element_tree = ET.fromstring(self.xmldata)
         return self.element_tree
 
     def run_conversion(self):
-        # print etree.tostring(self.element_tree, pretty_print=True)    # dev only
+        # print ET.tostring(self.element_tree, pretty_print=True)    # dev only
         print_xml_to_file(self.uid, self.element_tree)
         if self.grab_contents_of_inventory():                                 # dev only
             contents_of_inventory = self.grab_contents_of_inventory()
@@ -168,7 +167,7 @@ class FindingAidPDFtoEAD():
             return list_of_sibling_children_text
         elems_following = elem_of_header[0].getparent().itersiblings()
         for sibling in elems_following:
-            sibling_str = etree.tostring(sibling, encoding="utf-8", method='text', ).strip()
+            sibling_str = ET.tostring(sibling, encoding="utf-8", method='text', ).strip()
             if sibling_str and len(sibling_str) > 0:
                 list_of_sibling_children_text.append(sibling_str)
         return list_of_sibling_children_text
@@ -177,7 +176,7 @@ class FindingAidPDFtoEAD():
         list_of_sibling_children_text = []
         elems_following = self.element_tree.xpath('//page[@number="{}"]/text'.format(page))
         for sibling in elems_following:
-            sibling_str = etree.tostring(sibling, encoding="utf-8", method='text', ).strip()
+            sibling_str = ET.tostring(sibling, encoding="utf-8", method='text', ).strip()
             if sibling_str and len(sibling_str) > 0:
                 list_of_sibling_children_text.append(sibling_str)
         return list_of_sibling_children_text
@@ -192,7 +191,7 @@ class FindingAidPDFtoEAD():
         if header_xpath:
             elems_preceding = header_xpath[0].getparent().itersiblings(preceding=True)
             for sibling in elems_preceding:
-                sibling_str = etree.tostring(sibling, encoding="utf-8", method='text', ).strip()
+                sibling_str = ET.tostring(sibling, encoding="utf-8", method='text', ).strip()
                 if sibling_str and len(sibling_str) > 0:
                     list_of_sibling_children_text.append(sibling_str)
         list_of_sibling_children_text = list_of_sibling_children_text.reverse()
