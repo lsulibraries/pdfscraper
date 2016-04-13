@@ -1,8 +1,10 @@
 #!/usr/bin/env python2.7
 
+# python2 required due to scraperwiki not yet ported to python3
+
 import os
 import re
-# import urllib2
+import urllib2
 import logging
 
 import scraperwiki
@@ -14,13 +16,42 @@ from no_outline_pdfs import no_outline_pdfs_COI
 from ParseTableofContents import ParseTableofContents as ParseTOC
 
 
+def which_subject_heading_type(text):
+    for (subject_heading, MARCencoding), source_dict in terms_dict_set.iteritems():
+        for source, item_set in source_dict.iteritems():
+            if text in item_set:
+                return (subject_heading, MARCencoding, source)
+
+def abbreviate_lang(language):
+    lang_abbr_dict = get_langs_and_abbr()
+    if language.lower() in lang_abbr_dict:
+        return lang_abbr_dict[language.lower()]
+
+def get_pdf_length(pdf_etree):
+    list_of_all_page_nums = [int(i) for i in pdf_etree.xpath('//page/@number')]
+    return max(list_of_all_page_nums)
+
+def read_url_return_etree(url):
+    pdfdata = urllib2.urlopen(url).read()
+    xmldata = scraperwiki.pdftoxml(pdfdata)
+    xmldata = bytes(bytearray(xmldata, encoding='utf-8'))
+    element_tree = ET.fromstring(xmldata)
+    return element_tree
+
+def read_file_return_etree(uid):
+    with open('cached_pdfs/{}.pdf'.format(uid), 'r') as f:
+        pdfdata = f.read()                                    # str
+    xmldata = scraperwiki.pdftoxml(pdfdata)                   # unicode
+    xmldata = bytes(bytearray(xmldata, encoding='utf-8'))     # str
+    element_tree = ET.fromstring(xmldata)
+    return element_tree
+
 def print_ead_to_file(uid, ead):
     if 'exported_eads' not in os.listdir(os.getcwd()):
         os.mkdir('{}/exported_eads'.format(os.getcwd()))
     path_file_name = 'exported_eads/{}.xml'.format(uid)
     with open(path_file_name, 'w') as f:
         f.write(ET.tostring(ead, encoding="utf-8", method="xml"))
-
 
 def print_xml_to_file(uid, xml):
     if 'starting_xmls' not in os.listdir(os.getcwd()):
@@ -30,51 +61,22 @@ def print_xml_to_file(uid, xml):
         f.write(ET.tostring(xml, pretty_print=True))
 
 
-def which_subject_heading_type(text):
-    for (subject_heading, MARCencoding), source_dict in terms_dict_set.iteritems():
-        for source, item_set in source_dict.iteritems():
-            if text in item_set:
-                return (subject_heading, MARCencoding, source)
-    return None
-
-
-def abbreviate_lang(language):
-    lang_abbr_dict = get_langs_and_abbr()
-    if language.lower() in lang_abbr_dict:
-        return lang_abbr_dict[language.lower()]
-    return None
-
-
 class FindingAidPDFtoEAD():
     def __init__(self, url):
         self.uid = os.path.splitext(os.path.basename(url))[0]
         self.url = url
         logging.basicConfig(filename='log', level=logging.INFO)
         logging.info('{}'.format(self.uid))
-        self.element_tree = self.read_url_return_etree(self.url)
-
-    def read_url_return_etree(self, url):
-        # '''normal 'pull pdf from web and interpret' code'''
-        # self.pdfdata = urllib2.urlopen(url).read()   # Necessary code for pulling pdf from web.
-        # self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
-        # self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
-        # self.element_tree = ET.fromstring(self.xmldata)
-        # return self.element_tree
-
-        '''temporary 'read cached file from harddrive' monkeypatch'''
-        if 'cached_pdfs' not in os.listdir(os.getcwd()):
-            print('you may not have the pdfs in the cached_pdfs directory')
-        with open('cached_pdfs/{}.pdf'.format(self.uid), 'r') as f:
-            self.pdfdata = f.read()
-            self.xmldata = scraperwiki.pdftoxml(self.pdfdata)
-            self.xmldata = bytes(bytearray(self.xmldata, encoding='utf-8'))
-            self.element_tree = ET.fromstring(self.xmldata)
-        return self.element_tree
+        try:
+            self.element_tree = read_file_return_etree(self.uid)
+        except IOError:
+            self.element_tree = read_url_return_etree(self.url)
+        self.run_conversion()
 
     def run_conversion(self):
-        # print ET.tostring(self.element_tree, pretty_print=True)    # dev only
+        # print ET.tostring(self.element_tree, pretty_print=True)             # dev only
         print_xml_to_file(self.uid, self.element_tree)
-        if self.grab_contents_of_inventory():                                 # dev only
+        if self.grab_contents_of_inventory():
             contents_of_inventory = self.grab_contents_of_inventory()
         else:
             contents_of_inventory = no_outline_pdfs_COI[self.uid]
@@ -83,15 +85,6 @@ class FindingAidPDFtoEAD():
         compiled_ead = self.get_ead()
         print_ead_to_file(self.uid, compiled_ead)
 
-    def get_columns_after_summary(self):
-        summary_header_pages = [elem for elem in self.c_o_i_ordered if 'summ' in elem[0].lower()]
-        if summary_header_pages:
-            header, (beginning_page, end_page) = summary_header_pages[0]
-            summary_page_elem = self.element_tree.xpath('//page[@number="{}"]'.format(beginning_page))[0]
-            return ParseTOC.get_table(summary_page_elem)
-            print(summary_page_elem)
-        return None
-
     def grab_contents_of_inventory(self):
         if self.element_tree.xpath('//outline'):
             return [
@@ -99,6 +92,14 @@ class FindingAidPDFtoEAD():
                 for elem in self.element_tree.xpath('//outline')[0].iter()
                 if elem.tag == 'item'
                 ]
+
+    def get_columns_after_summary(self):
+        summary_header_pages = [elem for elem in self.c_o_i_ordered if 'summ' in elem[0].lower()]
+        if summary_header_pages:
+            header, (beginning_page, end_page) = summary_header_pages[0]
+            summary_page_elem = self.element_tree.xpath('//page[@number="{}"]'.format(beginning_page))[0]
+            return ParseTOC.get_table(summary_page_elem)
+        return None
 
     def convert_text_after_header_to_string(self, header_snippet):
         for pos, i in enumerate(self.c_o_i_ordered):
@@ -121,6 +122,7 @@ class FindingAidPDFtoEAD():
     def convert_text_in_column_to_string(self, column_snippet):
         if self.summary_columns:
             for i in self.summary_columns:
+                print(column_snippet, i)
                 if column_snippet.lower() in i.lower():
                     return self.summary_columns[i].decode('utf-8')
         return None
@@ -201,14 +203,10 @@ class FindingAidPDFtoEAD():
         beginning_page = int(beginning_page)
         temp_text_list = []
         count = 0
-        while (self.get_pdf_length() - beginning_page) - count > 0:
+        while (get_pdf_length(self.element_tree) - beginning_page) - count > 0:
             temp_text_list.append(self.get_middle_page_siblings_and_childrent(beginning_page + 1 + count))
             count += 1
         return temp_text_list
-
-    def get_pdf_length(self):
-        list_of_all_page_nums = [int(i) for i in self.element_tree.xpath('//page/@number')]
-        return max(list_of_all_page_nums)
 
     def get_ead(self):
         ead = ET.Element('ead', attrib={'relatedencoding': "MARC21", 'type': "inventory", 'level': "collection", })
@@ -504,19 +502,16 @@ class FindingAidPDFtoEAD():
 
 
 if __name__ == '__main__':
+    # single file
     # uid = '0005m'
     # url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
-    # FindingAidPDFtoEAD(url).run_conversion()
+    # FindingAidPDFtoEAD(url)
 
+    # list of files
     filename = 'findaid_list.txt'
     with open(filename, 'r') as f:
         for uid in f.readlines():
             uid = uid.strip()
             url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
-            print uid
-            FindingAidPDFtoEAD(url).run_conversion()
-            # try:
-            #     FindingAidPDFtoEAD(url).run_conversion()
-            # except Exception as e:
-            #     pass
-            #     print e
+            print(uid)
+            FindingAidPDFtoEAD(url)
