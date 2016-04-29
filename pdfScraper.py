@@ -61,7 +61,7 @@ def print_xml_to_file(uid, xml):
         f.write(ET.tostring(xml, pretty_print=True))
 
 
-class FindingAidPDFtoEAD():
+class PDFtoEAD():
     def __init__(self, url):
         self.uid = os.path.splitext(os.path.basename(url))[0]
         self.url = url
@@ -83,7 +83,38 @@ class FindingAidPDFtoEAD():
         self.c_o_i_ordered = sorted(contents_of_inventory, key=lambda item: int(item[1][0]))
         self.summary_columns = self.get_columns_after_summary()
         compiled_ead = self.get_ead()
+        self.alert_if_bad_summary(compiled_ead)
         print_ead_to_file(self.uid, compiled_ead)
+
+    def alert_if_bad_summary(self, compiled_ead):
+        summary_elems = dict()
+        summary_elems['Size'] = compiled_ead.xpath('//physdesc/extent')[0]
+        # Geographic Location is not searched for.
+        summary_elems['Dates Inclusive'] = compiled_ead.xpath('//unitdate[@type="inclusive"]')[0]
+        summary_elems['Dates Bulk'] = compiled_ead.xpath('//unitdate[@type="bulk"]')[0]
+        if compiled_ead.xpath('//langmaterial/language'):
+            summary_elems['Language'] = compiled_ead.xpath('//langmaterial/language')[0]
+        summary_elems['Summary'] = compiled_ead.xpath('//abstract[@label="Summary"]')[0]
+        # Organization is not searched for.
+        if compiled_ead.xpath('//origination[@label="Creator"]/persname'):
+            summary_elems['Creator persname'] = compiled_ead.xpath('//origination[@label="Creator"]/persname')[0]
+        if compiled_ead.xpath('//origination[@label="Creator"]/corpname'):
+            summary_elems['Creator corpname'] = compiled_ead.xpath('//origination[@label="Creator"]/corpname')[0]
+        if compiled_ead.xpath('//unitid[@label="Identification"]'):
+            summary_elems['MSS'] = compiled_ead.xpath('//unitid[@label="Identification"]')[0]
+        if compiled_ead.xpath('//unittitle[@label="Title:"]'):
+            summary_elems['Title'] = compiled_ead.xpath('//unittitle[@label="Title:"]')[0]
+        summary_elems['Access Restrictions'] = compiled_ead.xpath('//accessrestrict/p')[0]
+        summary_elems['Related Material'] = compiled_ead.xpath('//relatedmaterial/p')[0]
+        summary_elems['Copyright'] = compiled_ead.xpath('//userestrict/p')[0]
+        summary_elems['Citation'] = compiled_ead.xpath('//prefercite/p')[0]
+        
+        for name, element in summary_elems.items():
+            if element.text is None:
+                logging.info('no {}'.format(name))
+
+
+        # print(compiled_ead.xpath('//unitdate[@type="inclusive"]')[0].text)
 
     def grab_contents_of_inventory(self):
         if self.element_tree.xpath('//outline'):
@@ -97,6 +128,7 @@ class FindingAidPDFtoEAD():
         if summary_header_pages:
             header, (beginning_page, end_page) = summary_header_pages[0]
             summary_page_elem = self.element_tree.xpath('//page[@number="{}"]'.format(beginning_page))[0]
+            print_xml_to_file('SummaryPageElem/{}'.format(self.uid), summary_page_elem)
             return ParseTOC.get_table(summary_page_elem)
         return None
 
@@ -133,9 +165,7 @@ class FindingAidPDFtoEAD():
             following_header, (following_beginning_page, following_end_page) = following_inventory_item
         elem_of_header = self.element_tree.xpath(
             '//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(
-                beginning_page, header.lower().strip()
-                )
-            )
+                beginning_page, header.lower().strip()))
         text_after_header = []
         for i in self.get_first_page_siblings_and_children(elem_of_header):
             if i.lower().strip() == following_header.lower().strip():
@@ -332,28 +362,35 @@ class FindingAidPDFtoEAD():
 
         a2 = ET.SubElement(a, 'physdesc', attrib={'label': 'Size', 'encodinganalog': '300$a', })
         a2a = ET.SubElement(a2, 'extent',)
-        a2a.text = self.convert_text_in_column_to_string('siz')
+        text = self.convert_text_in_column_to_string('siz')
+        if text:
+            a2a.text = text.replace('.', '')
 
         a3 = ET.SubElement(a, 'unitdate', attrib={'label': 'Dates:', 'type': 'inclusive', 'encodinganalog': '245$f'})
-        a3.text = self.convert_text_in_column_to_string('inclusive')
+        text = self.convert_text_in_column_to_string('inclusive')
+        if text:
+            a3.text = text.replace('.', '')
 
         a4 = ET.SubElement(a, 'unitdate', attrib={'label': 'Dates:', 'type': 'bulk', 'encodinganalog': default_stub})
-        a4.text = self.convert_text_in_column_to_string('bulk')
+        text = self.convert_text_in_column_to_string('bulk')
+        if text:
+            a4.text = text.replace('.', '')
 
         a5 = ET.SubElement(a, 'langmaterial')
         lang_list = self.convert_text_in_column_to_string('langua')
         if not lang_list:
             logging.info('no lang list found')
         else:
-            for i in lang_list.split(','):
-                i = i.strip().replace('.', '').replace(',', '')
-                if i:
-                    if abbreviate_lang(i):
-                        elem = ET.Element('language', attrib={'langcode': abbreviate_lang(i), })
-                        elem.text = i
+            for lang in lang_list.split(','):
+                lang = lang.strip().replace('.', '').replace(',', '')
+                if lang:
+                    lang_code = abbreviate_lang(lang)
+                    if lang_code:
+                        elem = ET.Element('language', attrib={'langcode': lang_code, })
+                        elem.text = lang
                         a5.append(elem)
                     else:
-                        logging.info('{} lang not found, possible key value mismatch'.format(i.encode('ascii', 'ignore')))
+                        logging.info('{} lang not found, possible key value mismatch'.format(lang.encode('ascii', 'ignore')))
                 else:
                     logging.info('no language column found in contents of inventory')
 
@@ -500,16 +537,17 @@ class FindingAidPDFtoEAD():
 
 
 if __name__ == '__main__':
-    # single file
-    uid = '0005m'
-    url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
-    FindingAidPDFtoEAD(url)
+    '''single file'''
+    # uid = '0528m'
+    # url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
+    # print(uid)
+    # PDFtoEAD(url)
 
-    # list of files
-    # filename = 'findaid_list.txt'
-    # with open(filename, 'r') as f:
-    #     for uid in f.readlines():
-    #         uid = uid.strip()
-    #         url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
-    #         print(uid)
-    #         FindingAidPDFtoEAD(url)
+    '''list of files'''
+    filename = 'findaid_list.txt'
+    with open(filename, 'r') as f:
+        for uid in f.readlines():
+            uid = uid.strip()
+            url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
+            print(uid)
+            PDFtoEAD(url)
