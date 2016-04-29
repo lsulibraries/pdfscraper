@@ -90,8 +90,7 @@ class FindingAidPDFtoEAD():
             return [
                 (elem.text.encode('ascii', 'ignore'), (int(elem.get('page')), int(elem.get('page'))))
                 for elem in self.element_tree.xpath('//outline')[0].iter()
-                if elem.tag == 'item'
-                ]
+                if elem.tag == 'item']
 
     def get_columns_after_summary(self):
         summary_header_pages = [elem for elem in self.c_o_i_ordered if 'summ' in elem[0].lower()]
@@ -122,7 +121,6 @@ class FindingAidPDFtoEAD():
     def convert_text_in_column_to_string(self, column_snippet):
         if self.summary_columns:
             for i in self.summary_columns:
-                print(column_snippet, i)
                 if column_snippet.lower() in i.lower():
                     return self.summary_columns[i].decode('utf-8')
         return None
@@ -503,15 +501,15 @@ class FindingAidPDFtoEAD():
 
 if __name__ == '__main__':
     # single file
-    # uid = '0005m'
-    # url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
-    # FindingAidPDFtoEAD(url)
+    uid = '0005m'
+    url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
+    FindingAidPDFtoEAD(url)
 
     # list of files
-    filename = 'findaid_list.txt'
-    with open(filename, 'r') as f:
-        for uid in f.readlines():
-            uid = uid.strip()
-            url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
-            print(uid)
-            FindingAidPDFtoEAD(url)
+    # filename = 'findaid_list.txt'
+    # with open(filename, 'r') as f:
+    #     for uid in f.readlines():
+    #         uid = uid.strip()
+    #         url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
+    #         print(uid)
+    #         FindingAidPDFtoEAD(url)
