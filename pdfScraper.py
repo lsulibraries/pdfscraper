@@ -71,66 +71,103 @@ class PDFtoEAD():
             self.element_tree = read_file_return_etree(self.uid)
         except IOError:
             self.element_tree = read_url_return_etree(self.url)
-        self.run_conversion()
+        self.run_conversion(self.element_tree)
 
-    def run_conversion(self):
-        # print ET.tostring(self.element_tree, pretty_print=True)             # dev only
-        print_xml_to_file(self.uid, self.element_tree)
-        if self.grab_contents_of_inventory():
-            contents_of_inventory = self.grab_contents_of_inventory()
+    def run_conversion(self, element_tree):
+        # print ET.tostring(element_tree, pretty_print=True)             # dev only
+        print_xml_to_file(self.uid, element_tree)
+        if self.grab_contents_of_inventory(element_tree):
+            contents_of_inventory = self.grab_contents_of_inventory(element_tree)
         else:
             contents_of_inventory = no_outline_pdfs_COI[self.uid]
         self.c_o_i_ordered = sorted(contents_of_inventory, key=lambda item: int(item[1][0]))
-        self.summary_columns = self.get_columns_after_summary()
+        self.summary_columns = self.get_summary(element_tree)
         compiled_ead = self.get_ead()
         self.alert_if_bad_summary(compiled_ead)
         print_ead_to_file(self.uid, compiled_ead)
 
-    def alert_if_bad_summary(self, compiled_ead):
-        summary_elems = dict()
-        summary_elems['Size'] = compiled_ead.xpath('//physdesc/extent')[0]
-        # Geographic Location is not searched for.
-        summary_elems['Dates Inclusive'] = compiled_ead.xpath('//unitdate[@type="inclusive"]')[0]
-        summary_elems['Dates Bulk'] = compiled_ead.xpath('//unitdate[@type="bulk"]')[0]
-        if compiled_ead.xpath('//langmaterial/language'):
-            summary_elems['Language'] = compiled_ead.xpath('//langmaterial/language')[0]
-        summary_elems['Summary'] = compiled_ead.xpath('//abstract[@label="Summary"]')[0]
-        # Organization is not searched for.
-        if compiled_ead.xpath('//origination[@label="Creator"]/persname'):
-            summary_elems['Creator persname'] = compiled_ead.xpath('//origination[@label="Creator"]/persname')[0]
-        if compiled_ead.xpath('//origination[@label="Creator"]/corpname'):
-            summary_elems['Creator corpname'] = compiled_ead.xpath('//origination[@label="Creator"]/corpname')[0]
-        if compiled_ead.xpath('//unitid[@label="Identification"]'):
-            summary_elems['MSS'] = compiled_ead.xpath('//unitid[@label="Identification"]')[0]
-        if compiled_ead.xpath('//unittitle[@label="Title:"]'):
-            summary_elems['Title'] = compiled_ead.xpath('//unittitle[@label="Title:"]')[0]
-        summary_elems['Access Restrictions'] = compiled_ead.xpath('//accessrestrict/p')[0]
-        summary_elems['Related Material'] = compiled_ead.xpath('//relatedmaterial/p')[0]
-        summary_elems['Copyright'] = compiled_ead.xpath('//userestrict/p')[0]
-        summary_elems['Citation'] = compiled_ead.xpath('//prefercite/p')[0]
-        
-        for name, element in summary_elems.items():
-            if element.text is None:
-                logging.info('no {}'.format(name))
-
-
-        # print(compiled_ead.xpath('//unitdate[@type="inclusive"]')[0].text)
-
-    def grab_contents_of_inventory(self):
-        if self.element_tree.xpath('//outline'):
+    def grab_contents_of_inventory(self, element_tree):
+        if element_tree.xpath('//outline'):
             return [
                 (elem.text.encode('ascii', 'ignore'), (int(elem.get('page')), int(elem.get('page'))))
-                for elem in self.element_tree.xpath('//outline')[0].iter()
+                for elem in element_tree.xpath('//outline')[0].iter()
                 if elem.tag == 'item']
 
-    def get_columns_after_summary(self):
-        summary_header_pages = [elem for elem in self.c_o_i_ordered if 'summ' in elem[0].lower()]
-        if summary_header_pages:
-            header, (beginning_page, end_page) = summary_header_pages[0]
-            summary_page_elem = self.element_tree.xpath('//page[@number="{}"]'.format(beginning_page))[0]
-            print_xml_to_file('SummaryPageElem/{}'.format(self.uid), summary_page_elem)
-            return ParseTOC.get_table(summary_page_elem)
-        return None
+    def get_summary(self, element_tree):
+        # no summary section
+        if uid in ('3070', '4644'):
+            return None
+        # hardcoding page for finding summary, cause i'm lazy & worried introducing errors.
+        if uid in ('0385', '0408', '1295', '1295sen', '1490company', '1490family', '1785', '3425',
+                   '3637', '4171', '4625', '4777', '4966', 'folklife', ):
+            pagenumber = '2'
+        elif uid in ('4906'):
+            pagenumber = '4'
+        else:
+            pagenumber = '3'
+        elem_of_header = element_tree.xpath(
+            '//page[@number="{}"]/text/b[text()[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "{}")]]'.format(
+                pagenumber, 'Summary'.lower().strip().replace('.', '')))
+        text_list = self.convert_summary_into_text_list(elem_of_header)
+        combined_bolds = self.combine_bolds(text_list)
+        combined_normals = self.combine_normals(combined_bolds)
+        summary_dict = self.dict_it(combined_normals)
+        return summary_dict
+
+    def convert_summary_into_text_list(self, elem_of_header):
+        text_list = []
+        for elem in elem_of_header[0].getparent().itersiblings():
+            if elem.text and len(elem.text.strip()) > 0:
+                text_list.append(['Text', elem.text.strip().strip('.').strip(',')])
+            for bold_level in elem.getchildren():
+                if bold_level.text and bold_level.text:
+                    if len(bold_level.text.strip().strip('.').strip(',')) > 0:
+                        text_list.append(['Bold', bold_level.text.strip().strip('.').strip(',')])
+                    if bold_level.tail and len(bold_level.tail.strip().strip('.')):
+                        text_list.append(['Tail', bold_level.tail.strip().strip('.').strip(',')])
+        return text_list
+
+    def combine_bolds(self, text_list):
+        starts_with = ('size', 'geographic', 'inclusive', 'bulk', 'language', 'summary',
+                       'organization', 'access', 'copyright', 'citation', 'stack', 'related', 'reproduction', 'arrangement'
+                       )
+        compressed_text_list = []
+        for i in text_list:
+            if i[0] == 'Bold':
+                for starter in starts_with:
+                    if starter in i[1].lower():
+                        compressed_text_list.append(i)
+                        break
+                else:
+                    for text_item in compressed_text_list[::-1]:
+                        if text_item[0] == 'Bold':
+                            text_item[1] = '{} {}'.format(text_item[1].encode('ascii', 'ignore'), i[1].encode('ascii', 'ignore')).encode('utf-8')
+                            break
+            elif i[0] in ('Text', 'Tail'):
+                compressed_text_list.append(i)
+        return compressed_text_list
+
+    def combine_normals(self, compressed_text_list):
+        final_text_list = []
+        previous = 'Bold'
+        for i in compressed_text_list:
+            if i[0] == 'Bold':
+                final_text_list.append(i)
+                previous = 'Bold'
+            else:
+                if previous == 'Bold':
+                    final_text_list.append(['Normal', i[1]])
+                    previous = 'Normal'
+                else:
+                    final_text_list[-1][1] = '{} {}'.format(final_text_list[-1][1].encode('ascii', 'ignore'), i[1].encode('ascii', 'ignore')).encode('utf-8')
+        return final_text_list
+
+    def dict_it(self, final_text_list):
+        summary_dict = dict()
+        for count, i in enumerate(final_text_list):
+            if count % 2 == 0 and len(final_text_list) > count + 1:
+                summary_dict[i[1]] = final_text_list[count + 1][1]
+        return summary_dict
 
     def convert_text_after_header_to_string(self, header_snippet):
         for pos, i in enumerate(self.c_o_i_ordered):
@@ -154,7 +191,7 @@ class PDFtoEAD():
         if self.summary_columns:
             for i in self.summary_columns:
                 if column_snippet.lower() in i.lower():
-                    return self.summary_columns[i].decode('utf-8')
+                    return self.summary_columns[i].encode('utf-8', 'ignore')
         return None
 
     def get_text_after_header(self, inventory_item, following_inventory_item=None):
@@ -364,17 +401,26 @@ class PDFtoEAD():
         a2a = ET.SubElement(a2, 'extent',)
         text = self.convert_text_in_column_to_string('siz')
         if text:
-            a2a.text = text.replace('.', '')
+            try:
+                a2a.text = text.replace('.', '')
+            except:
+                a2a.text = text.decode('utf-8').replace('.', '').encode('ascii', 'ignore')
 
         a3 = ET.SubElement(a, 'unitdate', attrib={'label': 'Dates:', 'type': 'inclusive', 'encodinganalog': '245$f'})
         text = self.convert_text_in_column_to_string('inclusive')
         if text:
-            a3.text = text.replace('.', '')
+            try:
+                a3.text = text
+            except:
+                a3.text = text.decode('utf-8').encode('ascii', 'ignore')
 
-        a4 = ET.SubElement(a, 'unitdate', attrib={'label': 'Dates:', 'type': 'bulk', 'encodinganalog': default_stub})
+        a4 = ET.SubElement(a, 'unitdate', attrib={'label': 'Dates:', 'type': 'bulk', 'encodinganalog': '245$g'})
         text = self.convert_text_in_column_to_string('bulk')
         if text:
-            a4.text = text.replace('.', '')
+            try:
+                a4.text = text.replace('.', '')
+            except:
+                a4.text = text.decode('utf-8').replace('.', '').encode('ascii', 'ignore')
 
         a5 = ET.SubElement(a, 'langmaterial')
         lang_list = self.convert_text_in_column_to_string('langua')
@@ -395,7 +441,12 @@ class PDFtoEAD():
                     logging.info('no language column found in contents of inventory')
 
         a6 = ET.SubElement(a, 'abstract', attrib={'label': "Summary", 'encodinganalog': "520$a", })
-        a6.text = self.convert_text_in_column_to_string('sum')
+        text = self.convert_text_in_column_to_string('sum')
+        if text:
+            try:
+                a6.text = text
+            except:
+                a6.text = text.decode('utf-8').encode('ascii', 'ignore')
 
         a7 = ET.SubElement(a, 'repository', attrib={'label': 'Repository', 'encodinganalog': '825$a'})
         a7a = ET.SubElement(a7, 'corpname')
@@ -404,7 +455,12 @@ class PDFtoEAD():
         a7b.text = "Louisiana and Lower Mississippi Valley Collection"
 
         a8 = ET.SubElement(a, 'physloc')
-        a8.text = self.convert_text_in_column_to_string('stack')
+        text = self.convert_text_in_column_to_string('stack')
+        if text:
+            try:
+                a8.text = text
+            except:
+                a8.text = text.decode('utf-8').encode('ascii', 'ignore')
 
         a9 = ET.SubElement(a, 'origination', attrib={'label': 'Creator: '})
         a9a = ET.SubElement(a9, 'persname', attrib={'encodinganalog': "100"})
@@ -433,13 +489,23 @@ class PDFtoEAD():
         b1 = ET.SubElement(b, 'head')
         b1.text = "Access Restrictions"
         b2 = ET.SubElement(b, 'p')
-        b2.text = self.convert_text_in_column_to_string('restriction')
+        text = self.convert_text_in_column_to_string('restriction')
+        if text:
+            try:
+                b2.text = text
+            except:
+                b2.text = text.decode('utf-8').encode('ascii', 'ignore')
 
         c = ET.SubElement(archdesc, 'relatedmaterial', attrib={'encodinganalog': '544 1'})
         c1 = ET.SubElement(c, 'head')
         c1.text = "Related Collections"
         c2 = ET.SubElement(c, 'p')
-        c2.text = self.convert_text_in_column_to_string('related')
+        text = self.convert_text_in_column_to_string('related')
+        if text:
+            try:
+                c2.text = text
+            except:
+                c2.text = text.decode('utf-8').encode('ascii', 'ignore')
 
         d = ET.SubElement(archdesc, 'userestrict', attrib={'encodinganalog': '540'})
         d1 = ET.SubElement(d, 'head')
@@ -473,8 +539,6 @@ class PDFtoEAD():
         #     ix = ET.SubElement(i, 'p')
         #     ix.text = text of paragraph
 
-        i2 = ET.SubElement(i, 'p')
-        i2.text = default_stub
         j = ET.SubElement(archdesc, 'otherfindaid')
 
         k = ET.SubElement(archdesc, 'controlaccess')
@@ -519,26 +583,55 @@ class PDFtoEAD():
         p1 = ET.SubElement(p, 'head')
         p1.text = 'Related Material'
         p2 = ET.SubElement(p1, 'p')
-        p2.text = self.convert_text_in_column_to_string('related')
+        text = self.convert_text_in_column_to_string('related')
+        if text:
+            try:
+                p2.text = text
+            except:
+                p2.text = text.decode('utf-8').encode('ascii', 'ignore')
 
         q = ET.SubElement(archdesc, 'appraisal', attrib={'encodinganalog': "583"})
         q1 = ET.SubElement(q, 'head')
         q1.text = 'Appraisal Information'
-        q2 = ET.SubElement(q, 'p')
-        q2.text = default_stub
 
         r = ET.SubElement(archdesc, 'accruals', attrib={'encodinganalog': "584"})
         r1 = ET.SubElement(r, 'head')
         r1.text = 'Accruals'
-        r2 = ET.SubElement(r, 'p')
-        r2.text = default_stub
 
         return archdesc
 
+    """bookkeeping & verification"""
+
+    def alert_if_bad_summary(self, compiled_ead):
+        summary_elems = dict()
+        summary_elems['Size'] = compiled_ead.xpath('//physdesc/extent')[0]
+        # Geographic Location is not searched for.
+        summary_elems['Dates Inclusive'] = compiled_ead.xpath('//unitdate[@type="inclusive"]')[0]
+        summary_elems['Dates Bulk'] = compiled_ead.xpath('//unitdate[@type="bulk"]')[0]
+        if compiled_ead.xpath('//langmaterial/language'):
+            summary_elems['Language'] = compiled_ead.xpath('//langmaterial/language')[0]
+        summary_elems['Summary'] = compiled_ead.xpath('//abstract[@label="Summary"]')[0]
+        # Organization is not searched for.
+        if compiled_ead.xpath('//origination[@label="Creator"]/persname'):
+            summary_elems['Creator persname'] = compiled_ead.xpath('//origination[@label="Creator"]/persname')[0]
+        if compiled_ead.xpath('//origination[@label="Creator"]/corpname'):
+            summary_elems['Creator corpname'] = compiled_ead.xpath('//origination[@label="Creator"]/corpname')[0]
+        if compiled_ead.xpath('//unitid[@label="Identification"]'):
+            summary_elems['MSS'] = compiled_ead.xpath('//unitid[@label="Identification"]')[0]
+        if compiled_ead.xpath('//unittitle[@label="Title:"]'):
+            summary_elems['Title'] = compiled_ead.xpath('//unittitle[@label="Title:"]')[0]
+        summary_elems['Access Restrictions'] = compiled_ead.xpath('//accessrestrict/p')[0]
+        summary_elems['Related Material'] = compiled_ead.xpath('//relatedmaterial/p')[0]
+        summary_elems['Copyright'] = compiled_ead.xpath('//userestrict/p')[0]
+        summary_elems['Citation'] = compiled_ead.xpath('//prefercite/p')[0]
+        
+        for name, element in summary_elems.items():
+            if element.text is None:
+                logging.info('no {}'.format(name))
 
 if __name__ == '__main__':
     '''single file'''
-    # uid = '0528m'
+    # uid = '2713'
     # url = 'http://lib.lsu.edu/sites/default/files/sc/findaid/{}.pdf'.format(uid)
     # print(uid)
     # PDFtoEAD(url)

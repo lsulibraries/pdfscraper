@@ -20,9 +20,9 @@ class ReadSummary():
             for possible_header in all_possible_headers:
                 if possible_header != header:
                     if i.lower().strip().replace('.', '') == possible_header.lower().strip().replace('.', ''):
-                        break
+                        continue
             text_after_keyword.append(i.strip())
-        print(text_after_keyword)
+        print('{}: {}\n'.format(header, text_after_keyword))
 
     def get_siblings_and_children(self, elem_of_header):
         list_of_sibling_children_text = []
